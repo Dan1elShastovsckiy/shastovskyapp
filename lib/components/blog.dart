@@ -9,20 +9,40 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 class ImageWrapper extends StatelessWidget {
   final String image;
+  final double? height;
 
-  const ImageWrapper({super.key, required this.image});
+  const ImageWrapper({super.key, required this.image, this.height});
 
   @override
   Widget build(BuildContext context) {
-    //TODO Listen to inherited widget width updates.
     double width = MediaQuery.of(context).size.width;
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final maxWidth = width > 800 ? 1200 : 800;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 24),
-      child: Image.asset(
-        image,
-        width: width,
-        height: width / 1.618,
-        fit: BoxFit.cover,
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Image.asset(
+          image,
+          fit: BoxFit.cover,
+          cacheWidth: (maxWidth * devicePixelRatio).toInt(),
+          cacheHeight: ((maxWidth * 9 / 16) * devicePixelRatio).toInt(),
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded || frame != null) {
+              return child;
+            }
+            return Container(
+              color: Colors.grey[200],
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Text('Ошибка загрузки изображения',
+                  style: TextStyle(color: Colors.white)),
+            );
+          },
+        ),
       ),
     );
   }
@@ -187,8 +207,6 @@ List<Widget> authorSection({String? imageUrl, String? name, String? bio}) {
 class PostNavigation extends StatelessWidget {
   const PostNavigation({super.key});
 
-  // TODO Get PostID from Global Routing Singleton.
-  // Example: String currentPage = RouteController.of(context).currentPage;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -236,7 +254,7 @@ class ListNavigation extends StatelessWidget {
               color: textSecondary,
             ),
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-              Text("БОЛЕЕ НОВЫЕ ПОСТЫ", style: buttonTextStyle),
+              Text("НОВЫЕ ПОСТЫ", style: buttonTextStyle),
           ],
         ),
         const Spacer(),
@@ -259,7 +277,6 @@ class ListNavigation extends StatelessWidget {
 class Footer extends StatelessWidget {
   const Footer({super.key});
 
-  // TODO Add additional footer components (i.e. about, links, logos).
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -273,13 +290,20 @@ class Footer extends StatelessWidget {
 }
 
 class ListItem extends StatelessWidget {
-  // TODO replace with Post item model.
   final String title;
   final String? imageUrl;
   final String? description;
+  final double? imageHeight;
+  final VoidCallback onReadMore; // Добавляем callback
 
-  const ListItem(
-      {super.key, required this.title, this.imageUrl, this.description});
+  const ListItem({
+    super.key,
+    required this.title,
+    this.imageUrl,
+    this.description,
+    this.imageHeight,
+    required this.onReadMore, // Обязательный параметр
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +339,7 @@ class ListItem extends StatelessWidget {
           child: Container(
             margin: marginBottom24,
             child: ReadMoreButton(
-              onPressed: () => Navigator.pushNamed(context, PostPage.name),
+              onPressed: onReadMore, // Используем переданный callback
             ),
           ),
         ),
@@ -324,23 +348,8 @@ class ListItem extends StatelessWidget {
   }
 }
 
-// ignore: slash_for_doc_comments
-/**
- * Menu/Navigation Bar
- *
- * A top menu bar with a text or image logo and
- * navigation links. Navigation links collapse into
- * a hamburger menu on screens smaller than 400px.
- */
-class MinimalMenuBar extends StatefulWidget {
+class MinimalMenuBar extends StatelessWidget {
   const MinimalMenuBar({super.key});
-
-  @override
-  State<MinimalMenuBar> createState() => _MinimalMenuBarState();
-}
-
-class _MinimalMenuBarState extends State<MinimalMenuBar> {
-  bool isMenuOpen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -352,16 +361,12 @@ class _MinimalMenuBarState extends State<MinimalMenuBar> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Верхняя панель
           Container(
             margin: EdgeInsets.symmetric(
-              vertical: isMobile ? 10 : 20,
-              horizontal: isMobile ? 12 : 16,
-            ),
+                vertical: isMobile ? 10 : 20, horizontal: isMobile ? 12 : 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Логотип остается без изменений
                 InkWell(
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
@@ -381,14 +386,10 @@ class _MinimalMenuBarState extends State<MinimalMenuBar> {
                     ),
                   ),
                 ),
-                // Меню
                 if (isMobile)
                   IconButton(
-                    icon: Icon(
-                      isMenuOpen ? Icons.close : Icons.menu,
-                      size: 28,
-                    ),
-                    onPressed: () => setState(() => isMenuOpen = !isMenuOpen),
+                    icon: const Icon(Icons.menu, size: 28),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
                   )
                 else
                   Expanded(
@@ -396,42 +397,13 @@ class _MinimalMenuBarState extends State<MinimalMenuBar> {
                       alignment: Alignment.centerRight,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: _buildMenuItems(),
+                        children: _buildMenuItems(context),
                       ),
                     ),
                   ),
               ],
             ),
           ),
-          // Мобильное меню
-          if (isMobile && isMenuOpen)
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: _buildMenuItems().map((item) {
-                  return Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Color(0xFFEEEEEE),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
-                      ),
-                      child: Center(child: item),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
           Container(
             height: 1,
             color: const Color(0xFFEEEEEE),
@@ -441,62 +413,126 @@ class _MinimalMenuBarState extends State<MinimalMenuBar> {
     );
   }
 
-  List<Widget> _buildMenuItems() {
-    final isMobile = MediaQuery.of(context).size.width < 800;
-    final menuStyle = TextStyle(
-      fontSize: isMobile ? 16 : 14,
+  List<Widget> _buildMenuItems(BuildContext context) {
+    final menuStyle = GoogleFonts.montserrat(
+      fontSize: 14,
       fontWeight: FontWeight.w500,
       letterSpacing: 1.5,
       color: textPrimary,
     );
+    final menuButtonStyle = ButtonStyle(
+      overlayColor: WidgetStateProperty.all<Color>(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all<Color>(textPrimary),
+      textStyle: WidgetStateProperty.all<TextStyle>(menuStyle),
+      padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+    );
 
-    final items = [
-      TextButton(
-        onPressed: () {
-          if (isMobile) setState(() => isMenuOpen = false);
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/',
-            (route) => false,
-          );
-        },
-        style: menuButtonStyle,
-        child: Text("ГЛАВНАЯ", style: menuStyle),
+    return [
+      _buildMenuItem(
+        "ГЛАВНАЯ",
+        menuStyle,
+        menuButtonStyle,
+        () => Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/',
+          (route) => false,
+        ),
       ),
-      TextButton(
-        onPressed: () {
-          if (isMobile) setState(() => isMenuOpen = false);
-          Navigator.pushNamed(context, PortfolioPage.name);
-        },
-        style: menuButtonStyle,
-        child: Text("ПОРТФОЛИО", style: menuStyle),
+      _buildMenuItem(
+        "ОБО МНЕ",
+        menuStyle,
+        menuButtonStyle,
+        () => Navigator.pushNamed(context, AboutPage.name),
       ),
-      TextButton(
-        onPressed: () {
-          if (isMobile) setState(() => isMenuOpen = false);
-          Navigator.pushNamed(context, TypographyPage.name);
-        },
-        style: menuButtonStyle,
-        child: Text("ОБ ЭТОМ САЙТЕ", style: menuStyle),
+      _buildMenuItem(
+        "ПОРТФОЛИО",
+        menuStyle,
+        menuButtonStyle,
+        () => Navigator.pushNamed(context, PortfolioPage.name),
       ),
-      TextButton(
-        onPressed: () {
-          if (isMobile) setState(() => isMenuOpen = false);
-          Navigator.pushNamed(context, AboutPage.name);
-        },
-        style: menuButtonStyle,
-        child: Text("ОБО МНЕ", style: menuStyle),
+      _buildMenuItem(
+        "ОБ ЭТОМ САЙТЕ",
+        menuStyle,
+        menuButtonStyle,
+        () => Navigator.pushNamed(context, TypographyPage.name),
       ),
-      TextButton(
-        onPressed: () {
-          if (isMobile) setState(() => isMenuOpen = false);
-          Navigator.pushNamed(context, ContactsPage.name);
-        },
-        style: menuButtonStyle,
-        child: Text("КОНТАКТЫ", style: menuStyle),
+      _buildMenuItem(
+        "КОНТАКТЫ",
+        menuStyle,
+        menuButtonStyle,
+        () => Navigator.pushNamed(context, ContactsPage.name),
       ),
     ];
-
-    return items;
   }
+
+  Widget _buildMenuItem(String text, TextStyle style, ButtonStyle buttonStyle,
+      VoidCallback onPressed) {
+    return TextButton(
+      onPressed: onPressed,
+      style: buttonStyle,
+      child: Text(text, style: style),
+    );
+  }
+}
+
+// в конец файла blog.dart
+Drawer buildAppDrawer(BuildContext context) {
+  return Drawer(
+    backgroundColor: Colors.white, // Белый фон всего меню
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        DrawerHeader(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF5F5F5),
+          ),
+          child: Text(
+            "SHASTOVSKY.",
+            style: GoogleFonts.montserrat(
+              color: textPrimary,
+              fontSize: 24,
+              letterSpacing: 3,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        ListTile(
+          title: const Text('ГЛАВНАЯ'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          },
+        ),
+        ListTile(
+          title: const Text('ОБО МНЕ'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, AboutPage.name);
+          },
+        ),
+        ListTile(
+          title: const Text('ПОРТФОЛИО'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, PortfolioPage.name);
+          },
+        ),
+        ListTile(
+          title: const Text('ОБ ЭТОМ САЙТЕ'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, TypographyPage.name);
+          },
+        ),
+        ListTile(
+          title: const Text('КОНТАКТЫ'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, ContactsPage.name);
+          },
+        ),
+      ],
+    ),
+  );
 }
