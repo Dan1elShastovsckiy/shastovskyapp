@@ -1,6 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/pages/page_about.dart';
+import 'package:minimal/pages/page_contacts.dart';
+import 'package:minimal/pages/page_portfolio.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,14 +14,99 @@ class TypographyPage extends StatelessWidget {
 
   const TypographyPage({super.key});
 
+  Drawer _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F5F5),
+            ),
+            child: Text(
+              "SHASTOVSKY.",
+              style: GoogleFonts.montserrat(
+                color: textPrimary,
+                fontSize: 24,
+                letterSpacing: 3,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ListTile(
+            title: const Text('ГЛАВНАЯ'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            },
+          ),
+          ListTile(
+            title: const Text('ОБО МНЕ'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, AboutPage.name);
+            },
+          ),
+          ListTile(
+            title: const Text('ПОРТФОЛИО'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, PortfolioPage.name);
+            },
+          ),
+          ListTile(
+            title: const Text('ОБ ЭТОМ САЙТЕ'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, TypographyPage.name);
+            },
+          ),
+          ListTile(
+            title: const Text('КОНТАКТЫ'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, ContactsPage.name);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(String label, IconData icon, String url) {
+    return SizedBox(
+      width: 300,
+      height: 80,
+      child: ElevatedButton.icon(
+        icon: Icon(icon, color: Colors.black, size: 32),
+        label: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          side: const BorderSide(color: Colors.black),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+        ),
+        onPressed: () => launchUrl(Uri.parse(url)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
     return Scaffold(
+      drawer: isMobile ? buildAppDrawer(context) : null,
       backgroundColor: const Color(0xFFF5F5F5),
-      // фиксированный AppBar как в ListPage
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(
-            ResponsiveBreakpoints.of(context).smallerThan(TABLET) ? 60 : 410),
+        preferredSize: Size.fromHeight(isMobile ? 65 : 410),
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(
@@ -42,9 +131,31 @@ class TypographyPage extends StatelessWidget {
               alignment: Alignment.center,
               child: Container(
                 margin: marginBottom24,
-                child: Text(
-                    "Это приложение, написанное на Flutter, демонстрирует возможности фреймворка и его адаптивность. А также служит моим портфолио, где я делюсь своими путешествиями и фотографиями.",
-                    style: subtitleTextStyle),
+                child: RichText(
+                  text: TextSpan(
+                    style: subtitleTextStyle,
+                    children: [
+                      const TextSpan(
+                        text: "Это приложение, написанное на ",
+                      ),
+                      TextSpan(
+                        text: "Flutter",
+                        style: subtitleTextStyle.copyWith(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () =>
+                              launchUrl(Uri.parse('https://docs.flutter.dev/')),
+                      ),
+                      const TextSpan(
+                        text:
+                            ", демонстрирует возможности фреймворка и его адаптивность.\n\n"
+                            "А также служит моим портфолио, где я делюсь результатами своей работы, а также своими путешествиями и фотографиями.",
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             divider,
@@ -63,13 +174,82 @@ class TypographyPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom24,
                 child: Text(
-                    "Я его сделал чтобы показать свои навыки и возможности Flutter. А также чтобы у меня была простая ссылка на все мое портфолио, в котором будет информация обо мне - как о специалисте, мои проекты и результаты моей работы, а также мой блог с фотографиями и историями путешествий потому что мне это нравится и я хочу делиться своими впечатлениями с окружающими.",
+                    "Я его сделал чтобы показать свои навыки и возможности Flutter. А также, чтобы у меня была простая ссылка на все мое портфолио, в котором будет информация обо мне - как о специалисте, мои проекты и результаты моей работы, а также мой блог с фотографиями и историями путешествий, потому что мне это нравится и я хочу делиться своими впечатлениями с окружающими.",
                     style: subtitleTextStyle),
               ),
             ),
             dividerSmall,
             Container(
               margin: marginBottom24,
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: marginBottom12,
+                child: Text("Что дальше?", style: headlineSecondaryTextStyle),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: marginBottom24,
+                child: Text(
+                    "Дальше у меня есть планы развивать это приложение, добавлять новые разделы и возможности. Например, я хочу разделить меню главная на меню блог и сделать два меню с Блогом и Полезными материалами. На Полезные материалы повесить подменю SEO обучение и Разработка обучение",
+                    style: subtitleTextStyle),
+              ),
+            ),
+            dividerSmall,
+            Container(
+              margin: marginBottom24,
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: marginBottom12,
+                child: Text(" ", style: headlineSecondaryTextStyle),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: marginBottom12,
+                child: Text("Хочу такой же сайт",
+                    style: headlineSecondaryTextStyle),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: marginBottom24,
+                child: RichText(
+                  text: TextSpan(
+                    style: subtitleTextStyle,
+                    children: [
+                      const TextSpan(
+                        text:
+                            "Заказать такой же сайт можно у меня в личных сообщениях ",
+                      ),
+                      TextSpan(
+                        text: "вот тут находятся мои контакты",
+                        style: subtitleTextStyle.copyWith(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => launchUrl(Uri.parse('/contacts')),
+                      ),
+                      const TextSpan(
+                        text: ".\n\n"
+                            "А также ниже перечислены социальные сети, в которых я есть.",
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            divider,
+            Container(
+              margin: marginBottom40,
             ),
             Align(
               alignment: Alignment.centerLeft,
@@ -88,7 +268,7 @@ class TypographyPage extends StatelessWidget {
                     children: [
                       const TextSpan(
                         text:
-                            "Если вам понравился этот сайт, вы можете поддержать меня в моем телеграм канале ",
+                            "Если вам понравился этот сайт или то, что я делаю - вы можете поддержать меня в моем телеграм канале ",
                       ),
                       TextSpan(
                         text: "@shastovscky",
@@ -148,7 +328,7 @@ class TypographyPage extends StatelessWidget {
                           elevation: 0,
                         ),
                         onPressed: () =>
-                            launchUrl(Uri.parse('https://t.me/shastovscky')),
+                            launchUrl(Uri.parse('https://t.me/switchleveler')),
                       ),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.campaign, color: Colors.black),
@@ -161,8 +341,8 @@ class TypographyPage extends StatelessWidget {
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
-                        onPressed: () => launchUrl(
-                            Uri.parse('https://t.me/shastovscky_channel')),
+                        onPressed: () =>
+                            launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.camera_alt, color: Colors.black),
@@ -189,8 +369,38 @@ class TypographyPage extends StatelessWidget {
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
-                        onPressed: () => launchUrl(
-                            Uri.parse('https://linkedin.com/in/yourprofile')),
+                        onPressed: () => launchUrl(Uri.parse(
+                            'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
+                      ),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.smart_display_outlined,
+                            color: Colors.black), // YouTube
+                        label: const Text('YouTube'), // текст кнопки
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 15),
+                          side: const BorderSide(color: Colors.black),
+                          elevation: 0,
+                        ),
+                        onPressed: () => launchUrl(Uri.parse(
+                            'https://www.youtube.com/@itsmyadv')), // ссылка на YouTube
+                      ),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.article_outlined,
+                            color: Colors.black),
+                        label: const Text('VC.RU'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 15),
+                          side: const BorderSide(color: Colors.black),
+                          elevation: 0,
+                        ),
+                        onPressed: () =>
+                            launchUrl(Uri.parse('https://vc.ru/id1145025')),
                       ),
                     ],
                   ),
