@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:minimal/components/spacing.dart';
 import 'package:minimal/components/typography.dart';
 
-import 'color.dart';
-
 class TextBody extends StatelessWidget {
   final String text;
 
@@ -78,10 +76,12 @@ class TextBlockquote extends StatelessWidget {
   }
 }
 
-ButtonStyle? menuButtonStyle = TextButton.styleFrom(
-    foregroundColor: textSecondary,
-    backgroundColor: Colors.transparent,
-    disabledForegroundColor: const Color.fromRGBO(
-        0, 0, 0, 0.38), // Replace null with desired color and opacity
-    textStyle: buttonTextStyle,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16));
+ButtonStyle menuButtonStyle = TextButton.styleFrom(
+  foregroundColor: Colors.black, // Черный текст
+  backgroundColor: Colors.transparent,
+  textStyle: buttonTextStyle,
+  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(18.0), // Скругленные углы
+  ),
+);
