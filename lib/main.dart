@@ -70,11 +70,8 @@ class MyApp extends StatelessWidget {
             path != '/' && path.startsWith('/') ? path.substring(1) : path;
         return SelectionArea(
           child: switch (pathName) {
-            '/' || ListPage.name => const ListPage(),
-            PostPage.name =>
-              // Breakpoints can be nested.
-              // Here's an example of custom "per-page" breakpoints.
-              const ResponsiveBreakpoints(breakpoints: [
+            '/' || ListPage.name => ListPage(),
+            PostPage.name => const ResponsiveBreakpoints(breakpoints: [
                 Breakpoint(start: 0, end: 480, name: MOBILE),
                 Breakpoint(start: 481, end: 1200, name: TABLET),
                 Breakpoint(start: 1201, end: double.infinity, name: DESKTOP),
@@ -83,6 +80,10 @@ class MyApp extends StatelessWidget {
             PortfolioPage.name => const PortfolioPage(),
             AboutPage.name => const AboutPage(),
             ContactsPage.name => const ContactsPage(),
+            PageUnderConstruction.name => PageUnderConstruction(
+                postTitle: (ModalRoute.of(context)?.settings.arguments
+                        as Map<String, dynamic>?)?['title'] ??
+                    'Статья в разработке'),
             _ => const SizedBox.shrink(),
           },
         );
