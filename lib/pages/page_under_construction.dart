@@ -9,7 +9,7 @@ class PageUnderConstruction extends StatelessWidget {
   static const String name = 'under_construction';
   final String postTitle;
 
-  const PageUnderConstruction({super.key, required this.postTitle});
+  const PageUnderConstruction({super.key, required this.postTitle, required title});
 
   get menuStyle => null;
 
@@ -18,10 +18,12 @@ class PageUnderConstruction extends StatelessWidget {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
+      // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(isMobile ? 65 : 410),
+        preferredSize: Size.fromHeight(
+            isMobile ? 65 : 110), // Высота для десктопа исправлена
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(

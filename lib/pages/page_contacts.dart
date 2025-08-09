@@ -1,75 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/components.dart';
-import 'package:minimal/components/color.dart';
-import 'package:minimal/pages/page_about.dart';
-import 'package:minimal/pages/page_portfolio.dart';
-import 'package:minimal/pages/page_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactsPage extends StatelessWidget {
   static const String name = 'contacts';
 
   const ContactsPage({super.key});
-
-  Drawer _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xFFF5F5F5),
-            ),
-            child: Text(
-              "SHASTOVSKY.",
-              style: GoogleFonts.montserrat(
-                color: textPrimary,
-                fontSize: 24,
-                letterSpacing: 3,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ListTile(
-            title: const Text('ГЛАВНАЯ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            },
-          ),
-          ListTile(
-            title: const Text('ОБО МНЕ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, AboutPage.name);
-            },
-          ),
-          ListTile(
-            title: const Text('ПОРТФОЛИО'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, PortfolioPage.name);
-            },
-          ),
-          ListTile(
-            title: const Text('ОБ ЭТОМ САЙТЕ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, TypographyPage.name);
-            },
-          ),
-          ListTile(
-            title: const Text('КОНТАКТЫ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, ContactsPage.name);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSocialButton(String label, IconData icon, String url) {
     return SizedBox(
@@ -101,10 +37,12 @@ class ContactsPage extends StatelessWidget {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
+      // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(isMobile ? 65 : 410),
+        preferredSize: Size.fromHeight(
+            isMobile ? 65 : 110), // Высота для десктопа исправлена
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(

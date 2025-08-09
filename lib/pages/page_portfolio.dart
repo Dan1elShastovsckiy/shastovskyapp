@@ -1,10 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/components.dart';
-import 'package:minimal/pages/page_about.dart';
-import 'package:minimal/pages/page_contacts.dart';
-import 'package:minimal/pages/page_typography.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,65 +9,6 @@ class PortfolioPage extends StatelessWidget {
   static const String name = 'portfolio';
 
   const PortfolioPage({super.key});
-
-  Drawer _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xFFF5F5F5),
-            ),
-            child: Text(
-              "SHASTOVSKY.",
-              style: GoogleFonts.montserrat(
-                color: textPrimary,
-                fontSize: 24,
-                letterSpacing: 3,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ListTile(
-            title: const Text('ГЛАВНАЯ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            },
-          ),
-          ListTile(
-            title: const Text('ОБО МНЕ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, AboutPage.name);
-            },
-          ),
-          ListTile(
-            title: const Text('ПОРТФОЛИО'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, PortfolioPage.name);
-            },
-          ),
-          ListTile(
-            title: const Text('ОБ ЭТОМ САЙТЕ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, TypographyPage.name);
-            },
-          ),
-          ListTile(
-            title: const Text('КОНТАКТЫ'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, ContactsPage.name);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSocialButton(String label, IconData icon, String url) {
     return SizedBox(
@@ -103,10 +40,12 @@ class PortfolioPage extends StatelessWidget {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
+      // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(isMobile ? 65 : 410),
+        preferredSize: Size.fromHeight(
+            isMobile ? 65 : 110), // Высота для десктопа исправлена
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(
@@ -603,8 +542,9 @@ class PortfolioPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom24,
                 child: Text(
-                    "Я верю в важность качественного кода, ТЗ по SMART и чистого дизайна. Мой подход заключается в том, чтобы создавать продукты, которые не только функциональны, но и приятны в использовании. \n\n"
-                    "Я всегда стремлюсь к лучшим практикам SEO - оптимизации, разработки и использую современные технологии. Я также ценю обратную связь и считаю, что она помогает мне расти как SEO специалисту и разработчику. Я открыт к новым идеям и всегда готов учиться. Я люблю работать в команде и считаю, что совместная работа приводит к лучшим результатам.",
+                    "Я верю в важность качественного кода, ТЗ по SMART и чистого дизайна. Мой подход заключается в том, чтобы создавать продукты, которые не только функциональные, но и приятны в использовании. \n\n"
+                    "Всегда стремлюсь к лучшим практикам SEO - оптимизации, разработки и использую современные технологии. Также ценю обратную связь и считаю, что она помогает мне расти как SEO специалисту и разработчику. \n"
+                    "Я открыт к новым идеям и всегда готов учиться, люблю работать в команде и считаю, что совместная работа приводит к лучшим результатам.",
                     style: subtitleTextStyle),
               ),
             ),
@@ -613,7 +553,7 @@ class PortfolioPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom24,
                 child: Text(
-                    "Я считаю, что каждый проект — это возможность для роста и обучения. Я стремлюсь к тому, чтобы каждый мой проект был не только успешным, но и полезным для пользователей. Я верю, что технологии могут изменить мир к лучшему, и я хочу быть частью этого изменения.",
+                    "Я считаю, что каждый проект — это возможность для роста и обучения и стремлюсь к тому, чтобы каждый мой проект был не только успешным, но и полезным для пользователей. Знаю, что технологии могут изменить мир к лучшему, и хочу быть частью этого изменения.",
                     style: subtitleTextStyle),
               ),
             ),
