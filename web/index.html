@@ -33,8 +33,44 @@
   <link rel="manifest" href="manifest.json">
     <!-- мета-тег для автообновления -->
   <!-- <meta http-equiv="refresh" content="30"> -->
+   <style>
+    body {
+      background-color: #F5F5F5; /* Цвет фона, как у вашего сайта */
+    }
+    .loader-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    }
+    .loader {
+      border: 8px solid #E0E0E0; /* Светло-серый круг */
+      border-top: 8px solid #242424; /* Темный цвет для вращающейся части */
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
+  <div class="loader-container">
+    <div class="loader"></div>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('Service Worker registered: ', reg))
+          .catch(err => console.error('SW registration failed: ', err));
+      });
+    }
+  </script>
 </body>
 </html>
