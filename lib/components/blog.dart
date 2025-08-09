@@ -355,60 +355,62 @@ class MinimalMenuBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
+    // ОПТИМИЗАЦИЯ: Виджет переделан для исправления бага на мобильных.
+    // Вместо Column используется Container с BoxDecoration для нижней границы.
     return Material(
-      elevation: 0,
       color: const Color(0xFFF5F5F5),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: EdgeInsets.symmetric(
-                vertical: isMobile ? 10 : 20, horizontal: isMobile ? 12 : 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                InkWell(
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  onTap: () => Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    Navigator.defaultRouteName,
-                    ModalRoute.withName(Navigator.defaultRouteName),
-                  ),
-                  child: Text(
-                    "SHASTOVSKY.",
-                    style: GoogleFonts.montserrat(
-                      color: textPrimary,
-                      fontSize: isMobile ? 20 : 24,
-                      letterSpacing: 3,
-                      fontWeight: FontWeight.w500,
-                    ),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+            vertical: isMobile ? 0 : 10, horizontal: isMobile ? 12 : 16),
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            InkWell(
+              hoverColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              onTap: () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                Navigator.defaultRouteName,
+                ModalRoute.withName(Navigator.defaultRouteName),
+              ),
+              child: Padding(
+                // Добавлен вертикальный padding для логотипа, чтобы он не прилипал к краям
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Text(
+                  "SHASTOVSKY.",
+                  style: GoogleFonts.montserrat(
+                    color: textPrimary,
+                    fontSize: isMobile ? 20 : 24,
+                    letterSpacing: 3,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                if (isMobile)
-                  IconButton(
-                    icon: const Icon(Icons.menu, size: 28),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  )
-                else
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: _buildMenuItems(context),
-                      ),
-                    ),
-                  ),
-              ],
+              ),
             ),
-          ),
-          Container(
-            height: 1,
-            color: const Color(0xFFEEEEEE),
-          ),
-        ],
+            if (isMobile)
+              IconButton(
+                icon: const Icon(Icons.menu, size: 28),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              )
+            else
+              Expanded(
+                child: Container(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _buildMenuItems(context),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -429,39 +431,37 @@ class MinimalMenuBar extends StatelessWidget {
     );
 
     return [
+      // ИСПРАВЛЕНИЕ: Используем простой pushNamed для ГЛАВНОЙ
       _buildMenuItem(
         "ГЛАВНАЯ",
         menuStyle,
         menuButtonStyle,
-        () => Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/',
-          (route) => false,
-        ),
+        () => Navigator.pushNamed(context, '/'), // Просто переходим на '/'
       ),
       _buildMenuItem(
         "ОБО МНЕ",
         menuStyle,
         menuButtonStyle,
-        () => Navigator.pushNamed(context, AboutPage.name),
+        // ИСПРАВЛЕНИЕ: Добавляем слеш к имени маршрута
+        () => Navigator.pushNamed(context, '/${AboutPage.name}'),
       ),
       _buildMenuItem(
         "ПОРТФОЛИО",
         menuStyle,
         menuButtonStyle,
-        () => Navigator.pushNamed(context, PortfolioPage.name),
+        () => Navigator.pushNamed(context, '/${PortfolioPage.name}'),
       ),
       _buildMenuItem(
         "ОБ ЭТОМ САЙТЕ",
         menuStyle,
         menuButtonStyle,
-        () => Navigator.pushNamed(context, TypographyPage.name),
+        () => Navigator.pushNamed(context, '/${TypographyPage.name}'),
       ),
       _buildMenuItem(
         "КОНТАКТЫ",
         menuStyle,
         menuButtonStyle,
-        () => Navigator.pushNamed(context, ContactsPage.name),
+        () => Navigator.pushNamed(context, '/${ContactsPage.name}'),
       ),
     ];
   }
@@ -479,7 +479,7 @@ class MinimalMenuBar extends StatelessWidget {
 // в конец файла blog.dart
 Drawer buildAppDrawer(BuildContext context) {
   return Drawer(
-    backgroundColor: Colors.white, // Белый фон всего меню
+    backgroundColor: Colors.white,
     child: ListView(
       padding: EdgeInsets.zero,
       children: [
@@ -500,36 +500,36 @@ Drawer buildAppDrawer(BuildContext context) {
         ListTile(
           title: const Text('ГЛАВНАЯ'),
           onTap: () {
-            Navigator.pop(context);
-            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            Navigator.pop(context); // Сначала закрываем Drawer
+            Navigator.pushNamed(context, '/'); // Потом переходим
           },
         ),
         ListTile(
           title: const Text('ОБО МНЕ'),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, AboutPage.name);
+            Navigator.pushNamed(context, '/${AboutPage.name}');
           },
         ),
         ListTile(
           title: const Text('ПОРТФОЛИО'),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, PortfolioPage.name);
+            Navigator.pushNamed(context, '/${PortfolioPage.name}');
           },
         ),
         ListTile(
           title: const Text('ОБ ЭТОМ САЙТЕ'),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, TypographyPage.name);
+            Navigator.pushNamed(context, '/${TypographyPage.name}');
           },
         ),
         ListTile(
           title: const Text('КОНТАКТЫ'),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, ContactsPage.name);
+            Navigator.pushNamed(context, '/${ContactsPage.name}');
           },
         ),
       ],
