@@ -73,7 +73,7 @@ class MyApp extends StatelessWidget {
     switch (name) {
       case '/':
       case ListPage.name:
-        return const ListPage();
+        return ListPage();
       case PostPage.name:
         return const PostPage();
       case TypographyPage.name:

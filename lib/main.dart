@@ -1,8 +1,10 @@
+// lib/main.dart
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:minimal/pages/pages.dart';
+import 'package:minimal/components/route_generator.dart';
 import 'package:minimal/utils/no_animation_page_transitions_builder.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -22,8 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Wrapping the app with a builder method makes breakpoints
-      // accessible throughout the widget tree.
+      // обертка ResponsiveBreakpoints
       builder: (context, child) => ResponsiveBreakpoints.builder(
         breakpoints: [
           const Breakpoint(start: 0, end: 450, name: MOBILE),
@@ -33,17 +34,8 @@ class MyApp extends StatelessWidget {
         ],
         child: child!,
       ),
-      initialRoute: '/',
-      onGenerateInitialRoutes: (initialRoute) {
-        final Uri uri = Uri.parse(initialRoute);
-        return [
-          buildPage(path: uri.path, queryParams: uri.queryParameters),
-        ];
-      },
-      onGenerateRoute: (RouteSettings settings) {
-        final Uri uri = Uri.parse(settings.name ?? '/');
-        return buildPage(path: uri.path, queryParams: uri.queryParameters);
-      },
+
+      // Настройки темы
       theme: ThemeData(
         pageTransitionsTheme: PageTransitionsTheme(
           builders: {
@@ -55,39 +47,12 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-    );
-  }
 
-  // onGenerateRoute route switcher.
-  // Navigate using the page name, `Navigator.pushNamed(context, ListPage.name)`.
-  Route<dynamic> buildPage(
-      {required String path, Map<String, String> queryParams = const {}}) {
-    return PageRouteBuilder(
-      settings: RouteSettings(
-          name: (path.startsWith('/') == false) ? '/$path' : path),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        String pathName =
-            path != '/' && path.startsWith('/') ? path.substring(1) : path;
-        return SelectionArea(
-          child: switch (pathName) {
-            '/' || ListPage.name => ListPage(),
-            PostPage.name => const ResponsiveBreakpoints(breakpoints: [
-                Breakpoint(start: 0, end: 480, name: MOBILE),
-                Breakpoint(start: 481, end: 1200, name: TABLET),
-                Breakpoint(start: 1201, end: double.infinity, name: DESKTOP),
-              ], child: PostPage()),
-            TypographyPage.name => const TypographyPage(),
-            PortfolioPage.name => const PortfolioPage(),
-            AboutPage.name => const AboutPage(),
-            ContactsPage.name => const ContactsPage(),
-            PageUnderConstruction.name => PageUnderConstruction(
-                postTitle: (ModalRoute.of(context)?.settings.arguments
-                        as Map<String, dynamic>?)?['title'] ??
-                    'Статья в разработке'),
-            _ => const SizedBox.shrink(),
-          },
-        );
-      },
+      // --- ЛОГИКА МАРШРУТИЗАЦИИ ---
+      initialRoute: '/',
+      onGenerateRoute: RouteGenerator.generateRoute,
+      // onUnknownRoute можно не указывать, так как onGenerateRoute
+      // уже обрабатывает все случаи через default в switch.
     );
   }
 }
