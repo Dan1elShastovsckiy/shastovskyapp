@@ -292,7 +292,7 @@ class Footer extends StatelessWidget {
 class ListItem extends StatelessWidget {
   final String title;
   final String? imageUrl;
-  final String? description;
+  final Widget? description;
   final double? imageHeight;
   final VoidCallback onReadMore; // Добавляем callback
 
@@ -328,10 +328,7 @@ class ListItem extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Container(
               margin: marginBottom12,
-              child: Text(
-                description!,
-                style: bodyTextStyle,
-              ),
+              child: description!, // <-- Теперь просто вставляем виджет
             ),
           ),
         Align(
