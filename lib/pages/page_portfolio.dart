@@ -10,42 +10,17 @@ class PortfolioPage extends StatelessWidget {
 
   const PortfolioPage({super.key});
 
-  Widget _buildSocialButton(String label, IconData icon, String url) {
-    return SizedBox(
-      width: 300,
-      height: 80,
-      child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.black, size: 32),
-        label: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          side: const BorderSide(color: Colors.black),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-        ),
-        onPressed: () => launchUrl(Uri.parse(url)),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    // Стиль для жирного текста, чтобы не дублировать
+    final boldTextStyle = bodyTextStyle.copyWith(fontWeight: FontWeight.bold);
 
     return Scaffold(
-      // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(
-            isMobile ? 65 : 110), // Высота для десктопа исправлена
+        preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(
@@ -70,7 +45,8 @@ class PortfolioPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom24,
                 child: Text(
-                    "Здесь вы можете найти мои проекты и работы, которые я вырастил в процессе своей карьеры. ",
+                    "Здесь вы можете найти проекты, которые я вел и выращивал в процессе своей карьеры. \nЯ продолжаю активно работать со многими из нижеперечисленных компаний, развивая их и достигая новых высот.",
+                    textAlign: TextAlign.center,
                     style: subtitleTextStyle),
               ),
             ),
@@ -78,7 +54,6 @@ class PortfolioPage extends StatelessWidget {
             Container(
               margin: marginBottom40,
             ),
-            // Заголовок раздела проектов
             Container(
               color: Colors.white,
               child: Column(
@@ -95,430 +70,324 @@ class PortfolioPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Проект 1: Maple Tattoo Supply CA
-                  Container(
-                    color: Colors.white,
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 24),
-                      childrenPadding: EdgeInsets.zero,
-                      title: Text(
-                        "SEO для Maple Tattoo Supply CA",
-                        style:
-                            headlineSecondaryTextStyle.copyWith(fontSize: 22),
+                  // Genotek.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для Genotek.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/genotek_logo.webp'),
+                      Text(
+                        "Проект вел длительное время, и он продолжает показывать положительную динамику. За год работы удалось добиться роста органического трафика на +42% и вывести ключевые запросы по генетическим тестам в ТОП-3.",
+                        style: bodyTextStyle,
                       ),
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Логотип проекта
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/maple_logo.webp',
-                                  width: 200,
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Я вел этот проект по продвижению канадского интернет-магазина товаров для татуировок в течение ограниченного периода. К сожалению, сотрудничество было непродолжительным - заказчик принял решение прекратить SEO-продвижение после выполнения начального этапа работ. ",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                "За отведенное время были выполнены следующие задачи:",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const Text(
-                                  "• Полный анализ внешней и внутренней оптимизации"),
-                              const Text("• Технический аудит сайта"),
-                              const Text(
-                                  "• Анализ и аудит конкурентов в сегменте"),
-                              const SizedBox(height: 20),
-                              // Изображения показателей
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/maple_metrics1.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/maple_metrics2.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Был проведен комплексный анализ текущего состояния сайта, включая технический аудит, оценку внешней ссылочной массы и анализ конкурентной среды в нише товаров для тату. Особое внимание уделялось выявлению технических ошибок, мешающих корректной индексации ресурса.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 16),
-                              // Дополнительное изображение
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/maple_metrics3.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "По результатам аудита был подготовлен детальный отчет с рекомендациями по оптимизации, включая план по улучшению структуры сайта, исправлению технических ошибок и разработке контент-стратегии. Несмотря на преждевременное завершение проекта, все базовые работы по SEO были качественно выполнены.",
-                                style: bodyTextStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      _buildMetricImage(
+                          'assets/portfolio/genotek_metrics1.webp'),
+                      _buildMetricImage(
+                          'assets/portfolio/genotek_metrics2.webp'),
+                      const SizedBox(height: 20),
+                      Text("Ключевые задачи:", style: boldTextStyle),
+                      const Text("• Полный технический и конкурентный аудит."),
+                      const Text(
+                          "• Переработка архитектуры сайта и создание тематических кластеров."),
+                      const Text(
+                          "• Написание метатегов и экспертного контента."),
+                      const Text(
+                          "• Построение стратегии внешней оптимизации и цитирования в авторитетных медицинских источниках."),
+                      _buildMetricImage(
+                          'assets/portfolio/genotek_metrics3.webp'),
+                      const SizedBox(height: 20),
+                      Text(
+                        "Текущие результаты показывают стабильный рост и увеличение конверсии в заявки. Проект продолжает развиваться с фокусом на экспертном контенте и улучшении пользовательского опыта.",
+                        style: bodyTextStyle,
+                      ),
+                    ],
                   ),
-                  const Divider(height: 1, thickness: 1, color: Colors.grey),
 
-                  // Проект 2: Genotek.ru
-                  Container(
-                    color: Colors.white,
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 24),
-                      childrenPadding: EdgeInsets.zero,
-                      title: Text(
-                        "SEO для Genotek.ru",
-                        style:
-                            headlineSecondaryTextStyle.copyWith(fontSize: 22),
+                  // Vitateka.ee
+                  _buildProjectExpansionTile(
+                    title: "SEO для Vitateka.ee",
+                    children: [
+                      _buildLogo('assets/portfolio/vitateka_logo.webp'),
+                      Text(
+                        "Ключевая задача: реабилитация европейского проекта интернет-аптеки после взлома. За год работы средняя позиция по целевым запросам была улучшена на 35% по всем регионам Европы, а органический трафик вырос на 75% по сравнению с докризисным периодом.",
+                        style: bodyTextStyle,
                       ),
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Логотип проекта
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/genotek_logo.webp',
-                                  width: 200,
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Проект вел длительное время, продолжает показывать положительную динамику по всем позициям. Особенно заметен рост позиций по генетическим тестированиям, которые вошли в TOP3 по запросам.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 16),
-                              // Изображения показателей
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/genotek_metrics1.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/genotek_metrics2.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "На старте проекта была проведена глубокая аналитическая работа: технический аудит выявил проблемы с индексацией, анализ конкурентов показал слабые места в нашей стратегии, а семантическое ядро было расширено до 5000+ запросов. Особое внимание уделялось медицинской тематике и соответствию требованиям E-A-T.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 20),
-                              const Text(
-                                "На начальных этапах работы:",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const Text(
-                                  "• Проведен полный анализ внешней и внутренней оптимизации"),
-                              const Text("• Выполнен технический аудит сайта"),
-                              const SizedBox(height: 16),
-                              const Text(
-                                "В процессе работы:",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const Text(
-                                  "• Составлена расширенная архитектура сайта"),
-                              const Text(
-                                  "• Собраны ключевые запросы и сгруппированы по страницам"),
-                              const Text(
-                                  "• Написаны метатеги для низкоранжируемых страниц"),
-                              const Text(
-                                  "• Проанализированы конкуренты и построена стратегия внешней оптимизации"),
-                              const Text(
-                                  "• Улучшено цитирование на внешних источниках"),
-                              const SizedBox(height: 20),
-                              // Дополнительное изображение
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/genotek_metrics3.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "В процессе работы мы полностью переработали архитектуру сайта, создали систему тематических кластеров и значительно улучшили контент. Для внешней оптимизации была разработана стратегия цитирования в авторитетных медицинских источниках, что повысило доверие к ресурсу.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Текущие результаты показывают стабильный рост органического трафика (+42% за год) и увеличение конверсии в заявки на генетические исследования. Проект продолжает развиваться с фокусом на экспертном контенте и улучшении пользовательского опыта.",
-                                style: bodyTextStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      const SizedBox(height: 16),
+                      Text("Ключевые задачи:", style: boldTextStyle),
+                      const Text(
+                          "• Восстановление сайта после взлома и комплексная техническая оптимизация."),
+                      const Text(
+                          "• Разработка многоязычной контент-стратегии с учетом требований GDPR."),
+                      _buildMetricImage(
+                          'assets/portfolio/vitateka_metrics1.webp'),
+                      const Text(
+                          "• Наращивание региональной ссылочной массы в странах Балтии и Европы."),
+                      _buildMetricImage(
+                          'assets/portfolio/vitateka_metrics2.webp'),
+                    ],
                   ),
-                  const Divider(height: 1, thickness: 1, color: Colors.grey),
 
-                  // Проект 3: Vitateka.ee
-                  Container(
-                    color: Colors.white,
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 24),
-                      childrenPadding: EdgeInsets.zero,
-                      title: Text(
-                        "SEO для Vitateka.ee",
-                        style:
-                            headlineSecondaryTextStyle.copyWith(fontSize: 22),
+                  // Credistory.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для блога Credistory.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/credistory_logo.webp'),
+                      Text(
+                        "Результат: впечатляющий рост органического трафика на +55% к каждому месяцу в течение года. Ключевым фактором успеха стала разработка и реализация контент-стратегии.",
+                        style: bodyTextStyle,
                       ),
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Логотип проекта
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/vitateka_logo.webp',
-                                  width: 200,
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Европейский проект интернет-аптеки столкнулся с серьезным кризисом - сайт был взломан, что привело к полной потере позиций в поисковых системах. Моей задачей было не только восстановить прежние позиции, но и превзойти их. За год работы нам удалось улучшить среднюю позицию по ключевым запросам на 35% по всем целевым регионам Европы.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "После восстановления сайта от последствий взлома была разработана комплексная стратегия, включающая техническую оптимизацию, создание многоязычного контента и построение региональной ссылочной массы. Особое внимание уделялось соответствию европейским требованиям GDPR.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 16),
-                              // Изображение показателей
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/vitateka_metrics1.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Динамика позиций отслеживалась по неизменному семантическому ядру, чтобы точно оценить эффект от проделанной работы. Ядро обновлялось только в отдельных разделах, которые были исключены из общей статистики для чистоты анализа.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 20),
-                              // Дополнительное изображение
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/vitateka_metrics2.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Результатом стала не только полная реабилитация проекта после взлома, но и увеличение органического трафика на 75% по сравнению с докризисным периодом. Особенно заметен рост в Эстонии и странах Балтии, где проект вышел в ТОП-3-5 по основным коммерческим запросам.",
-                                style: bodyTextStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      _buildMetricImage(
+                          'assets/portfolio/credistory_metrics1.webp'),
+                      const SizedBox(height: 20),
+                      Text("Ключевые задачи:", style: boldTextStyle),
+                      const Text(
+                          "• Разработка и реализация контент-стратегии с нуля (более 150 статей)."),
+                      const Text(
+                          "• Улучшение структуры сайта и внутренней перелинковки."),
+                      const Text("• Рост времени пребывания на сайте на 40%."),
+                      _buildMetricImage(
+                          'assets/portfolio/credistory_metrics2.webp'),
+                    ],
                   ),
-                  const Divider(height: 1, thickness: 1, color: Colors.grey),
 
-                  // Проект 4: Credistory.ru
-                  Container(
-                    color: Colors.white,
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 24),
-                      childrenPadding: EdgeInsets.zero,
-                      title: Text(
-                        "SEO для блога Credistory.ru",
-                        style:
-                            headlineSecondaryTextStyle.copyWith(fontSize: 22),
-                      ),
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Логотип проекта
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/credistory_logo.webp',
-                                  width: 200,
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Для этого финансового проекта был достигнут впечатляющий рост органического трафика - +55% к каждому месяцу(!) за год благодаря комплексной работе с блогом и основными коммерческими страницами. Ключевым фактором успеха стала разработка контент-стратегии, ориентированной на решение проблем целевой аудитории.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 16),
-                              // Изображение показателей
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/credistory_metrics1.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Мы создали новые разделы блога, посвященные финансовой грамотности, кредитованию и инвестициям. Каждая статья тщательно прорабатывалась с точки зрения полезности для пользователя и SEO-оптимизации. Контент-план включал более 150 материалов, охватывающих все аспекты финансовой тематики.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 20),
-                              const Text(
-                                "В рамках проекта:",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const Text("• Созданы новые разделы для блога"),
-                              const Text("• Разработан контент-план"),
-                              const Text(
-                                  "• Написаны экспертные статьи по финансовой тематике"),
-                              const Text("• Оптимизирована структура сайта"),
-                              const Text("• Улучшена внутренняя перелинковка"),
-                              const SizedBox(height: 20),
-                              // Дополнительное изображение
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/credistory_metrics2.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Оптимизация структуры сайта и улучшение внутренней перелинковки позволили равномерно распределить ссылочный вес и повысить авторитетность ключевых коммерческих страниц. Была внедрена система контекстных ссылок, связывающая полезный контент с услугами компании. В результате не только вырос трафик, но и увеличилось время пребывания на сайте на 40%.",
-                                style: bodyTextStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  // Leroymerlin.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для Leroymerlin.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/leroymerlin_logo.webp'),
+                      Text(
+                          "Работал в качестве Middle SEO-специалиста в большой внутренней команде проекта до ухода компании из РФ. Ввиду NDA, могу поделиться общей стратегией и результатами на концептуальном уровне.",
+                          style: bodyTextStyle),
+                      const SizedBox(height: 16),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/leroymerlin_metrics1.webp'),
+                      Text(
+                          "Ключевой задачей была реализация масштабной контент-стратегии (20-40 текстов в день) с целью вытеснения конкурентов из выдачи по всем возможным НЧ и СЧ запросам. Такой проактивный подход обеспечивал проекту колоссальные показатели роста и доминирование в нише.",
+                          style: bodyTextStyle),
+                    ],
                   ),
-                  const Divider(height: 1, thickness: 1, color: Colors.grey),
 
-                  // Проект 5: shastovsky.ru
-                  Container(
-                    color: Colors.white,
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 24),
-                      childrenPadding: EdgeInsets.zero,
-                      title: Text(
-                        "flutter разработка сайта shastovsky.ru",
-                        style:
-                            headlineSecondaryTextStyle.copyWith(fontSize: 22),
+                  // sportmaster.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для sportmaster.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/sportmaster_logo.webp'),
+                      Text(
+                          "В качестве Middle SEO-специалиста в составе сильной команды внес свой вклад в рост онлайн-продаж на +35% в крупнейших городах.",
+                          style: bodyTextStyle),
+                      const SizedBox(height: 16),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/sportmaster_metrics1.webp'),
+                      Text("Мои зоны ответственности:", style: boldTextStyle),
+                      const Text(
+                          "• Контент-планирование для блога: от идеи и ТЗ до контроля копирайтинга."),
+                      const Text(
+                          "• Участие в реорганизации структуры сайта и брейншторме новых идей."),
+                    ],
+                  ),
+
+                  // iek.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для iek.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/iek_logo.webp'),
+                      Text(
+                          "Работал над проектом в составе команды агентства. Нашей задачей было обеспечение стабильного роста в консервативной B2B-нише. Мы добились планомерного улучшения всех ключевых SEO-показателей (переходов, показов, CTR).",
+                          style: bodyTextStyle),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage('assets/portfolio/iek_metrics1.webp'),
+                      const SizedBox(height: 16),
+                      Text(
+                          "Стратегия была сфокусирована на двух ключевых направлениях:",
+                          style: boldTextStyle),
+                      const Text(
+                          "• Систематическое обновление и улучшение существующего контента."),
+                      const Text(
+                          "• Планомерное наращивание качественной ссылочной массы."),
+                    ],
+                  ),
+
+                  // weitnauer.com
+                  _buildProjectExpansionTile(
+                    title: "SEO для weitnauer.com",
+                    children: [
+                      _buildLogo('assets/portfolio/weitnauer_logo.webp'),
+                      Text(
+                          "Принял проект швейцарского бренда (поставщик Duty Free) и за короткий срок провел полный аудит, внедрил систему контент-менеджмента и составил стартовую стратегию для линкбилдинга.",
+                          style: bodyTextStyle),
+                      const SizedBox(height: 16),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/weitnauer_metrics1.webp'),
+                      Text(
+                          "Затем я передал проект своему подопечному Антону (Антон если читаешь это - こんにちは), который блестяще его реализовал. С помощью стратегической базы проект вырос с нуля до ТОП-3 и ТОП-10 в ключевых регионах, а DR сайта увеличился до 15 всего за полгода.",
+                          style: bodyTextStyle),
+                    ],
+                  ),
+
+                  // askona.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для askona.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/askona_logo.webp'),
+                      Text(
+                          "Один из самых сложных и конкурентных проектов. В условиях высочайшей конкуренции в мебельной нише и внутренних сложностей с разработкой, под моим контролем проект показывает стабильный рост показателей от квартала к кварталу, нивелируя даже сезонные падения спроса.",
+                          style: bodyTextStyle),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/askona_metrics1.webp'),
+                      const SizedBox(height: 16),
+                      Text(
+                          "Более подробной информацией, к сожалению, поделиться не могу ввиду строгого NDA.",
+                          style: bodyTextStyle),
+                    ],
+                  ),
+
+                  // rsk-factory.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для rsk-factory.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/rsk_factory_logo.webp'),
+                      Text(
+                          "Уникальный проект по созданию кастомной мебели. Нашей совместной стратегией стало: «заявлять о себе везде, делать это качественно и системно».",
+                          style: bodyTextStyle),
+                      const SizedBox(height: 16),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/rsk_factory_metrics1.webp'),
+                      Text("Результаты за год совместной работы:",
+                          style: boldTextStyle),
+                      const Text(
+                          "• Рост семантического ядра в ТОП-10 на 27% и в ТОП-3 на 12%."),
+                      const Text(
+                          "• Увеличение переходов по всем регионам на 63%."),
+                      const Text(
+                          "• Значительный рост конверсий и минимальный процент отказов."),
+                      const SizedBox(height: 16),
+                      Text(
+                          "Это было достигнуто за счет полной переработки блога, обновления контента и создания экспертных статей на внешних площадках.",
+                          style: bodyTextStyle),
+                    ],
+                  ),
+
+                  // vmeste.sber.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для vmeste.sber.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/vmeste_sber_logo.webp'),
+                      Text(
+                          "Очень важный и добрый проект, где главная цель — сделать так, чтобы помощь всегда находила тех, кто в ней нуждается. Вся работа по SEO направлена на максимальное увеличение видимости сайта по запросам, связанным с благотворительностью.",
+                          style: bodyTextStyle),
+                      const SizedBox(height: 16),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/vmeste_sber_metrics1.webp'),
+                      Text(
+                          "Мы растим блог и улучшаем сайт, чтобы каждый, кто хочет помочь, мог легко нас найти. Проект находится под NDA.",
+                          style: bodyTextStyle),
+                    ],
+                  ),
+
+                  // sbersova.ru
+                  _buildProjectExpansionTile(
+                    title: "SEO для sbersova.ru",
+                    children: [
+                      _buildLogo('assets/portfolio/sbersova_logo.webp'),
+                      Text(
+                          "Большая платформа с курсами и блогом по инвестициям. Несмотря на молодость проекта и жесточайшую конкуренцию с гигантами вроде Тинькофф Журнала, мы показываем очень успешную годовую динамику.",
+                          style: bodyTextStyle),
+                      const SizedBox(height: 16),
+                      // <<< Плейсхолдер для метрик >>>
+                      _buildMetricImage(
+                          'assets/portfolio/sbersova_metrics1.webp'),
+                      Text(
+                          "Благодаря комплексной работе моей команды с контентом и внешними ссылками, мы добились значительного роста запросов в ТОП-10 и увеличения цитируемости сайта. Проект находится под NDA.",
+                          style: bodyTextStyle),
+                    ],
+                  ),
+
+                  // Maple Tattoo
+                  _buildProjectExpansionTile(
+                    title: "SEO для Maple Tattoo Supply CA",
+                    children: [
+                      _buildLogo('assets/portfolio/maple_logo.webp'),
+                      Text(
+                        "Задача: комплексная подготовка и запуск SEO-продвижения для канадского интернет-магазина с нуля. За время сотрудничества был выполнен полный комплекс работ по базовой оптимизации, что создало прочный фундамент для дальнейшего роста проекта.",
+                        style: bodyTextStyle,
                       ),
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      _buildMetricImage('assets/portfolio/maple_metrics1.webp'),
+                      const SizedBox(height: 16),
+                      Text("Ключевые выполненные задачи:",
+                          style: boldTextStyle),
+                      const Text(
+                          "• Проведена базовая SEO-оптимизация сайта под регион Канады."),
+                      const Text(
+                          "• Собрано семантическое ядро для дальнейшей работы с мета-тегами и контентом."),
+                      const Text(
+                          "• Разработана стартовая стратегия для внешнего продвижения и наращивания ссылочной массы."),
+                      const Text(
+                          "• Проведены глубокие аудиты: конкурентный и E-E-A-T (Экспертиза, Опыт, Авторитетность, Доверие)."),
+                      const Text(
+                          "• Внесены правки в дизайн и внедрены элементы для улучшения поведенческих факторов и удержания пользователей."),
+                      const SizedBox(height: 16),
+                      _buildMetricImage('assets/portfolio/maple_metrics2.webp'),
+                      _buildMetricImage('assets/portfolio/maple_metrics3.webp'),
+                      const SizedBox(height: 20),
+                      Text(
+                        "По итогам моей работы проект был полностью готов к активной фазе контент-маркетинга и линкбилдинга, с четко определенной стратегией и исправленными техническими ошибками, мешавшими индексации.",
+                        style: bodyTextStyle,
+                      ),
+                    ],
+                  ),
+
+                  // shastovsky.ru
+                  _buildProjectExpansionTile(
+                    title: "Flutter разработка сайта shastovsky.ru",
+                    isInitiallyExpanded: true,
+                    children: [
+                      _buildLogo('assets/portfolio/shastovsky_logo.webp'),
+                      Text(
+                        "Этот сайт - мой личный проект, разработанный с нуля на Flutter для демонстрации навыков в создании кроссплатформенных веб-приложений. Он служит живым примером моего подхода к чистому коду, адаптивному дизайну и производительности.",
+                        style: bodyTextStyle,
+                      ),
+                      _buildMetricImage('assets/portfolio/shastovsky_in1.webp'),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Использование фреймворка Flutter позволило создать единую кодовую базу для веба и потенциально для мобильных приложений. Особое внимание уделено SEO-оптимизации на стороне сервера (Nginx) и настройке корректной обработки маршрутов для SPA.",
+                        style: bodyTextStyle,
+                      ),
+                      _buildMetricImage('assets/portfolio/shastovsky_in2.webp'),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.center,
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: bodyTextStyle,
                             children: [
-                              // Логотип проекта
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/shastovsky_logo.webp',
-                                  width: 200,
-                                  height: 100,
-                                  fit: BoxFit.contain,
+                              const TextSpan(
+                                  text:
+                                      "Если вам интересно посмотреть подробно исходники: Исходный код проекта доступен на "),
+                              TextSpan(
+                                text: "GitHub",
+                                style: bodyTextStyle.copyWith(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
                                 ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => launchUrl(Uri.parse(
+                                      'https://github.com/Dan1elShastovsckiy/shastovskyapp/')),
                               ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Этот сайт - мой личный проект, который я разработал с нуля на Flutter. Он демонстрирует мои навыки в разработке кроссплатформенных приложений и веб-сайтов. Я использовал современные технологии и подходы, чтобы создать удобный и функциональный интерфейс.",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 16),
-                              // Изображение показателей
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/shastovsky_in1.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                "Сайт был разработан с акцентом на производительность и отзывчивость. Я использовал язык Dart, а точнее его фреймворк Flutter для создания кроссплатформенного приложения, которое работает как на мобильных устройствах, так и в веб-браузерах. Это позволяет пользователям легко получать доступ к моему портфолио и контактной информации с любого устройства. \n\n"
-                                "Я также применил принципы matherial design и сделал его адаптивным, чтобы сайт выглядел отлично на любых экранах. Использование Flutter позволяет мне быстро вносить изменения и обновления, что делает этот проект гибким и масштабируемым. \n",
-                                style: bodyTextStyle,
-                              ),
-                              const SizedBox(height: 20),
-                              // Дополнительное изображение
-                              Center(
-                                child: Image.asset(
-                                  'assets/portfolio/shastovsky_in2.webp',
-                                  width: 300,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  margin: marginBottom24,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: bodyTextStyle,
-                                      children: [
-                                        const TextSpan(
-                                          text:
-                                              "Масштабируемость особенно важна для ",
-                                        ),
-                                        TextSpan(
-                                          text: "этого проекта",
-                                          style: bodyTextStyle.copyWith(
-                                            color: Colors.blue,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () => launchUrl(Uri.parse(
-                                                'https://github.com/Dan1elShastovsckiy/shastovskyapp/')),
-                                        ),
-                                        const TextSpan(
-                                          text:
-                                              ", так как я планирую регулярно обновлять контент(особенно в блоге) и добавлять новые разделы(например в будущем хочу сделать магазин с авторизацией и заказом для своих фото, чтобы монетизировать свои путешествия). Я также использую возможности Flutter для интеграции с различными API и внешними сервисами, что позволяет расширять функциональность сайта без значительных затрат времени на разработку.\n",
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              const TextSpan(
+                                  text:
+                                      ". Далее развитие сайта планируется с учетом отзывов пользователей, поэтому если вам что-то показалось неудобным - напишите мне в личные сообщения, я бы хотел знать и исправить все возможные проблемы."),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const Divider(height: 1, thickness: 1, color: Colors.grey),
                 ],
               ),
             ),
@@ -545,6 +414,7 @@ class PortfolioPage extends StatelessWidget {
                     "Я верю в важность качественного кода, ТЗ по SMART и чистого дизайна. Мой подход заключается в том, чтобы создавать продукты, которые не только функциональные, но и приятны в использовании. \n\n"
                     "Всегда стремлюсь к лучшим практикам SEO - оптимизации, разработки и использую современные технологии. Также ценю обратную связь и считаю, что она помогает мне расти как SEO специалисту и разработчику. \n"
                     "Я открыт к новым идеям и всегда готов учиться, люблю работать в команде и считаю, что совместная работа приводит к лучшим результатам.",
+                    textAlign: TextAlign.center,
                     style: subtitleTextStyle),
               ),
             ),
@@ -554,6 +424,7 @@ class PortfolioPage extends StatelessWidget {
                 margin: marginBottom24,
                 child: Text(
                     "Я считаю, что каждый проект — это возможность для роста и обучения и стремлюсь к тому, чтобы каждый мой проект был не только успешным, но и полезным для пользователей. Знаю, что технологии могут изменить мир к лучшему, и хочу быть частью этого изменения.",
+                    textAlign: TextAlign.center,
                     style: subtitleTextStyle),
               ),
             ),
@@ -591,7 +462,8 @@ class PortfolioPage extends StatelessWidget {
                               launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
                       const TextSpan(
-                        text: " или подписаться на меня в инстаграм ",
+                        text:
+                            " или подписаться на меня в инстаграм(запрещенная в РФ организация) ",
                       ),
                       TextSpan(
                         text: "@yellolwapple",
@@ -611,21 +483,19 @@ class PortfolioPage extends StatelessWidget {
                 ),
               ),
             ),
-            // кнопки соц.сетей
             Container(
               margin: const EdgeInsets.only(bottom: 40),
-              width: double.infinity, // Растягиваем контейнер на всю ширину
+              width: double.infinity,
               child: Center(
-                // Центрируем содержимое
                 child: Container(
                   constraints: const BoxConstraints(
-                      maxWidth:
-                          600), // Ограничиваем максимальную ширину блока с кнопками
+                      maxWidth: 800), // Можно увеличить ширину для удобства
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     alignment: WrapAlignment.center,
                     children: [
+                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
                         icon: const Icon(Icons.telegram, color: Colors.black),
                         label: const Text('Telegram личный'),
@@ -654,49 +524,100 @@ class PortfolioPage extends StatelessWidget {
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
+
+                      // --- КНОПКИ С ПОДПИСЬЮ (ИЗМЕНЕНА СТРУКТУРА LABEL) ---
+
+                      // Кнопка Instagram
                       ElevatedButton.icon(
                         icon: const Icon(Icons.camera_alt, color: Colors.black),
-                        label: const Text('Instagram'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Instagram'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20,
+                              vertical:
+                                  12), // Немного уменьшен вертикальный паддинг
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
+
+                      // Кнопка LinkedIn
                       ElevatedButton.icon(
                         icon: const Icon(Icons.work, color: Colors.black),
-                        label: const Text('LinkedIn'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('LinkedIn'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20, vertical: 12),
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
+
+                      // Кнопка YouTube
                       ElevatedButton.icon(
                         icon: const Icon(Icons.smart_display_outlined,
-                            color: Colors.black), // YouTube
-                        label: const Text('YouTube'), // текст кнопки
+                            color: Colors.black),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('YouTube'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20, vertical: 12),
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
-                        onPressed: () => launchUrl(Uri.parse(
-                            'https://www.youtube.com/@itsmyadv')), // ссылка на YouTube
+                        onPressed: () => launchUrl(
+                            Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
+
+                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
                         icon: const Icon(Icons.article_outlined,
                             color: Colors.black),
@@ -716,7 +637,7 @@ class PortfolioPage extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            )
           ].toMaxWidthSliver(),
           SliverFillRemaining(
             hasScrollBody: false,
@@ -730,6 +651,73 @@ class PortfolioPage extends StatelessWidget {
             const Footer(),
           ].toMaxWidthSliver(),
         ],
+      ),
+    );
+  }
+
+  // ОБЩИЙ ВИДЖЕТ-КОНСТРУКТОР ДЛЯ ПЛИТКИ ПРОЕКТА
+  Widget _buildProjectExpansionTile({
+    required String title,
+    required List<Widget> children,
+    bool isInitiallyExpanded = false,
+  }) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          ExpansionTile(
+            key: PageStorageKey(title),
+            initiallyExpanded: isInitiallyExpanded,
+            tilePadding:
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            childrenPadding:
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            title: Text(
+              title,
+              style: headlineSecondaryTextStyle.copyWith(fontSize: 22),
+            ),
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              ),
+            ],
+          ),
+          const Divider(height: 1, thickness: 1, color: Colors.grey),
+        ],
+      ),
+    );
+  }
+
+  // Вспомогательный виджет для логотипа
+  Widget _buildLogo(String path) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20.0),
+        child: Image.asset(
+          path,
+          width: 200,
+          height: 100,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) =>
+              const SizedBox(height: 100),
+        ),
+      ),
+    );
+  }
+
+  // Вспомогательный виджет для картинок с метриками
+  Widget _buildMetricImage(String path) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Image.asset(
+          path,
+          width: 400, // Увеличил ширину для лучшей читаемости
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => const SizedBox
+              .shrink(), // Если картинки нет, ничего не показываем
+        ),
       ),
     );
   }

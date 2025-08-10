@@ -22,7 +22,7 @@ class PostPage extends StatefulWidget {
 class _PostPageState extends State<PostPage> {
   // Список всех изображений на странице для предварительного кэширования
   final List<String> _pageImages = [
-    "assets/images/me_sachara_desert.jpg",
+    "assets/images/me_sachara_desert.webp",
     "assets/images/marocco/IMG_4129.webp",
     "assets/images/marocco/IMG_9519.webp",
     "assets/images/marocco/IMG_9524.webp",
@@ -126,7 +126,7 @@ class _PostPageState extends State<PostPage> {
           ...[
             // Главная карусель с фото пустыни
             const ImageCarousel(images: [
-              "assets/images/me_sachara_desert.jpg",
+              "assets/images/me_sachara_desert.webp",
               "assets/images/marocco/IMG_4129.webp",
               "assets/images/marocco/IMG_9519.webp",
             ]),
@@ -486,7 +486,7 @@ class _PostPageState extends State<PostPage> {
               ),
             ),
 
-            // <<< ТРЕТЬЯ КНОПКА ЗДЕСЬ >>>
+            // <<< Скачать КНОПКА ЗДЕСЬ >>>
             _buildDownloadWallpaperButton(),
 
             // Теги и P.S.
@@ -556,12 +556,14 @@ class _PostPageState extends State<PostPage> {
               width: double.infinity,
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 800),
+                  constraints: const BoxConstraints(
+                      maxWidth: 800), // Можно увеличить ширину для удобства
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     alignment: WrapAlignment.center,
                     children: [
+                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
                         icon: const Icon(Icons.telegram, color: Colors.black),
                         label: const Text('Telegram личный'),
@@ -590,49 +592,100 @@ class _PostPageState extends State<PostPage> {
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
+
+                      // --- КНОПКИ С ПОДПИСЬЮ (ИЗМЕНЕНА СТРУКТУРА LABEL) ---
+
+                      // Кнопка Instagram
                       ElevatedButton.icon(
                         icon: const Icon(Icons.camera_alt, color: Colors.black),
-                        label: const Text('Instagram'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Instagram'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20,
+                              vertical:
+                                  12), // Немного уменьшен вертикальный паддинг
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
+
+                      // Кнопка LinkedIn
                       ElevatedButton.icon(
                         icon: const Icon(Icons.work, color: Colors.black),
-                        label: const Text('LinkedIn'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('LinkedIn'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20, vertical: 12),
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
+
+                      // Кнопка YouTube
                       ElevatedButton.icon(
                         icon: const Icon(Icons.smart_display_outlined,
                             color: Colors.black),
-                        label: const Text('YouTube'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('YouTube'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20, vertical: 12),
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(
                             Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
+
+                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
                         icon: const Icon(Icons.article_outlined,
                             color: Colors.black),
@@ -658,10 +711,12 @@ class _PostPageState extends State<PostPage> {
                 name: "Автор: Я, Шастовский Даниил",
                 bio:
                     "Автор этого сайта, аналитик, фотограф, путешественник и просто хороший человек. Я люблю делиться своими впечатлениями и фотографиями из поездок по всему миру."),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 80),
-              child: const PostNavigation(),
-            ),
+            //нерабочие кнопки навигации
+            // Если нужно, можно раскомментировать и использовать
+            //Container(
+            //padding: const EdgeInsets.symmetric(vertical: 80),
+            //child: const PostNavigation(),
+            //),
           ].toMaxWidthSliver(),
           SliverFillRemaining(
             hasScrollBody: false,
@@ -711,7 +766,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
   void _startAutoPlay() {
     if (widget.images.length <= 1) return;
     _autoPlayTimer?.cancel();
-    _autoPlayTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (!mounted) return;
       if (_currentPage < widget.images.length - 1) {
         _controller.nextPage(

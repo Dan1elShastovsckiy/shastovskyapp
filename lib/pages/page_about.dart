@@ -395,12 +395,14 @@ class AboutPage extends StatelessWidget {
               width: double.infinity,
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 600),
+                  constraints: const BoxConstraints(
+                      maxWidth: 800), // Можно увеличить ширину для удобства
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     alignment: WrapAlignment.center,
                     children: [
+                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
                         icon: const Icon(Icons.telegram, color: Colors.black),
                         label: const Text('Telegram личный'),
@@ -429,49 +431,100 @@ class AboutPage extends StatelessWidget {
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
+
+                      // --- КНОПКИ С ПОДПИСЬЮ (ИЗМЕНЕНА СТРУКТУРА LABEL) ---
+
+                      // Кнопка Instagram
                       ElevatedButton.icon(
                         icon: const Icon(Icons.camera_alt, color: Colors.black),
-                        label: const Text('Instagram'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Instagram'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20,
+                              vertical:
+                                  12), // Немного уменьшен вертикальный паддинг
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
+
+                      // Кнопка LinkedIn
                       ElevatedButton.icon(
                         icon: const Icon(Icons.work, color: Colors.black),
-                        label: const Text('LinkedIn'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('LinkedIn'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20, vertical: 12),
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
+
+                      // Кнопка YouTube
                       ElevatedButton.icon(
                         icon: const Icon(Icons.smart_display_outlined,
                             color: Colors.black),
-                        label: const Text('YouTube'),
+                        label: Column(
+                          // Вместо Text используется Column
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('YouTube'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
+                              horizontal: 20, vertical: 12),
                           side: const BorderSide(color: Colors.black),
                           elevation: 0,
                         ),
                         onPressed: () => launchUrl(
                             Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
+
+                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
                         icon: const Icon(Icons.article_outlined,
                             color: Colors.black),
@@ -491,7 +544,7 @@ class AboutPage extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            )
           ].toMaxWidthSliver(),
           SliverFillRemaining(
             hasScrollBody: false,

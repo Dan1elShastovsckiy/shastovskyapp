@@ -223,6 +223,7 @@ class ContactsPage extends StatelessWidget {
                   runSpacing: 20,
                   alignment: WrapAlignment.center,
                   children: [
+                    // --- Кнопки без подписи (остаются без изменений) ---
                     _buildSocialButton(
                       "Telegram личный",
                       Icons.telegram,
@@ -233,25 +234,138 @@ class ContactsPage extends StatelessWidget {
                       Icons.campaign,
                       'https://t.me/shastovscky',
                     ),
-                    _buildSocialButton(
-                      "Instagram",
-                      Icons.camera_alt,
-                      'https://instagram.com/yellolwapple',
+
+                    // --- Кнопки с подписью (модифицируем напрямую) ---
+
+                    // Кнопка Instagram
+                    SizedBox(
+                      width: 300,
+                      height: 80,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.camera_alt,
+                            color: Colors.black, size: 32),
+                        label: Align(
+                          // Выравниваем Column по левому краю
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Instagram',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Запрещенная в РФ организация',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          alignment: Alignment.centerLeft,
+                        ),
+                        onPressed: () => launchUrl(
+                            Uri.parse('https://instagram.com/yellolwapple')),
+                      ),
                     ),
-                    _buildSocialButton(
-                      "YouTube",
-                      Icons.smart_display_outlined,
-                      'https://www.youtube.com/@itsmyadv',
+
+                    // Кнопка YouTube
+                    SizedBox(
+                      width: 300,
+                      height: 80,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.smart_display_outlined,
+                            color: Colors.black, size: 32),
+                        label: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'YouTube',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Запрещенная в РФ организация',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          alignment: Alignment.centerLeft,
+                        ),
+                        onPressed: () => launchUrl(
+                            Uri.parse('https://www.youtube.com/@itsmyadv')),
+                      ),
                     ),
+
+                    // Кнопка VC.RU (без подписи)
                     _buildSocialButton(
                       "VC.RU",
                       Icons.article_outlined,
                       'https://vc.ru/id1145025',
                     ),
-                    _buildSocialButton(
-                      "LinkedIn",
-                      Icons.work,
-                      'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571',
+
+                    // Кнопка LinkedIn
+                    SizedBox(
+                      width: 300,
+                      height: 80,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.work,
+                            color: Colors.black, size: 32),
+                        label: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'LinkedIn',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Запрещенная в РФ организация',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          alignment: Alignment.centerLeft,
+                        ),
+                        onPressed: () => launchUrl(Uri.parse(
+                            'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
+                      ),
                     ),
                   ],
                 ),
