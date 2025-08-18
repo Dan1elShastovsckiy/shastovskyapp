@@ -20,6 +20,8 @@ dependencies:
   url_launcher: ^6.3.0 # Requires setup.
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.3.0
+  flutter_web_optimizer: ^1.5.1
+  prerender: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -49,4 +51,6 @@ flutter:
     - assets/images/
     - assets/portfolio/
     - assets/images/marocco/
+    - assets/images/georgia_1/
     - assets/marocco_photos_pack.zip
+    - assets/georgia_1_photos_pack.zip
