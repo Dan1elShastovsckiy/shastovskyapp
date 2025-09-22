@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/pages/page_georgia_post.dart'; // <<< 1. ИМПОРТ НОВОЙ СТРАНИЦЫ
 import 'package:minimal/pages/page_post.dart';
 import 'package:minimal/pages/page_under_construction.dart';
 import 'package:minimal/utils/max_width_extension.dart';
@@ -21,13 +22,12 @@ const String vietnamDescription =
 
 const String georgiaMountains1Title = "ГРУЗИЯ: Из Батуми в Кутаиси через горы";
 const String georgiaMountains1Description =
-    "Первое знакомство с Кавказом: серпантины, горные деревушки и гостеприимство местных жителей […]";
+    "Первое знакомство с Грузией: апокалиптическая посадка в Батуми, огненная шаурма и хоррор-квест по ночным дорогам в деревню над облаками […]";
 
 const String georgiaMountains2Title = "ГРУЗИЯ: От Тбилиси к границе с Россией";
 const String georgiaMountains2Description =
     "Путешествие по Военно-Грузинской дороге: древние крепости, горные перевалы и виды на Кавказский хребет […]";
 
-// <<< НОВЫЕ КОНСТАНТЫ >>>
 const String malaysiaTitle = "МАЛАЙЗИЯ: Небоскребы и джунгли Куала-Лумпура";
 const String malaysiaDescription =
     "Контрасты столицы Малайзии: от башен-близнецов Петронас до скрытых в зелени храмов и уличной еды, которая вскружит вам голову […]";
@@ -52,16 +52,15 @@ class ListPage extends StatefulWidget {
 class _ListPageState extends State<ListPage> {
   final ScrollController _scrollController = ScrollController();
 
-  // <<< СПИСОК ИЗОБРАЖЕНИЙ РАСШИРЕН >>>
   final List<String> _pageImages = [
     "assets/images/me_sachara_desert.webp",
-    "assets/images/vietnam_beach.webp",
-    "assets/images/georgia_mountains.webp",
-    "assets/images/me_similan_island_colored.webp",
-    "assets/images/me_georgia_mountains 2.webp",
+    "assets/images/georgia_mountains.webp", // <-- Картинка для Грузии (остается)
     "assets/images/kuala_lumpur.jpg",
     "assets/images/abu_dhabi.jpg",
     "assets/images/me_istambul.jpg",
+    "assets/images/vietnam_beach.webp",
+    "assets/images/me_similan_island_colored.webp",
+    "assets/images/me_georgia_mountains 2.webp",
   ];
 
   @override
@@ -156,6 +155,59 @@ class _ListPageState extends State<ListPage> {
                 ),
                 divider,
 
+                // <<< 2. ПОСТ ПРО ГРУЗИЮ (ЧАСТЬ 1) ПЕРЕМЕЩЕН СЮДА >>>
+                ListItem(
+                  imageUrl: "assets/images/georgia_mountains.webp",
+                  title: georgiaMountains1Title,
+                  description:
+                      Text(georgiaMountains1Description, style: bodyTextStyle),
+                  // <<< 3. ССЫЛКА ВЕДЕТ НА НОВУЮ СТРАНИЦУ >>>
+                  onReadMore: () => Navigator.pushNamed(
+                    context,
+                    '/${PostGeorgiaPage.name}',
+                  ),
+                ),
+                divider,
+
+                // Малайзия
+                ListItem(
+                  imageUrl: "assets/images/kuala_lumpur.jpg",
+                  title: malaysiaTitle,
+                  description: Text(malaysiaDescription, style: bodyTextStyle),
+                  onReadMore: () => Navigator.pushNamed(
+                    context,
+                    '/${PageUnderConstruction.name}',
+                    arguments: {'title': malaysiaTitle},
+                  ),
+                ),
+                divider,
+
+                // Дубай
+                ListItem(
+                  imageUrl: "assets/images/abu_dhabi.jpg",
+                  title: dubaiTitle,
+                  description: Text(dubaiDescription, style: bodyTextStyle),
+                  onReadMore: () => Navigator.pushNamed(
+                    context,
+                    '/${PageUnderConstruction.name}',
+                    arguments: {'title': dubaiTitle},
+                  ),
+                ),
+                divider,
+
+                // Турция
+                ListItem(
+                  imageUrl: "assets/images/me_istambul.jpg",
+                  title: turkeyTitle,
+                  description: Text(turkeyDescription, style: bodyTextStyle),
+                  onReadMore: () => Navigator.pushNamed(
+                    context,
+                    '/${PageUnderConstruction.name}',
+                    arguments: {'title': turkeyTitle},
+                  ),
+                ),
+                divider,
+
                 // Вьетнам
                 ListItem(
                   imageUrl: "assets/images/vietnam_beach.webp",
@@ -165,32 +217,6 @@ class _ListPageState extends State<ListPage> {
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': vietnamTitle},
-                  ),
-                ),
-                divider,
-
-                // Грузия 1
-                ListItem(
-                  imageUrl: "assets/images/georgia_mountains.webp",
-                  title: georgiaMountains1Title,
-                  description:
-                      Text(georgiaMountains1Description, style: bodyTextStyle),
-                  onReadMore: () => Navigator.pushNamed(
-                    context,
-                    '/${PageUnderConstruction.name}',
-                    arguments: {'title': georgiaMountains1Title},
-                  ),
-                ),
-                divider,
-                // <<< НОВАЯ КАРТОЧКА: ДУБАЙ >>>
-                ListItem(
-                  imageUrl: "assets/images/abu_dhabi.jpg",
-                  title: dubaiTitle,
-                  description: Text(dubaiDescription, style: bodyTextStyle),
-                  onReadMore: () => Navigator.pushNamed(
-                    context,
-                    '/${PageUnderConstruction.name}',
-                    arguments: {'title': dubaiTitle},
                   ),
                 ),
                 divider,
@@ -208,7 +234,7 @@ class _ListPageState extends State<ListPage> {
                 ),
                 divider,
 
-                // Грузия 2
+                // Грузия 2 (заглушка)
                 ListItem(
                   imageUrl: "assets/images/me_georgia_mountains 2.webp",
                   title: georgiaMountains2Title,
@@ -222,30 +248,7 @@ class _ListPageState extends State<ListPage> {
                 ),
                 divider,
 
-                // <<< НОВАЯ КАРТОЧКА: ТУРЦИЯ >>>
-                ListItem(
-                  imageUrl: "assets/images/me_istambul.jpg",
-                  title: turkeyTitle,
-                  description: Text(turkeyDescription, style: bodyTextStyle),
-                  onReadMore: () => Navigator.pushNamed(
-                    context,
-                    '/${PageUnderConstruction.name}',
-                    arguments: {'title': turkeyTitle},
-                  ),
-                ),
-                divider,
-
-                // <<< НОВАЯ КАРТОЧКА: МАЛАЙЗИЯ >>>
-                ListItem(
-                  imageUrl: "assets/images/kuala_lumpur.jpg",
-                  title: malaysiaTitle,
-                  description: Text(malaysiaDescription, style: bodyTextStyle),
-                  onReadMore: () => Navigator.pushNamed(
-                    context,
-                    '/${PageUnderConstruction.name}',
-                    arguments: {'title': malaysiaTitle},
-                  ),
-                ),
+                const SizedBox(height: 80),
               ].toMaxWidth(),
             ),
             SliverFillRemaining(

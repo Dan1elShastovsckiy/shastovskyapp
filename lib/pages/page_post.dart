@@ -59,7 +59,7 @@ class _PostPageState extends State<PostPage> {
     "assets/images/marocco/IMG_4232.webp",
     "assets/images/marocco/IMG_1419.webp",
     "assets/images/marocco/IMG_1427.webp",
-    "assets/images/avatar_default.png",
+    "assets/images/avatar_default.webp",
   ];
 
   @override
@@ -116,7 +116,7 @@ class _PostPageState extends State<PostPage> {
 
     return Scaffold(
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
@@ -147,10 +147,21 @@ class _PostPageState extends State<PostPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 40),
             const Align(
               alignment: Alignment.centerLeft,
-              child: TextBodySecondary(text: "Главная  /  Марокко"),
+              child: Breadcrumbs(
+                items: [
+                  BreadcrumbItem(text: "Главная", routeName: '/'),
+                  BreadcrumbItem(text: "Марокко"), // Текущая страница
+                ],
+              ),
             ),
+            const SizedBox(height: 20),
+            /*const Align(
+              alignment: Alignment.centerLeft,
+              child: TextBodySecondary(text: "Главная  /  Марокко"),
+            ),*/
             const Align(
               alignment: Alignment.centerLeft,
               child: TextBody(
@@ -707,7 +718,7 @@ class _PostPageState extends State<PostPage> {
               ),
             ),
             ...authorSection(
-                imageUrl: "assets/images/avatar_default.png",
+                imageUrl: "assets/images/avatar_default.webp",
                 name: "Автор: Я, Шастовский Даниил",
                 bio:
                     "Автор этого сайта, аналитик, фотограф, путешественник и просто хороший человек. Я люблю делиться своими впечатлениями и фотографиями из поездок по всему миру."),
