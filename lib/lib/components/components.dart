@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 export 'image_carousel.dart';
 
-export 'blog.dart';
+export 'blog.dart'; 
 export 'color.dart';
 export 'spacing.dart';
 export 'text.dart';
