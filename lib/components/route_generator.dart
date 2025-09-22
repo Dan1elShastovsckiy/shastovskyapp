@@ -2,49 +2,47 @@
 
 import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
-import 'package:minimal/pages/page_not_found.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) {
-        print("Navigator вызван с именем: '${settings.name}'");
-        final Uri uri = Uri.parse(settings.name ?? '/');
-        final String pathName = uri.path.startsWith('/') && uri.path.length > 1
-            ? uri.path.substring(1)
-            : uri.path;
+        // <<< ИЗМЕНЕНИЕ: Теперь мы берем полный путь без обрезки >>>
+        final String pathName = Uri.parse(settings.name ?? '/').path;
 
         return SelectionArea(
+          // <<< ИЗМЕНЕНИЕ: Switch теперь работает с полными, вложенными путями >>>
           child: switch (pathName) {
-            '/' || ListPage.name => ListPage(),
-            PostPage.name => const ResponsiveBreakpoints(
-                breakpoints: [
-                  Breakpoint(start: 0, end: 480, name: MOBILE),
-                  Breakpoint(start: 481, end: 1200, name: TABLET),
-                  Breakpoint(start: 1201, end: double.infinity, name: DESKTOP),
-                ],
-                child: PostPage(),
-              ),
-            AboutPage.name => const AboutPage(),
-            PortfolioPage.name => const PortfolioPage(),
-            TypographyPage.name => const TypographyPage(),
-            ContactsPage.name => const ContactsPage(),
-            PageUnderConstruction.name => PageUnderConstruction(
-                // ИСПРАВЛЕНИЕ: Используем правильные имена параметров из вашего оригинального кода
-                postTitle:
-                    (settings.arguments as Map<String, dynamic>?)?['title'] ??
-                        'Статья в разработке',
-                title: null,
-              ), // <-- ИСПРАВЛЕНИЕ: Добавлена недостающая запятая
+            '/' || '/${ListPage.name}' => const ListPage(),
+            '/${PostPage.name}' => const PostPage(),
+            '/${PostGeorgiaPage.name}' => const PostGeorgiaPage(),
 
-            // Обработка всех остальных случаев
+            // --- Новая вложенная структура ---
+            '/${UsefulPage.name}' => const UsefulPage(),
+            '/${UsefulDevPage.name}' => const UsefulDevPage(),
+            '/${UsefulSeoPage.name}' => const UsefulSeoPage(),
+            '/${PostFlutterSeoPage.name}' => const PostFlutterSeoPage(),
+            '/${PostStateManagementPage.name}' =>
+              const PostStateManagementPage(),
+            '/${PostSeoAiPage.name}' => const PostSeoAiPage(),
+            '/${PostEeatGuidePage.name}' => const PostEeatGuidePage(),
+            '/${PostLinkbuildingPage.name}' => const PostLinkbuildingPage(),
+            '/${PostTechnicalAuditPage.name}' => const PostTechnicalAuditPage(),
+            '/${AboutPage.name}' => const AboutPage(),
+            '/${PortfolioPage.name}' => const PortfolioPage(),
+            '/${TypographyPage.name}' => const TypographyPage(),
+            '/${ContactsPage.name}' => const ContactsPage(),
+            '/${PageUnderConstruction.name}' => PageUnderConstruction(
+                title:
+                    (settings.arguments as Map<String, dynamic>?)?['title'] ??
+                        'Страница в разработке',
+                postTitle: 'Страница в разработке',
+              ),
             _ => const PageNotFound(),
           },
         );
       },
-      // Убираем анимацию перехода
       transitionDuration: Duration.zero,
       reverseTransitionDuration: Duration.zero,
     );
