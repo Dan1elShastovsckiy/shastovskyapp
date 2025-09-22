@@ -7,7 +7,7 @@ import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class UsefulDevPage extends StatefulWidget {
-  static const String name = 'useful-dev';
+  static const String name = 'useful/dev';
   const UsefulDevPage({super.key});
 
   @override
@@ -22,7 +22,7 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
           "Как настроить пререндеринг (SSG) для Flutter-сайта, чтобы он нравился поисковикам и быстро загружался...",
       imageUrl: "assets/images/dev_article_1.webp",
       tags: ["Flutter", "SEO"],
-      routeName: PageUnderConstruction.name,
+      routeName: PostFlutterSeoPage.name,
     ),
     UsefulArticle(
       title: "State Management в Flutter: Какой выбрать в 2025?",
@@ -30,7 +30,7 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
           "Provider, BLoC, Riverpod, GetX... Разбираем плюсы и минусы каждого подхода на реальных примерах.",
       imageUrl: "assets/images/dev_article_2.webp",
       tags: ["Flutter", "Архитектура"],
-      routeName: PageUnderConstruction.name,
+      routeName: PostStateManagementPage.name,
     ),
   ];
 
@@ -77,8 +77,20 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
         slivers: [
           ...[
             const SizedBox(height: 40),
-            Text("Полезное / Разработка",
-                style: headlineTextStyle, textAlign: TextAlign.center),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Breadcrumbs(
+                items: [
+                  BreadcrumbItem(text: "Главная", routeName: '/'),
+                  BreadcrumbItem(
+                      text: "Полезное",
+                      routeName: '/${UsefulPage.name}'), // Ссылка на разводящую
+                  BreadcrumbItem(text: "Разработка"), // Текущая страница
+                ],
+              ),
+            ),
+            /*Text("Полезное / Разработка",
+                style: headlineTextStyle, textAlign: TextAlign.center),*/
             const SizedBox(height: 16),
             Text("Статьи по Flutter, Dart и веб-технологиям",
                 style: subtitleTextStyle, textAlign: TextAlign.center),
@@ -129,6 +141,8 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
                             Text(article.description, style: bodyTextStyle),
                         onReadMore: () => Navigator.pushNamed(
                           context,
+                          // <<< ИЗМЕНЕНИЕ ЗДЕСЬ >>>
+                          // Просто передаем новый полный путь из константы
                           '/${article.routeName}',
                           arguments: {'title': article.title},
                         ),

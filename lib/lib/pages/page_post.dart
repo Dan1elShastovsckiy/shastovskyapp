@@ -1,6 +1,6 @@
 // lib/pages/page_post.dart
 
-//import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +59,7 @@ class _PostPageState extends State<PostPage> {
     "assets/images/marocco/IMG_4232.webp",
     "assets/images/marocco/IMG_1419.webp",
     "assets/images/marocco/IMG_1427.webp",
-    "assets/images/avatar_default.png",
+    "assets/images/avatar_default.webp",
   ];
 
   @override
@@ -116,7 +116,7 @@ class _PostPageState extends State<PostPage> {
 
     return Scaffold(
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
@@ -147,10 +147,21 @@ class _PostPageState extends State<PostPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 40),
             const Align(
               alignment: Alignment.centerLeft,
-              child: TextBodySecondary(text: "Главная  /  Марокко"),
+              child: Breadcrumbs(
+                items: [
+                  BreadcrumbItem(text: "Главная", routeName: '/'),
+                  BreadcrumbItem(text: "Марокко"), // Текущая страница
+                ],
+              ),
             ),
+            const SizedBox(height: 20),
+            /*const Align(
+              alignment: Alignment.centerLeft,
+              child: TextBodySecondary(text: "Главная  /  Марокко"),
+            ),*/
             const Align(
               alignment: Alignment.centerLeft,
               child: TextBody(
@@ -707,7 +718,7 @@ class _PostPageState extends State<PostPage> {
               ),
             ),
             ...authorSection(
-                imageUrl: "assets/images/avatar_default.png",
+                imageUrl: "assets/images/avatar_default.webp",
                 name: "Автор: Я, Шастовский Даниил",
                 bio:
                     "Автор этого сайта, аналитик, фотограф, путешественник и просто хороший человек. Я люблю делиться своими впечатлениями и фотографиями из поездок по всему миру."),
@@ -730,6 +741,208 @@ class _PostPageState extends State<PostPage> {
             const Footer(),
           ].toMaxWidthSliver(),
         ],
+      ),
+    );
+  }
+}
+
+// ... (Код виджета ImageCarousel остается без изменений) ...
+
+class ImageCarousel extends StatefulWidget {
+  final List<String> images;
+  const ImageCarousel({super.key, required this.images});
+  @override
+  _ImageCarouselState createState() => _ImageCarouselState();
+}
+
+class _ImageCarouselState extends State<ImageCarousel> {
+  late PageController _controller;
+  int _currentPage = 0;
+  bool _showButtons = false;
+  Timer? _autoPlayTimer;
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController();
+    _startAutoPlay();
+  }
+
+  @override
+  void dispose() {
+    _autoPlayTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _startAutoPlay() {
+    if (widget.images.length <= 1) return;
+    _autoPlayTimer?.cancel();
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (!mounted) return;
+      if (_currentPage < widget.images.length - 1) {
+        _controller.nextPage(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _controller.animateToPage(
+          0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  void _stopAutoPlay() {
+    _autoPlayTimer?.cancel();
+    _autoPlayTimer = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        if (!mounted) return;
+        setState(() => _showButtons = true);
+        _stopAutoPlay();
+      },
+      onExit: (_) {
+        if (!mounted) return;
+        setState(() => _showButtons = false);
+        _startAutoPlay();
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 24),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PageView.builder(
+                controller: _controller,
+                itemCount: widget.images.length,
+                onPageChanged: (index) {
+                  if (!mounted) return;
+                  setState(() => _currentPage = index);
+                },
+                itemBuilder: (context, index) {
+                  return InteractiveViewer(
+                    panEnabled: false,
+                    boundaryMargin: const EdgeInsets.all(20),
+                    minScale: 1,
+                    maxScale: 3,
+                    child: Image.asset(
+                      widget.images[index],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      frameBuilder:
+                          (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded || frame != null) {
+                          return child;
+                        }
+                        return Container(
+                          color: Colors.grey[200],
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Text('Ошибка загрузки изображения',
+                              style: TextStyle(color: Colors.red)),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+              if (widget.images.length > 1)
+                AnimatedOpacity(
+                  opacity: _showButtons ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon:
+                          const Icon(Icons.arrow_back_ios, color: Colors.white),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                        padding: const EdgeInsets.all(16),
+                      ),
+                      onPressed: _currentPage > 0
+                          ? () {
+                              _controller.animateToPage(
+                                _currentPage - 1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          : null,
+                    ),
+                  ),
+                ),
+              if (widget.images.length > 1)
+                AnimatedOpacity(
+                  opacity: _showButtons ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios,
+                          color: Colors.white),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                        padding: const EdgeInsets.all(16),
+                      ),
+                      onPressed: _currentPage < widget.images.length - 1
+                          ? () {
+                              _controller.animateToPage(
+                                _currentPage + 1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          : null,
+                    ),
+                  ),
+                ),
+              if (widget.images.length > 1)
+                Positioned(
+                  bottom: 10,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      widget.images.length,
+                      (index) => GestureDetector(
+                        onTap: () {
+                          _controller.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPage == index
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.5),
+                            border: Border.all(
+                              color: Colors.black.withOpacity(0.5),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

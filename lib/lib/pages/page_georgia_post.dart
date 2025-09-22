@@ -56,7 +56,7 @@ class _PostGeorgiaPageState extends State<PostGeorgiaPage> {
     "assets/images/georgia_1/IMG_033.webp",
     "assets/images/georgia_1/IMG_034.webp",
     "assets/images/georgia_mountains.webp",
-    "assets/images/avatar_default.png",
+    "assets/images/avatar_default.webp",
   ];
 
   @override
@@ -110,7 +110,7 @@ class _PostGeorgiaPageState extends State<PostGeorgiaPage> {
 
     return Scaffold(
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
@@ -142,10 +142,21 @@ class _PostGeorgiaPageState extends State<PostGeorgiaPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 40),
             const Align(
               alignment: Alignment.centerLeft,
-              child: TextBodySecondary(text: "Главная / Грузия: Часть 1"),
+              child: Breadcrumbs(
+                items: [
+                  BreadcrumbItem(text: "Главная", routeName: '/'),
+                  BreadcrumbItem(text: "Грузия: Часть 1"), // Текущая страница
+                ],
+              ),
             ),
+            const SizedBox(height: 20),
+            /*const Align(
+              alignment: Alignment.centerLeft,
+              child: TextBodySecondary(text: "Главная / Грузия: Часть 1"),
+            ),*/
             const Align(
               alignment: Alignment.centerLeft,
               child: TextBody(
@@ -537,7 +548,7 @@ class _PostGeorgiaPageState extends State<PostGeorgiaPage> {
               ),
             ),
             ...authorSection(
-                imageUrl: "assets/images/avatar_default.png",
+                imageUrl: "assets/images/avatar_default.webp",
                 name: "Автор: Я, Шастовский Даниил",
                 bio:
                     "Автор этого сайта, аналитик, фотограф, путешественник и просто хороший человек. Я люблю делиться своими впечатлениями и фотографиями из поездок по всему миру."),

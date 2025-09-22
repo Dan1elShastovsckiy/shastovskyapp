@@ -68,6 +68,20 @@ class AboutPage extends StatelessWidget {
                 child: Text("Обо мне", style: headlineTextStyle),
               ),
             ),
+            // <<< ИЗМЕНЕНИЕ: Добавлен блок с фотографией >>>
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: const EdgeInsets.only(top: 16, bottom: 24),
+                child: const CircleAvatar(
+                  radius: 64, // Задает размер круга 128x128 пикселей
+                  backgroundImage:
+                      AssetImage('assets/images/avatar_default.webp'),
+                  backgroundColor: Color(
+                      0xFFF5F5F5), // Фон на случай, если картинка не загрузится
+                ),
+              ),
+            ),
             Align(
               alignment: Alignment.center,
               child: Container(

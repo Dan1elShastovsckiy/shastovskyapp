@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
-import 'package:minimal/pages/page_under_construction.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -24,7 +23,7 @@ class UsefulArticle {
 }
 
 class UsefulSeoPage extends StatefulWidget {
-  static const String name = 'useful-seo';
+  static const String name = 'useful/seo';
   const UsefulSeoPage({super.key});
 
   @override
@@ -35,7 +34,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
   // <<< ЗАМЕНИТЕ ЭТОТ СПИСОК ЦЕЛИКОМ >>>
   final List<UsefulArticle> _allArticles = [
     UsefulArticle(
-      title: "SEO в Эпоху ИИ: Новые Правила Ранжирования",
+      title: "SEO в эпоху ИИ: Новые правила ранжирования",
       description:
           "Глубокое погружение в неочевидные факторы ранжирования, утечки Google и практические шаги для оптимизации в эру AI Overviews...",
       imageUrl: "assets/images/seo-ai-era/eeat_diagram.webp",
@@ -46,31 +45,30 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
       title: "Полное руководство по E-E-A-T в 2025 году",
       description:
           "Как доказать Google свою экспертизу, опыт и авторитетность. Практические шаги и примеры...",
-      imageUrl: "assets/images/seo_article_1.webp",
+      imageUrl: "assets/images/seo-guides/eeat_components.webp",
       tags: ["E-E-A-T", "Внутренняя оптимизация"],
-      routeName: PageUnderConstruction.name,
+      routeName: PostEeatGuidePage.name,
     ),
     UsefulArticle(
       title: "Стратегии линкбилдинга для сложных ниш",
       description:
           "Где брать качественные ссылки, когда все конкуренты уже везде? Методы, которые работают сегодня...",
-      imageUrl: "assets/images/seo_article_2.webp",
+      imageUrl: "assets/images/seo-guides/seo_strategy_linkbuilding_hard.webp",
       tags: ["Внешняя оптимизация"],
-      routeName: PageUnderConstruction.name,
+      routeName: PostLinkbuildingPage.name,
     ),
     UsefulArticle(
       title: "Технический аудит сайта: пошаговый чек-лист",
       description:
           "От скорости загрузки до лог-файлов. Находим и исправляем ошибки, которые мешают росту...",
-      imageUrl: "assets/images/seo_article_3.webp",
+      imageUrl: "assets/images/seo-guides/techcheck_website_seo.webp",
       tags: ["Техническое SEO", "Внутренняя оптимизация"],
-      routeName: PageUnderConstruction.name,
+      routeName: PostTechnicalAuditPage.name,
     ),
   ];
 
   late List<UsefulArticle> _filteredArticles;
   String _selectedTag = "Все материалы";
-  // <<< ЗАМЕНИТЕ ЭТОТ СПИСОК ЦЕЛИКОМ >>>
   final List<String> _allTags = [
     "Все материалы",
     "Ai Seoшка", // <-- ИЗМЕНЕНИЕ ЗДЕСЬ
@@ -114,7 +112,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
         slivers: [
           ...[
             const SizedBox(height: 40),
-            /*const Align(
+            const Align(
               alignment: Alignment.centerLeft,
               child: Breadcrumbs(
                 items: [
@@ -125,9 +123,9 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
                   BreadcrumbItem(text: "SEO"), // Текущая страница
                 ],
               ),
-            ),*/
-            Text("Полезное / SEO",
-                style: headlineTextStyle, textAlign: TextAlign.center),
+            ),
+            /*Text("Полезное / SEO",
+                style: headlineTextStyle, textAlign: TextAlign.center),*/
             const SizedBox(height: 16),
             Text("Статьи по поисковой оптимизации",
                 style: subtitleTextStyle, textAlign: TextAlign.center),
@@ -178,6 +176,8 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
                             Text(article.description, style: bodyTextStyle),
                         onReadMore: () => Navigator.pushNamed(
                           context,
+                          // <<< ИЗМЕНЕНИЕ ЗДЕСЬ >>>
+                          // Просто передаем новый полный путь из константы
                           '/${article.routeName}',
                           arguments: {'title': article.title},
                         ),
