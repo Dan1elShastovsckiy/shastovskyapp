@@ -1,6 +1,6 @@
 // lib/components/blog.dart
 
-//import 'package:flutter/gestures.dart'; <-- НЕОБХОДИМО ДЛЯ ХЛЕБНЫХ КРОШЕК
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/color.dart';
@@ -9,38 +9,46 @@ import 'package:minimal/components/text.dart';
 import 'package:minimal/components/typography.dart';
 import 'package:minimal/pages/pages.dart';
 
-// --- ВСЕ ОБЩИЕ КОМПОНЕНТЫ ---
+// --- ВСЕ ОБЩИЕ КОМПОНЕНТЫ (без изменений) ---
 
 class ImageWrapper extends StatelessWidget {
   final String image;
-  final double? height;
-  const ImageWrapper({super.key, required this.image, this.height});
+  // Параметр height больше не нужен, так как высота будет динамической
+  const ImageWrapper({super.key, required this.image});
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    // Эта логика для кэширования остается, она полезна
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-    final maxWidth = width > 800 ? 1200 : 800;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final maxWidth = screenWidth > 800 ? 1200 : 800;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 24),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Image.asset(
-          image,
-          fit: BoxFit.cover,
-          cacheWidth: (maxWidth * devicePixelRatio).toInt(),
-          cacheHeight: ((maxWidth * 9 / 16) * devicePixelRatio).toInt(),
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            if (wasSynchronouslyLoaded || frame != null) {
-              return child;
-            }
-            return Container(color: Colors.grey[200]);
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return const Center(child: Text('Ошибка загрузки изображения'));
-          },
-        ),
+      // Мы убираем жесткий AspectRatio
+      child: Image.asset(
+        image,
+        // BoxFit.fitWidth растягивает картинку по ширине,
+        // а высоту подбирает автоматически, сохраняя пропорции.
+        fit: BoxFit.fitWidth,
+        cacheWidth: (maxWidth * devicePixelRatio).toInt(),
+        // cacheHeight убираем, так как высота неизвестна заранее
+
+        // Плейсхолдер и обработчик ошибок оставляем, они полезны
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded || frame != null) {
+            return child;
+          }
+          // Плейсхолдер будет просто серой зоной без жесткой высоты
+          return Container(
+            height:
+                200, // Можно задать примерную высоту, чтобы не было "скачка"
+            color: Colors.grey[200],
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(child: Text('Ошибка загрузки изображения'));
+        },
       ),
     );
   }
@@ -290,8 +298,8 @@ class MinimalMenuBar extends StatelessWidget {
       const _DesktopDropdownMenuItem(
         title: "ПОЛЕЗНОЕ",
         items: {
-          "Разработка": UsefulDevPage.name,
-          "SEO": UsefulSeoPage.name,
+          "Разработка": '/${UsefulDevPage.name}',
+          "SEO": '/${UsefulSeoPage.name}',
         },
       ),
       _buildMenuItem(context, "ОБО МНЕ",
@@ -305,6 +313,7 @@ class MinimalMenuBar extends StatelessWidget {
     ];
   }
 
+  // <<< ИЗМЕНЕНИЕ №1: Виджет _buildMenuItem теперь использует InkWell >>>
   Widget _buildMenuItem(
       BuildContext context, String text, VoidCallback onPressed) {
     final menuStyle = GoogleFonts.montserrat(
@@ -313,20 +322,24 @@ class MinimalMenuBar extends StatelessWidget {
       letterSpacing: 1.5,
       color: textPrimary,
     );
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        foregroundColor: textPrimary,
-        textStyle: menuStyle,
+    // Используем InkWell для кликабельности без визуальных эффектов по умолчанию
+    return InkWell(
+      onTap: onPressed,
+      // Отключаем все эффекты наведения и нажатия
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        child: Text(
+          text,
+          style: menuStyle,
+        ),
       ),
-      child: Text(text),
     );
   }
 }
 
-// <<< ПОЛНОСТЬЮ ПЕРЕПИСАННЫЙ ВИДЖЕТ ВЫПАДАЮЩЕГО МЕНЮ >>>
 class _DesktopDropdownMenuItem extends StatefulWidget {
   final String title;
   final Map<String, String> items;
@@ -372,10 +385,11 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
                     children: widget.items.entries.map((entry) {
                       return SizedBox(
                         width: double.infinity,
+                        // <<< ИЗМЕНЕНИЕ №2: Кнопки внутри выпадающего списка остаются TextButton для стандартного поведения >>>
                         child: TextButton(
                           onPressed: () {
                             _portalController.hide();
-                            Navigator.pushNamed(context, '/${entry.value}');
+                            Navigator.pushNamed(context, entry.value);
                           },
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
@@ -397,28 +411,32 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
             ),
           );
         },
-        child: TextButton(
-          onPressed: () => _portalController.toggle(),
-          style: TextButton.styleFrom(
-            foregroundColor: textPrimary,
-            textStyle: menuStyle,
+        // <<< ИЗМЕНЕНИЕ №3: Основная кнопка выпадающего меню теперь тоже InkWell >>>
+        child: InkWell(
+          onTap: () => _portalController.toggle(),
+          // Отключаем все эффекты
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            shape:
-                const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(widget.title),
-              Icon(Icons.arrow_drop_down,
-                  size: 20, color: textPrimary.withAlpha(178)),
-            ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(widget.title, style: menuStyle),
+                const SizedBox(width: 4), // Небольшой отступ для иконки
+                Icon(Icons.arrow_drop_down,
+                    size: 20, color: textPrimary.withAlpha(178)),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+// ... Остальной код файла (Drawer, Breadcrumbs) остается без изменений ...
 
 Drawer buildAppDrawer(BuildContext context) {
   return Drawer(
@@ -504,9 +522,7 @@ Drawer buildAppDrawer(BuildContext context) {
   );
 }
 
-
-// <<< НЕДОДЕЛАННЫЙ ВИДЖЕТ ДЛЯ ХЛЕБНЫХ КРОШЕК >>>
-/*class BreadcrumbItem {
+class BreadcrumbItem {
   final String text;
   final String? routeName;
 
@@ -521,7 +537,7 @@ class Breadcrumbs extends StatelessWidget {
   Widget build(BuildContext context) {
     // Стиль, который имитирует TextBodySecondary
     final breadcrumbStyle = bodyTextStyle.copyWith(color: textSecondary);
-    
+
     final List<InlineSpan> spans = [];
     for (int i = 0; i < items.length; i++) {
       final item = items[i];
@@ -567,4 +583,4 @@ class Breadcrumbs extends StatelessWidget {
       ),
     );
   }
-}*/
+}
