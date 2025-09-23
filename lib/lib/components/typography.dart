@@ -1,27 +1,27 @@
-import 'package:flutter/painting.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:minimal/components/color.dart';
+// lib/components/typography.dart
 
-// Simple
-TextStyle headlineTextStyle = GoogleFonts.montserrat(
-    textStyle: const TextStyle(
-        fontSize: 26,
-        color: textPrimary,
-        letterSpacing: 1.5,
-        fontWeight: FontWeight.w300));
+import 'package:flutter/material.dart';
 
-TextStyle headlineSecondaryTextStyle = GoogleFonts.montserrat(
-    textStyle: const TextStyle(
-        fontSize: 20, color: textPrimary, fontWeight: FontWeight.w300));
+// <<< ИЗМЕНЕНИЕ: Вместо глобальных переменных теперь функции, принимающие BuildContext >>>
+// Эти функции обращаются к текущей теме (Theme.of(context)) и берут из нее
+// предопределенные стили, которые мы зададим в файле theme.dart.
 
-TextStyle subtitleTextStyle = GoogleFonts.openSans(
-    textStyle: const TextStyle(fontSize: 14, color: textSecondary, letterSpacing: 1));
+/// Стиль для главных заголовков (бывший headlineTextStyle)
+TextStyle headlineTextStyle(BuildContext context) =>
+    Theme.of(context).textTheme.displayLarge!;
 
-TextStyle bodyTextStyle = GoogleFonts.openSans(
-    textStyle: const TextStyle(fontSize: 14, color: textPrimary));
+/// Стиль для подзаголовков (бывший headlineSecondaryTextStyle)
+TextStyle headlineSecondaryTextStyle(BuildContext context) =>
+    Theme.of(context).textTheme.displayMedium!;
 
-TextStyle buttonTextStyle = GoogleFonts.montserrat(
-    textStyle: const TextStyle(fontSize: 14, color: textPrimary, letterSpacing: 1));
+/// Стиль для второстепенного текста, подписей (бывший subtitleTextStyle)
+TextStyle subtitleTextStyle(BuildContext context) =>
+    Theme.of(context).textTheme.bodyMedium!;
 
-// Advanced
-// TODO: Add additional text styles.
+/// Стиль для основного текста (бывший bodyTextStyle)
+TextStyle bodyTextStyle(BuildContext context) =>
+    Theme.of(context).textTheme.bodyLarge!;
+
+/// Стиль для кнопок (бывший buttonTextStyle)
+TextStyle buttonTextStyle(BuildContext context) =>
+    Theme.of(context).textTheme.labelLarge!;
