@@ -9,7 +9,7 @@ class PageNotFound extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      //backgroundColor: const Color(0xFFF5F5F5),// Убираем, чтобы использовать тему
       appBar: const PreferredSize(
         preferredSize: Size.fromHeight(110),
         child: MinimalMenuBar(),
@@ -24,18 +24,18 @@ class PageNotFound extends StatelessWidget {
                 const Spacer(),
                 Text(
                   "404",
-                  style: headlineTextStyle.copyWith(fontSize: 80),
+                  style: headlineTextStyle(context).copyWith(fontSize: 80),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   "Упс! Страница не найдена",
-                  style: subtitleTextStyle.copyWith(fontSize: 24),
+                  style: subtitleTextStyle(context).copyWith(fontSize: 24),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   "Мы не смогли найти страницу, которую вы искали.",
                   textAlign: TextAlign.center,
-                  style: bodyTextStyle,
+                  style: bodyTextStyle(context),
                 ),
                 const SizedBox(height: 40),
                 ElevatedButton.icon(

@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
 class PostTechnicalAuditPage extends StatefulWidget {
@@ -39,7 +40,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
   TextSpan _linkTextSpan(String text, String url) {
     return TextSpan(
       text: text,
-      style: bodyTextStyle.copyWith(
+      style: bodyTextStyle(context).copyWith(
         color: Colors.blue,
         decoration: TextDecoration.underline,
       ),
@@ -53,17 +54,18 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: Text(text,
-          style: bodyTextStyle.copyWith(fontWeight: FontWeight.bold)),
+          style: bodyTextStyle(context).copyWith(fontWeight: FontWeight.bold)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final theme = Theme.of(context);
 
     return Scaffold(
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: Colors.white,
+      //backgroundColor: Colors.white, // Убираем, чтобы использовать тему
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
@@ -79,7 +81,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                 margin: marginBottom12,
                 child: Text(
                   "Полный чек-лист по техническому аудиту сайта",
-                  style: headlineTextStyle,
+                  style: headlineTextStyle(context),
                 ),
               ),
             ),
@@ -136,7 +138,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
 
             const TextHeadlineSecondary(text: "2. Дубли сайта"),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "• По IP-адресу: Сайт не должен открываться по своему IP. Узнать IP можно через сервис "),
@@ -162,7 +164,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                     text:
                         "Отчет 'Покрытие' в Google Search Console — ваш главный помощник в поиске ошибок")),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "• Существующие страницы должны отдавать код `200 OK`, несуществующие — `404 Not Found`. Проверить можно через "),
@@ -183,7 +185,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                     text:
                         "Стремитесь к 'зеленой зоне' в отчете PageSpeed Insights")),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "Скорость — ключевой фактор ранжирования. Проверьте главную и типовую внутреннюю страницу через "),
@@ -217,7 +219,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
 
             const TextHeadlineSecondary(text: "7. Валидность HTML-кода"),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "Ошибки в HTML-коде могут мешать корректному отображению и индексации. Проверить главную страницу можно через "),
@@ -231,7 +233,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
             const TextHeadlineSecondary(
                 text: "8. Адаптивность и кросс-браузерность"),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "Сайт должен корректно отображаться на всех устройствах. Проверьте его с помощью "),
@@ -245,7 +247,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
 
             const TextHeadlineSecondary(text: "9. SSL-сертификат"),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "Наличие HTTPS — обязательно. Проверьте качество вашего сертификата через "),
@@ -259,7 +261,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
 
             const TextHeadlineSecondary(text: "10. Микроразметка"),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "Микроразметка Schema.org помогает поисковикам лучше понимать контент и формировать расширенные сниппеты. Внедрите разметку `Organization` (на странице контактов), `BreadcrumbList` (для 'хлебных крошек'), `Product` (для товаров). Корректность проверяйте в "),
@@ -295,7 +297,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
             const TextHeadlineSecondary(text: "13. Контент и изображения"),
             _subHeader("Контент"),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text:
                       "• Уникальность: Проверяйте тексты на уникальность через сервисы вроде "),
@@ -317,7 +319,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                 child: TextBodySecondary(
                     text: "Анализ динамики ссылочной массы в Ahrefs")),
             RichText(
-                text: TextSpan(style: bodyTextStyle, children: [
+                text: TextSpan(style: bodyTextStyle(context), children: [
               const TextSpan(
                   text: "Проанализируйте ссылочный профиль с помощью "),
               _linkTextSpan("Ahrefs", "https://ahrefs.com/"),
@@ -346,7 +348,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
               alignment: Alignment.centerLeft,
               child: Container(
                 margin: marginBottom24,
-                child: Text("P.S.", style: subtitleTextStyle),
+                child: Text("P.S.", style: subtitleTextStyle(context)),
               ),
             ),
             Align(
@@ -355,7 +357,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                 margin: marginBottom40,
                 child: RichText(
                   text: TextSpan(
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                     children: [
                       const TextSpan(
                         text:
@@ -363,7 +365,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                       ),
                       TextSpan(
                         text: "@shastovscky",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -376,7 +378,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                       ),
                       TextSpan(
                         text: "@yellolwapple",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -406,118 +408,89 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
                     alignment: WrapAlignment.center,
                     children: [
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.telegram, color: Colors.black),
+                        icon: Icon(Icons.telegram,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram личный'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/switchleveler')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.campaign, color: Colors.black),
+                        icon: Icon(Icons.campaign,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram канал'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.camera_alt, color: Colors.black),
+                        icon: Icon(Icons.camera_alt,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('Instagram'),
                             const SizedBox(height: 2),
-                            Text('Запрещенная в РФ организация',
-                                style: TextStyle(
-                                    fontSize: 9, color: Colors.grey.shade600)),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
+                            ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.work, color: Colors.black),
+                        icon: Icon(Icons.work,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('LinkedIn'),
                             const SizedBox(height: 2),
-                            Text('Запрещенная в РФ организация',
-                                style: TextStyle(
-                                    fontSize: 9, color: Colors.grey.shade600)),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
+                            ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.smart_display_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.smart_display_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('YouTube'),
                             const SizedBox(height: 2),
-                            Text('Запрещенная в РФ организация',
-                                style: TextStyle(
-                                    fontSize: 9, color: Colors.grey.shade600)),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
+                            ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.article_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.article_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('VC.RU'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://vc.ru/id1145025')),
                       ),
@@ -545,6 +518,7 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
             ),
             const SizedBox(height: 20),
             ...authorSection(
+              context: context, // Передаем контекст для ссылки
               imageUrl: "assets/images/avatar_default.webp",
               name: "Автор: Шастовский Даниил",
               bio:
@@ -555,12 +529,11 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
             hasScrollBody: false,
             child: MaxWidthBox(
               maxWidth: 1200,
-              backgroundColor: Colors.white,
               child: Container(),
             ),
           ),
           ...[
-            divider,
+            divider(context),
             const Footer(),
           ].toMaxWidthSliver(),
         ],

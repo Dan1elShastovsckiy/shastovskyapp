@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 
 class UsefulArticle {
   final String title;
@@ -31,14 +32,13 @@ class UsefulSeoPage extends StatefulWidget {
 }
 
 class _UsefulSeoPageState extends State<UsefulSeoPage> {
-  // <<< ЗАМЕНИТЕ ЭТОТ СПИСОК ЦЕЛИКОМ >>>
   final List<UsefulArticle> _allArticles = [
     UsefulArticle(
       title: "SEO в эпоху ИИ: Новые правила ранжирования",
       description:
           "Глубокое погружение в неочевидные факторы ранжирования, утечки Google и практические шаги для оптимизации в эру AI Overviews...",
       imageUrl: "assets/images/seo-ai-era/eeat_diagram.webp",
-      tags: ["Ai Seoшка"], // <-- ИЗМЕНЕНИЕ ЗДЕСЬ
+      tags: ["Ai Seoшка"],
       routeName: PostSeoAiPage.name,
     ),
     UsefulArticle(
@@ -53,7 +53,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
       title: "Стратегии линкбилдинга для сложных ниш",
       description:
           "Где брать качественные ссылки, когда все конкуренты уже везде? Методы, которые работают сегодня...",
-      imageUrl: "assets/images/seo-guides/seo_strategy_linkbuilding_hard.webp",
+      imageUrl: "assets/images/seo-guides/skyscraper_technique_flowchart.webp",
       tags: ["Внешняя оптимизация"],
       routeName: PostLinkbuildingPage.name,
     ),
@@ -71,7 +71,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
   String _selectedTag = "Все материалы";
   final List<String> _allTags = [
     "Все материалы",
-    "Ai Seoшка", // <-- ИЗМЕНЕНИЕ ЗДЕСЬ
+    "Ai Seoшка",
     "Внутренняя оптимизация",
     "Внешняя оптимизация",
     "E-E-A-T",
@@ -100,10 +100,12 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    // <<< Получаем доступ к теме >>>
+    final theme = Theme.of(context);
 
     return Scaffold(
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
@@ -112,23 +114,21 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
         slivers: [
           ...[
             const SizedBox(height: 40),
+            // <<< Сохраняем ваши хлебные крошки >>>
             const Align(
               alignment: Alignment.centerLeft,
               child: Breadcrumbs(
                 items: [
                   BreadcrumbItem(text: "Главная", routeName: '/'),
                   BreadcrumbItem(
-                      text: "Полезное",
-                      routeName: '/${UsefulPage.name}'), // Ссылка на разводящую
-                  BreadcrumbItem(text: "SEO"), // Текущая страница
+                      text: "Полезное", routeName: '/${UsefulPage.name}'),
+                  BreadcrumbItem(text: "SEO"),
                 ],
               ),
             ),
-            /*Text("Полезное / SEO",
-                style: headlineTextStyle, textAlign: TextAlign.center),*/
             const SizedBox(height: 16),
             Text("Статьи по поисковой оптимизации",
-                style: subtitleTextStyle, textAlign: TextAlign.center),
+                style: subtitleTextStyle(context), textAlign: TextAlign.center),
             const SizedBox(height: 40),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -142,19 +142,22 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
                     label: Text(tag),
                     selected: isSelected,
                     onSelected: (selected) => _filterArticles(tag),
-                    backgroundColor: Colors.white,
-                    selectedColor: textPrimary,
+                    // <<< ИСПРАВЛЕНИЕ: Используем цвета из темы >>>
+                    backgroundColor: theme.colorScheme.surface,
+                    selectedColor: theme.colorScheme.primary,
                     labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : textPrimary),
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
-                        side: const BorderSide(color: textPrimary)),
+                        side: BorderSide(color: theme.colorScheme.primary)),
                   );
                 }).toList(),
               ),
             ),
             const SizedBox(height: 20),
-            divider,
+            divider(context),
           ].toMaxWidthSliver(),
           SliverList.list(
             children: [
@@ -164,7 +167,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
                   child: Center(
                       child: Text(
                     "Материалов по этому тегу пока нет...",
-                    style: subtitleTextStyle,
+                    style: subtitleTextStyle(context),
                   )),
                 )
               else
@@ -172,30 +175,25 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
                       ListItem(
                         imageUrl: article.imageUrl,
                         title: article.title,
-                        description:
-                            Text(article.description, style: bodyTextStyle),
+                        description: Text(article.description,
+                            style: bodyTextStyle(context)),
                         onReadMore: () => Navigator.pushNamed(
                           context,
-                          // <<< ИЗМЕНЕНИЕ ЗДЕСЬ >>>
-                          // Просто передаем новый полный путь из константы
                           '/${article.routeName}',
                           arguments: {'title': article.title},
                         ),
                       ),
-                      divider,
+                      divider(context),
                     ]),
               const SizedBox(height: 80),
             ].toMaxWidth(),
           ),
           SliverFillRemaining(
             hasScrollBody: false,
-            child: MaxWidthBox(
-                maxWidth: 1200,
-                backgroundColor: Colors.white,
-                child: Container()),
+            child: MaxWidthBox(maxWidth: 1200, child: Container()),
           ),
           ...[
-            divider,
+            divider(context),
             const Footer(),
           ].toMaxWidthSliver(),
         ],
