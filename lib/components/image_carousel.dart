@@ -58,6 +58,9 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< ИЗМЕНЕНИЕ: Адаптируем плейсхолдер к теме >>>
+    final theme = Theme.of(context);
+
     return MouseRegion(
       onEnter: (_) {
         if (!mounted) return;
@@ -100,7 +103,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
                           return child;
                         }
                         return Container(
-                          color: Colors.grey[200],
+                          // <<< ИЗМЕНЕНИЕ: Используем цвет из темы >>>
+                          color: theme.colorScheme.surface,
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {
@@ -186,9 +190,11 @@ class _ImageCarouselState extends State<ImageCarousel> {
                             shape: BoxShape.circle,
                             color: _currentPage == index
                                 ? Colors.white
-                                : Colors.white.withOpacity(0.5),
+                                // <<< ИСПРАВЛЕНО: Заменяем withOpacity(0.5) на withAlpha(128) >>>
+                                : Colors.white.withAlpha(128),
                             border: Border.all(
-                              color: Colors.black.withOpacity(0.5),
+                              // <<< ИСПРАВЛЕНО: Заменяем withOpacity(0.5) на withAlpha(128) >>>
+                              color: Colors.black.withAlpha(128),
                               width: 1,
                             ),
                           ),

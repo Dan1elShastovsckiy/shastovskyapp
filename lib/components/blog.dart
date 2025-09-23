@@ -3,47 +3,42 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:minimal/components/color.dart';
+// <<< ШАГ 5.1: Импортируем провайдер для доступа к состоянию темы >>>
+import 'package:minimal/components/theme_provider.dart';
+import 'package:provider/provider.dart';
+// <<< ШАГ 5.2: Больше не используем старые константы цветов напрямую >>>
+// import 'package:minimal/components/color.dart'; 
 import 'package:minimal/components/spacing.dart';
 import 'package:minimal/components/text.dart';
 import 'package:minimal/components/typography.dart';
 import 'package:minimal/pages/pages.dart';
 
-// --- ВСЕ ОБЩИЕ КОМПОНЕНТЫ (без изменений) ---
+// --- Компоненты ImageWrapper, TagWrapper (без изменений, но с адаптацией цветов) ---
 
 class ImageWrapper extends StatelessWidget {
   final String image;
-  // Параметр height больше не нужен, так как высота будет динамической
   const ImageWrapper({super.key, required this.image});
 
   @override
   Widget build(BuildContext context) {
-    // Эта логика для кэширования остается, она полезна
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     final screenWidth = MediaQuery.of(context).size.width;
     final maxWidth = screenWidth > 800 ? 1200 : 800;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 24),
-      // Мы убираем жесткий AspectRatio
       child: Image.asset(
         image,
-        // BoxFit.fitWidth растягивает картинку по ширине,
-        // а высоту подбирает автоматически, сохраняя пропорции.
         fit: BoxFit.fitWidth,
         cacheWidth: (maxWidth * devicePixelRatio).toInt(),
-        // cacheHeight убираем, так как высота неизвестна заранее
-
-        // Плейсхолдер и обработчик ошибок оставляем, они полезны
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
           if (wasSynchronouslyLoaded || frame != null) {
             return child;
           }
-          // Плейсхолдер будет просто серой зоной без жесткой высоты
           return Container(
-            height:
-                200, // Можно задать примерную высоту, чтобы не было "скачка"
-            color: Colors.grey[200],
+            height: 200,
+            // <<< ШАГ 5.3: Используем цвет из темы для плейсхолдера >>>
+            color: Theme.of(context).colorScheme.surface,
           );
         },
         errorBuilder: (context, error, stackTrace) {
@@ -74,16 +69,19 @@ class Tag extends StatelessWidget {
   Widget build(BuildContext context) {
     return RawMaterialButton(
       onPressed: () {},
-      fillColor: const Color(0xFF242424),
+      // <<< ШАГ 5.4: Адаптируем цвета тега для темной и светлой темы >>>
+      fillColor: Theme.of(context).colorScheme.onSurface,
+      hoverColor: Theme.of(context).colorScheme.secondary,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       elevation: 0,
       hoverElevation: 0,
-      hoverColor: const Color(0xFFC7C7C7),
       highlightElevation: 0,
       focusElevation: 0,
       child: Text(
         tag,
-        style: GoogleFonts.openSans(color: Colors.white, fontSize: 14),
+        style: GoogleFonts.openSans(
+          color: Theme.of(context).colorScheme.surface, 
+          fontSize: 14),
       ),
     );
   }
@@ -95,22 +93,24 @@ class ReadMoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5.5: Адаптируем цвета кнопки "Читать далее" >>>
+    final theme = Theme.of(context);
     return OutlinedButton(
       onPressed: onPressed,
       style: ButtonStyle(
-        overlayColor: WidgetStateProperty.all<Color>(textPrimary),
+        overlayColor: WidgetStateProperty.all<Color>(theme.colorScheme.primary),
         side: WidgetStateProperty.resolveWith((states) {
-          return const BorderSide(color: textPrimary, width: 2);
+          return BorderSide(color: theme.colorScheme.primary, width: 2);
         }),
         foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.hovered)) {
-            return Colors.white;
+            return theme.colorScheme.onPrimary;
           }
-          return textPrimary;
+          return theme.colorScheme.primary;
         }),
         backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.hovered)) {
-            return textPrimary;
+            return theme.colorScheme.primary;
           }
           return Colors.transparent;
         }),
@@ -122,33 +122,50 @@ class ReadMoreButton extends StatelessWidget {
   }
 }
 
-const Widget divider = Divider(color: Color(0xFFEEEEEE), thickness: 1);
-Widget dividerSmall = Container(
-  width: 40,
-  decoration: const BoxDecoration(
-    border: Border(bottom: BorderSide(color: Color(0xFFA0A0A0), width: 1)),
-  ),
-);
+// <<< ШАГ 5.6: Адаптируем цвета разделителей >>>
+Widget divider(BuildContext context) => Divider(color: Theme.of(context).dividerColor, thickness: 1);
+Widget dividerSmall(BuildContext context) => Container(
+      width: 40,
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1)),
+      ),
+    );
 
-List<Widget> authorSection({String? imageUrl, String? name, String? bio}) {
+
+List<Widget> authorSection(
+    {required BuildContext context,
+    String? imageUrl,
+    String? name,
+    String? bio}) {
+      
+  // <<< ИСПРАВЛЕНИЕ: Переменная переписана в локальную функцию >>>
+  void navigateToAbout() {
+      Navigator.pushNamed(context, '/${AboutPage.name}');
+  }
+
   return [
-    divider,
+    // <<< ШАГ 5.7: Передаем context в виджет divider >>>
+    divider(context),
     Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Row(
         children: [
           if (imageUrl != null)
-            Container(
-              margin: const EdgeInsets.only(right: 25),
-              child: Material(
-                shape: const CircleBorder(),
-                clipBehavior: Clip.hardEdge,
-                color: Colors.transparent,
-                child: Image.asset(
-                  imageUrl,
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.contain,
+            InkWell(
+              onTap: navigateToAbout,
+              customBorder: const CircleBorder(),
+              child: Container(
+                margin: const EdgeInsets.only(right: 25),
+                child: Material(
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  color: Colors.transparent,
+                  child: Image.asset(
+                    imageUrl,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
@@ -156,11 +173,16 @@ List<Widget> authorSection({String? imageUrl, String? name, String? bio}) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (name != null) Text(name, style: headlineSecondaryTextStyle),
+                if (name != null)
+                  InkWell(
+                    onTap: navigateToAbout,
+                    // <<< ШАГ 5.8: Заменяем жестко заданные стили на стили из темы >>>
+                    child: Text(name, style: headlineSecondaryTextStyle(context)),
+                  ),
                 if (bio != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(bio, style: bodyTextStyle),
+                    child: Text(bio, style: bodyTextStyle(context)),
                   ),
               ],
             ),
@@ -173,7 +195,6 @@ List<Widget> authorSection({String? imageUrl, String? name, String? bio}) {
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -209,7 +230,8 @@ class ListItem extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Container(
             margin: marginBottom12,
-            child: Text(title, style: headlineTextStyle),
+            // <<< ШАГ 5.9: Заменяем жестко заданные стили на стили из темы >>>
+            child: Text(title, style: headlineTextStyle(context)),
           ),
         ),
         if (description != null)
@@ -238,14 +260,18 @@ class MinimalMenuBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    // <<< ШАГ 5.10: Получаем доступ к провайдеру и теме >>>
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
+
     return Material(
-      color: const Color(0xFFF5F5F5),
+      // <<< ШАГ 5.11: Используем цвета из темы >>>
+      color: theme.colorScheme.surface,
       child: Container(
         padding: EdgeInsets.symmetric(
             vertical: isMobile ? 0 : 10, horizontal: isMobile ? 12 : 16),
-        decoration: const BoxDecoration(
-          border:
-              Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -262,7 +288,8 @@ class MinimalMenuBar extends StatelessWidget {
                 child: Text(
                   "SHASTOVSKY.",
                   style: GoogleFonts.montserrat(
-                    color: textPrimary,
+                    // <<< ШАГ 5.12: Адаптируем цвет текста >>>
+                    color: theme.colorScheme.onSurface,
                     fontSize: isMobile ? 20 : 24,
                     letterSpacing: 3,
                     fontWeight: FontWeight.w500,
@@ -271,9 +298,25 @@ class MinimalMenuBar extends StatelessWidget {
               ),
             ),
             if (isMobile)
-              IconButton(
-                icon: const Icon(Icons.menu, size: 28),
-                onPressed: () => Scaffold.of(context).openDrawer(),
+              // <<< ШАГ 5.13: Добавляем переключатель темы для мобильной версии >>>
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   IconButton(
+                    icon: Icon(
+                      themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                      size: 24,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    onPressed: () {
+                      themeProvider.toggleTheme(!themeProvider.isDarkMode);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.menu, size: 28, color: theme.colorScheme.onSurface),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ],
               )
             else
               Expanded(
@@ -281,7 +324,19 @@ class MinimalMenuBar extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: _buildMenuItems(context),
+                    children: [
+                      // <<< ШАГ 5.14: Добавляем переключатель темы для десктопной версии >>>
+                      ..._buildMenuItems(context),
+                      IconButton(
+                        icon: Icon(
+                         themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                         color: theme.colorScheme.onSurface,
+                        ),
+                        onPressed: () {
+                          themeProvider.toggleTheme(!themeProvider.isDarkMode);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -304,7 +359,7 @@ class MinimalMenuBar extends StatelessWidget {
       ),
       _buildMenuItem(context, "ОБО МНЕ",
           () => Navigator.pushNamed(context, '/${AboutPage.name}')),
-      _buildMenuItem(context, "ПОРТФОЛИО",
+      _buildMenuItem(context, "ПРОЕКТЫ",
           () => Navigator.pushNamed(context, '/${PortfolioPage.name}')),
       _buildMenuItem(context, "ОБ ЭТОМ САЙТЕ",
           () => Navigator.pushNamed(context, '/${TypographyPage.name}')),
@@ -313,19 +368,17 @@ class MinimalMenuBar extends StatelessWidget {
     ];
   }
 
-  // <<< ИЗМЕНЕНИЕ №1: Виджет _buildMenuItem теперь использует InkWell >>>
   Widget _buildMenuItem(
       BuildContext context, String text, VoidCallback onPressed) {
+    // <<< ШАГ 5.15: Адаптируем цвет текста в пунктах меню >>>
     final menuStyle = GoogleFonts.montserrat(
       fontSize: 14,
       fontWeight: FontWeight.w500,
       letterSpacing: 1.5,
-      color: textPrimary,
+      color: Theme.of(context).colorScheme.onSurface,
     );
-    // Используем InkWell для кликабельности без визуальных эффектов по умолчанию
     return InkWell(
       onTap: onPressed,
-      // Отключаем все эффекты наведения и нажатия
       hoverColor: Colors.transparent,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -356,11 +409,13 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5.16: Адаптируем цвета выпадающего меню >>>
+    final theme = Theme.of(context);
     final menuStyle = GoogleFonts.montserrat(
       fontSize: 14,
       fontWeight: FontWeight.w500,
       letterSpacing: 1.5,
-      color: textPrimary,
+      color: theme.colorScheme.onSurface,
     );
 
     return CompositedTransformTarget(
@@ -378,14 +433,13 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
                 child: Container(
                   width: 200,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5).withAlpha(250),
+                    color: theme.colorScheme.surface.withAlpha(250),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: widget.items.entries.map((entry) {
                       return SizedBox(
                         width: double.infinity,
-                        // <<< ИЗМЕНЕНИЕ №2: Кнопки внутри выпадающего списка остаются TextButton для стандартного поведения >>>
                         child: TextButton(
                           onPressed: () {
                             _portalController.hide();
@@ -393,7 +447,7 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
                           },
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
-                            foregroundColor: textPrimary,
+                            foregroundColor: theme.colorScheme.onSurface,
                             textStyle: menuStyle.copyWith(
                                 fontWeight: FontWeight.normal),
                             padding: const EdgeInsets.symmetric(
@@ -411,10 +465,8 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
             ),
           );
         },
-        // <<< ИЗМЕНЕНИЕ №3: Основная кнопка выпадающего меню теперь тоже InkWell >>>
         child: InkWell(
           onTap: () => _portalController.toggle(),
-          // Отключаем все эффекты
           hoverColor: Colors.transparent,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
@@ -424,9 +476,9 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(widget.title, style: menuStyle),
-                const SizedBox(width: 4), // Небольшой отступ для иконки
+                const SizedBox(width: 4),
                 Icon(Icons.arrow_drop_down,
-                    size: 20, color: textPrimary.withAlpha(178)),
+                    size: 20, color: theme.colorScheme.onSurface.withAlpha(178)),
               ],
             ),
           ),
@@ -436,20 +488,23 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
   }
 }
 
-// ... Остальной код файла (Drawer, Breadcrumbs) остается без изменений ...
-
 Drawer buildAppDrawer(BuildContext context) {
+  // <<< ШАГ 5.17: Получаем доступ к провайдеру и теме для бокового меню >>>
+  final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+  final theme = Theme.of(context);
+
   return Drawer(
-    backgroundColor: Colors.white,
+    // <<< ШАГ 5.18: Адаптируем цвета бокового меню >>>
+    backgroundColor: theme.scaffoldBackgroundColor,
     child: ListView(
       padding: EdgeInsets.zero,
       children: [
         DrawerHeader(
-          decoration: const BoxDecoration(color: Color(0xFFF5F5F5)),
+          decoration: BoxDecoration(color: theme.colorScheme.surface),
           child: Text(
             "SHASTOVSKY.",
             style: GoogleFonts.montserrat(
-              color: textPrimary,
+              color: theme.colorScheme.onSurface,
               fontSize: 24,
               letterSpacing: 3,
               fontWeight: FontWeight.w500,
@@ -489,6 +544,7 @@ Drawer buildAppDrawer(BuildContext context) {
             ),
           ],
         ),
+        // ... (остальные ListTile навигации)
         ListTile(
           title: const Text('ОБО МНЕ'),
           onTap: () {
@@ -497,7 +553,7 @@ Drawer buildAppDrawer(BuildContext context) {
           },
         ),
         ListTile(
-          title: const Text('ПОРТФОЛИО'),
+          title: const Text('ПРОЕКТЫ'),
           onTap: () {
             Navigator.pop(context);
             Navigator.pushNamed(context, '/${PortfolioPage.name}');
@@ -517,10 +573,27 @@ Drawer buildAppDrawer(BuildContext context) {
             Navigator.pushNamed(context, '/${ContactsPage.name}');
           },
         ),
+        // <<< ШАГ 5.19: Добавляем переключатель темы в боковое меню >>>
+        const Divider(),
+        ListTile(
+          leading: Icon(
+             themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+             color: theme.colorScheme.onSurface,
+          ),
+          title: Text(themeProvider.isDarkMode ? 'Светлая тема' : 'Темная тема'),
+          onTap: () {
+             themeProvider.toggleTheme(!themeProvider.isDarkMode);
+             Navigator.pop(context);
+          },
+        ),
       ],
     ),
   );
 }
+
+// Классы BreadcrumbItem и Breadcrumbs остаются без изменений,
+// но их цвета также будут адаптироваться благодаря тому, что
+// bodyTextStyle и textSecondary теперь берутся из темы.
 
 class BreadcrumbItem {
   final String text;
@@ -535,14 +608,12 @@ class Breadcrumbs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Стиль, который имитирует TextBodySecondary
-    final breadcrumbStyle = bodyTextStyle.copyWith(color: textSecondary);
-
+    final breadcrumbStyle = bodyTextStyle(context).copyWith(color: Theme.of(context).colorScheme.secondary);
+    
     final List<InlineSpan> spans = [];
     for (int i = 0; i < items.length; i++) {
       final item = items[i];
       if (item.routeName != null) {
-        // Кликабельная часть
         spans.add(
           TextSpan(
             text: item.text,
@@ -557,7 +628,6 @@ class Breadcrumbs extends StatelessWidget {
           ),
         );
       } else {
-        // Некликабельная (последняя) часть
         spans.add(
           TextSpan(
             text: item.text,
@@ -566,7 +636,6 @@ class Breadcrumbs extends StatelessWidget {
         );
       }
 
-      // Разделитель
       if (i < items.length - 1) {
         spans.add(
           TextSpan(
