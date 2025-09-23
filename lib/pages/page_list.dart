@@ -4,7 +4,7 @@ import 'package:minimal/pages/page_georgia_post.dart'; // <<< 1. ИМПОРТ Н
 import 'package:minimal/pages/page_post.dart';
 import 'package:minimal/pages/page_under_construction.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:responsive_framework/responsive_framework.dart' hide MaxWidthBox;
 
 // Константы для постов
 const String moroccoTitle =
@@ -55,9 +55,9 @@ class _ListPageState extends State<ListPage> {
   final List<String> _pageImages = [
     "assets/images/me_sachara_desert.webp",
     "assets/images/georgia_mountains.webp", // <-- Картинка для Грузии (остается)
-    "assets/images/kuala_lumpur.jpg",
-    "assets/images/abu_dhabi.jpg",
-    "assets/images/me_istambul.jpg",
+    "assets/images/kuala_lumpur.webp",
+    "assets/images/abu_dhabi.webp",
+    "assets/images/me_istambul.webp",
     "assets/images/vietnam_beach.webp",
     "assets/images/me_similan_island_colored.webp",
     "assets/images/me_georgia_mountains 2.webp",
@@ -80,10 +80,11 @@ class _ListPageState extends State<ListPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final theme = Theme.of(context);
 
     return Scaffold(
         drawer: isMobile ? buildAppDrawer(context) : null,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        //backgroundColor: const Color.fromARGB(255, 255, 255, 255),// Убираем, чтобы использовать тему
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(isMobile ? 65 : 110),
           child: const MinimalMenuBar(),
@@ -100,14 +101,14 @@ class _ListPageState extends State<ListPage> {
                   children: [
                     Text(
                       "Привет, я Даниил!",
-                      style: headlineTextStyle.copyWith(fontSize: 26),
+                      style: headlineTextStyle(context).copyWith(fontSize: 26),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       "Это мой блог о путешествиях, работе и жизни в разных точках мира. Тут я делюсь своими историями, фотографиями и полезными материалами, которые помогают мне в работе.\n\n "
                       "Ниже можно найти последние посты из поездок.",
-                      style: subtitleTextStyle.copyWith(fontSize: 16),
+                      style: subtitleTextStyle(context).copyWith(fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -135,7 +136,7 @@ class _ListPageState extends State<ListPage> {
                       Navigator.pushNamed(context, '/${PostPage.name}'),
                   description: RichText(
                     text: TextSpan(
-                      style: bodyTextStyle,
+                      style: bodyTextStyle(context),
                       children: <TextSpan>[
                         const TextSpan(
                           text:
@@ -153,100 +154,100 @@ class _ListPageState extends State<ListPage> {
                     ),
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // <<< 2. ПОСТ ПРО ГРУЗИЮ (ЧАСТЬ 1) ПЕРЕМЕЩЕН СЮДА >>>
                 ListItem(
                   imageUrl: "assets/images/georgia_mountains.webp",
                   title: georgiaMountains1Title,
                   description:
-                      Text(georgiaMountains1Description, style: bodyTextStyle),
+                      Text(georgiaMountains1Description, style: bodyTextStyle(context)),
                   // <<< 3. ССЫЛКА ВЕДЕТ НА НОВУЮ СТРАНИЦУ >>>
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PostGeorgiaPage.name}',
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // Малайзия
                 ListItem(
-                  imageUrl: "assets/images/kuala_lumpur.jpg",
+                  imageUrl: "assets/images/kuala_lumpur.webp",
                   title: malaysiaTitle,
-                  description: Text(malaysiaDescription, style: bodyTextStyle),
+                  description: Text(malaysiaDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': malaysiaTitle},
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // Дубай
                 ListItem(
-                  imageUrl: "assets/images/abu_dhabi.jpg",
+                  imageUrl: "assets/images/abu_dhabi.webp",
                   title: dubaiTitle,
-                  description: Text(dubaiDescription, style: bodyTextStyle),
+                  description: Text(dubaiDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': dubaiTitle},
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // Турция
                 ListItem(
-                  imageUrl: "assets/images/me_istambul.jpg",
+                  imageUrl: "assets/images/me_istambul.webp",
                   title: turkeyTitle,
-                  description: Text(turkeyDescription, style: bodyTextStyle),
+                  description: Text(turkeyDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': turkeyTitle},
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // Вьетнам
                 ListItem(
                   imageUrl: "assets/images/vietnam_beach.webp",
                   title: vietnamTitle,
-                  description: Text(vietnamDescription, style: bodyTextStyle),
+                  description: Text(vietnamDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': vietnamTitle},
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // Пхукет
                 ListItem(
                   imageUrl: "assets/images/me_similan_island_colored.webp",
                   title: phuketTitle,
-                  description: Text(phuketDescription, style: bodyTextStyle),
+                  description: Text(phuketDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': phuketTitle},
                   ),
                 ),
-                divider,
+                divider(context),
 
                 // Грузия 2 (заглушка)
                 ListItem(
                   imageUrl: "assets/images/me_georgia_mountains 2.webp",
                   title: georgiaMountains2Title,
                   description:
-                      Text(georgiaMountains2Description, style: bodyTextStyle),
+                      Text(georgiaMountains2Description, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
                     arguments: {'title': georgiaMountains2Title},
                   ),
                 ),
-                divider,
+                divider(context),
 
                 const SizedBox(height: 80),
               ].toMaxWidth(),
@@ -255,11 +256,10 @@ class _ListPageState extends State<ListPage> {
               hasScrollBody: false,
               child: MaxWidthBox(
                   maxWidth: 1200,
-                  backgroundColor: Colors.white,
                   child: Container()),
             ),
             ...[
-              divider,
+              divider(context),
               const Footer(),
             ].toMaxWidthSliver(),
           ],

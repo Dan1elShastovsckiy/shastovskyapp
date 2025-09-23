@@ -6,7 +6,8 @@ import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 // <<< ИСПРАВЛЕНИЕ: Добавлен необходимый импорт для MaxWidthBox и toMaxWidthSliver >>>
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
 class PostSeoAiPage extends StatefulWidget {
@@ -42,7 +43,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
   TextSpan _linkTextSpan(String text, String url) {
     return TextSpan(
       text: text,
-      style: bodyTextStyle.copyWith(
+      style: bodyTextStyle(context).copyWith(
         color: Colors.blue,
         decoration: TextDecoration.underline,
       ),
@@ -54,11 +55,13 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-    final boldStyle = bodyTextStyle.copyWith(fontWeight: FontWeight.bold);
+    final theme = Theme.of(context);
+    final boldStyle =
+        bodyTextStyle(context).copyWith(fontWeight: FontWeight.bold);
 
     return Scaffold(
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: Colors.white,
+      //backgroundColor: Colors.white, // Убираем, чтобы использовать тему
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
@@ -73,7 +76,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 margin: marginBottom12,
                 child: Text(
                   "SEO в эпоху ИИ: Новые правила ранжирования",
-                  style: headlineTextStyle,
+                  style: headlineTextStyle(context),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -137,7 +140,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
-                    text: TextSpan(style: bodyTextStyle, children: [
+                    text: TextSpan(style: bodyTextStyle(context), children: [
                       TextSpan(
                           text:
                               "1. Topicality (T) – Тематическая релевантность: ",
@@ -166,7 +169,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                     ),
                   ),
                   RichText(
-                    text: TextSpan(style: bodyTextStyle, children: [
+                    text: TextSpan(style: bodyTextStyle(context), children: [
                       TextSpan(
                           text: "2. Quality Score (Q) – Показатель качества: ",
                           style:
@@ -178,7 +181,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ),
                   const SizedBox(height: 24),
                   RichText(
-                    text: TextSpan(style: bodyTextStyle, children: [
+                    text: TextSpan(style: bodyTextStyle(context), children: [
                       TextSpan(
                           text:
                               "3. Navboost – Корректировка на основе поведения пользователей: ",
@@ -191,7 +194,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ),
                   const SizedBox(height: 24),
                   RichText(
-                    text: TextSpan(style: bodyTextStyle, children: [
+                    text: TextSpan(style: bodyTextStyle(context), children: [
                       TextSpan(text: "4. RankBrain: ", style: boldStyle),
                       const TextSpan(
                           text:
@@ -220,7 +223,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• siteAuthority реально: ", style: boldStyle),
                     const TextSpan(
@@ -229,7 +232,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• 'Песочница' для новых сайтов (hostAge): ",
                         style: boldStyle),
@@ -239,7 +242,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(text: "• Белые списки: ", style: boldStyle),
                     const TextSpan(
                         text:
@@ -247,7 +250,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• Бренд – главный фактор ранжирования: ",
                         style: boldStyle),
@@ -257,7 +260,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• Disconnected Entity Hypothesis (DEH): ",
                         style: boldStyle),
@@ -283,7 +286,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text:
                             "• E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness): ",
@@ -297,8 +300,8 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                         left: 16.0, top: 8.0, bottom: 16.0),
                     child: RichText(
                         text: TextSpan(
-                            style: bodyTextStyle.copyWith(
-                                fontStyle: FontStyle.italic),
+                            style: bodyTextStyle(context)
+                                .copyWith(fontStyle: FontStyle.italic),
                             children: const [
                           TextSpan(
                               text:
@@ -309,7 +312,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                       text:
                           "Подкрепляйте утверждения данными, схемами, инфографикой, а для авторитетности указывайте ссылки на публикации авторов в авторитетных СМИ."),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• Helpful Content Update (HCU): ",
                         style: boldStyle),
@@ -319,7 +322,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• Подход 'Ответ-прежде-всего': ",
                         style: boldStyle),
@@ -329,7 +332,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(text: "• Обогащение контента: ", style: boldStyle),
                     const TextSpan(
                         text:
@@ -351,19 +354,22 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       RichText(
-                          text: TextSpan(style: bodyTextStyle, children: [
-                        TextSpan(
-                            text: "• AI Overviews (AIO): ", style: boldStyle),
-                        const TextSpan(
-                            text:
-                                "Сводки, генерируемые AI (например, Gemini), синтезируют информацию из нескольких источников и отображаются в самом верху SERP, оттесняя все остальные результаты, включая рекламу. Это значительно увеличивает вероятность поиска с нулевым кликом."),
-                      ])),
+                          text: TextSpan(
+                              style: bodyTextStyle(context),
+                              children: [
+                            TextSpan(
+                                text: "• AI Overviews (AIO): ",
+                                style: boldStyle),
+                            const TextSpan(
+                                text:
+                                    "Сводки, генерируемые AI (например, Gemini), синтезируют информацию из нескольких источников и отображаются в самом верху SERP, оттесняя все остальные результаты, включая рекламу. Это значительно увеличивает вероятность поиска с нулевым кликом."),
+                          ])),
                     ])),
             const TextBody(
                 text:
                     "Для издателей это 'экзистенциальный кризис', так как их бизнес зависит от трафика. Однако для местных сервисных предприятий Local Pack может быть 'мощным и чистым позитивным инструментом нулевого клика', обеспечивая немедленные ценные действия (звонки, бронирования)."),
             Text("Новая стратегия SEO ('Zero-Click Playbook') включает:",
-                style: bodyTextStyle),
+                style: bodyTextStyle(context)),
             Padding(
               padding:
                   const EdgeInsets.only(left: 16.0, bottom: 24.0, top: 16.0),
@@ -371,7 +377,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(text: "• On-SERP SEO: ", style: boldStyle),
                     const TextSpan(
                         text:
@@ -379,7 +385,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• Построение 'моста' (Click-Independence): ",
                         style: boldStyle),
@@ -389,7 +395,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                   ])),
                   const SizedBox(height: 16),
                   RichText(
-                      text: TextSpan(style: bodyTextStyle, children: [
+                      text: TextSpan(style: bodyTextStyle(context), children: [
                     TextSpan(
                         text: "• Переосмысление измерений: ", style: boldStyle),
                     const TextSpan(
@@ -489,28 +495,32 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                             text:
                                 "• Микроразметка Schema.org: Внедряйте релевантные типы разметки (Article, FAQPage, HowTo, Product, Organization, Person) и связывайте их через атрибут @id. Это продвинутая техника, которая помогает Google лучше понимать сущности на вашем сайте."),
                         RichText(
-                            text: TextSpan(style: bodyTextStyle, children: [
-                          const TextSpan(
-                              text:
-                                  "• Рендеринг контента: Проверяйте сохраненные копии страниц в Яндекс.Поиске и Google Search Console, а также используйте инструмент "),
-                          _linkTextSpan("totheweb.com",
-                              "https://totheweb.com/learning_center/tools-convert-html-text-to-plain-text-for-content-review/"),
-                          const TextSpan(
-                              text:
-                                  ", чтобы увидеть, как Google видит контент вашей страницы."),
-                        ])),
+                            text: TextSpan(
+                                style: bodyTextStyle(context),
+                                children: [
+                              const TextSpan(
+                                  text:
+                                      "• Рендеринг контента: Проверяйте сохраненные копии страниц в Яндекс.Поиске и Google Search Console, а также используйте инструмент "),
+                              _linkTextSpan("totheweb.com",
+                                  "https://totheweb.com/learning_center/tools-convert-html-text-to-plain-text-for-content-review/"),
+                              const TextSpan(
+                                  text:
+                                      ", чтобы увидеть, как Google видит контент вашей страницы."),
+                            ])),
                         RichText(
-                            text: TextSpan(style: bodyTextStyle, children: [
-                          const TextSpan(
-                              text:
-                                  "• Инструменты для проверки чанкирования: Используйте "),
-                          _linkTextSpan(
-                              "relevancylens.seoworkflow.online/analyzer",
-                              "http://relevancylens.seoworkflow.online/analyzer"),
-                          const TextSpan(
-                              text:
-                                  " для анализа, какие 'чанки' информации AI находит на странице и насколько они релевантны."),
-                        ])),
+                            text: TextSpan(
+                                style: bodyTextStyle(context),
+                                children: [
+                              const TextSpan(
+                                  text:
+                                      "• Инструменты для проверки чанкирования: Используйте "),
+                              _linkTextSpan(
+                                  "relevancylens.seoworkflow.online/analyzer",
+                                  "http://relevancylens.seoworkflow.online/analyzer"),
+                              const TextSpan(
+                                  text:
+                                      " для анализа, какие 'чанки' информации AI находит на странице и насколько они релевантны."),
+                            ])),
                       ],
                     ),
                   ),
@@ -620,7 +630,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 margin: marginBottom40,
                 child: RichText(
                   text: TextSpan(
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                     children: [
                       const TextSpan(
                         text:
@@ -628,7 +638,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                       ),
                       TextSpan(
                         text: "@shastovscky",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -641,7 +651,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                       ),
                       TextSpan(
                         text: "@yellolwapple",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -663,50 +673,32 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
               width: double.infinity,
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(
-                      maxWidth: 800), // Можно увеличить ширину для удобства
+                  constraints: const BoxConstraints(maxWidth: 800),
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     alignment: WrapAlignment.center,
                     children: [
-                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.telegram, color: Colors.black),
+                        icon: Icon(Icons.telegram,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram личный'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/switchleveler')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.campaign, color: Colors.black),
+                        icon: Icon(Icons.campaign,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram канал'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
-
-                      // --- КНОПКИ С ПОДПИСЬЮ (ИЗМЕНЕНА СТРУКТУРА LABEL) ---
-
-                      // Кнопка Instagram
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.camera_alt, color: Colors.black),
+                        icon: Icon(Icons.camera_alt,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -715,29 +707,19 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical:
-                                  12), // Немного уменьшен вертикальный паддинг
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
-
-                      // Кнопка LinkedIn
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.work, color: Colors.black),
+                        icon: Icon(Icons.work,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -746,28 +728,19 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
-
-                      // Кнопка YouTube
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.smart_display_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.smart_display_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -776,35 +749,20 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
-
-                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.article_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.article_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('VC.RU'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://vc.ru/id1145025')),
                       ),
@@ -832,6 +790,7 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
             ),
             const SizedBox(height: 20),
             ...authorSection(
+              context: context, // Передаем контекст для ссылки
               imageUrl: "assets/images/avatar_default.webp",
               name: "Автор: Шастовский Даниил",
               bio:
@@ -843,12 +802,11 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
             // <<< Теперь MaxWidthBox определён >>>
             child: MaxWidthBox(
               maxWidth: 1200,
-              backgroundColor: Colors.white,
               child: Container(),
             ),
           ),
           ...[
-            divider,
+            divider(context),
             const Footer(),
           ].toMaxWidthSliver(),
         ],

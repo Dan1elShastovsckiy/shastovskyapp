@@ -35,11 +35,12 @@ class ContactsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final theme = Theme.of(context);
 
     return Scaffold(
       // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      //backgroundColor: const Color.fromARGB(255, 255, 255, 255),// Убираем, чтобы использовать тему
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(
             isMobile ? 65 : 110), // Высота для десктопа исправлена
@@ -53,7 +54,7 @@ class ContactsPage extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Container(
                   margin: marginBottom12,
-                  child: Text(" ", style: headlineTextStyle),
+                  child: Text(" ", style: headlineTextStyle(context)),
                 ),
               ),
               Align(
@@ -63,10 +64,10 @@ class ContactsPage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text("Мои контакты",
-                          style: headlineTextStyle.copyWith(fontSize: 36)),
+                          style: headlineTextStyle(context).copyWith(fontSize: 36)),
                       const SizedBox(height: 8),
                       Text("Контакты для сотрудничества",
-                          style: subtitleTextStyle.copyWith(fontSize: 18)),
+                          style: subtitleTextStyle(context).copyWith(fontSize: 18)),
                     ],
                   ),
                 ),
@@ -86,7 +87,7 @@ class ContactsPage extends StatelessWidget {
                         title: Text(
                           "+7 991 *** ** 92",
                           style:
-                              headlineSecondaryTextStyle.copyWith(fontSize: 24),
+                              headlineSecondaryTextStyle(context).copyWith(fontSize: 24),
                         ),
                         onTap: () {
                           showDialog(
@@ -97,7 +98,7 @@ class ContactsPage extends StatelessWidget {
                               title: const Text("Телефон для связи"),
                               content: SelectableText(
                                 "+7 991 681-84-92",
-                                style: headlineSecondaryTextStyle.copyWith(
+                                style: headlineSecondaryTextStyle(context).copyWith(
                                     fontSize: 24),
                               ),
                               actions: [
@@ -124,11 +125,11 @@ class ContactsPage extends StatelessWidget {
                         title: Text(
                           "+7 991 *** ** 92",
                           style:
-                              headlineSecondaryTextStyle.copyWith(fontSize: 24),
+                              headlineSecondaryTextStyle(context).copyWith(fontSize: 24),
                         ),
                         subtitle: Text(
                           "WhatsApp",
-                          style: subtitleTextStyle.copyWith(
+                          style: subtitleTextStyle(context).copyWith(
                             color: Colors.green,
                             fontWeight: FontWeight.w500,
                           ),
@@ -137,8 +138,7 @@ class ContactsPage extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              backgroundColor:
-                                  Colors.white, // Белый фон всего меню
+                              backgroundColor: Colors.white,
                               title: const Text("WhatsApp"),
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -146,13 +146,13 @@ class ContactsPage extends StatelessWidget {
                                 children: [
                                   SelectableText(
                                     "+7 991 681-84-92",
-                                    style: headlineSecondaryTextStyle.copyWith(
+                                    style: headlineSecondaryTextStyle(context).copyWith(
                                         fontSize: 24),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     "Вы можете написать мне в WhatsApp по этому номеру",
-                                    style: bodyTextStyle,
+                                    style: bodyTextStyle(context),
                                   ),
                                 ],
                               ),
@@ -180,7 +180,7 @@ class ContactsPage extends StatelessWidget {
                         title: Text(
                           "shastovsckiy@gmail.com",
                           style:
-                              headlineSecondaryTextStyle.copyWith(fontSize: 24),
+                              headlineSecondaryTextStyle(context).copyWith(fontSize: 24),
                         ),
                         onTap: () => launchUrl(
                             Uri.parse('mailto:shastovsckiy@gmail.com')),
@@ -193,7 +193,7 @@ class ContactsPage extends StatelessWidget {
                         ),
                         title: Text(
                           "@switchleveler",
-                          style: headlineSecondaryTextStyle.copyWith(
+                          style: headlineSecondaryTextStyle(context).copyWith(
                             fontSize: 24,
                             color: Colors.blue,
                             decoration: TextDecoration.underline,
@@ -206,13 +206,13 @@ class ContactsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              divider,
+              divider(context),
               Align(
                 alignment: Alignment.center,
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 40),
                   child: Text("Все остальные мои профили в сети:",
-                      style: headlineSecondaryTextStyle.copyWith(fontSize: 28)),
+                      style: headlineSecondaryTextStyle(context).copyWith(fontSize: 28)),
                 ),
               ),
               Container(
@@ -377,7 +377,6 @@ class ContactsPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                divider,
                 Footer(),
               ],
             ),

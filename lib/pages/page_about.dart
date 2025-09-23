@@ -2,7 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
@@ -41,11 +42,12 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final theme = Theme.of(context);
 
     return Scaffold(
       // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      //backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Убираем, чтобы использовать тему
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(
             isMobile ? 65 : 110), // Высота для десктопа исправлена
@@ -58,14 +60,14 @@ class AboutPage extends StatelessWidget {
               alignment: Alignment.center,
               child: Container(
                 margin: marginBottom12,
-                child: Text(" ", style: headlineTextStyle),
+                child: Text(" ", style: headlineTextStyle(context)),
               ),
             ),
             Align(
               alignment: Alignment.center,
               child: Container(
                 margin: marginBottom12,
-                child: Text("Обо мне", style: headlineTextStyle),
+                child: Text("Обо мне", style: headlineTextStyle(context)),
               ),
             ),
             // <<< ИЗМЕНЕНИЕ: Добавлен блок с фотографией >>>
@@ -88,12 +90,12 @@ class AboutPage extends StatelessWidget {
                 margin: marginBottom24,
                 child: RichText(
                   text: TextSpan(
-                    style: subtitleTextStyle,
+                    style: subtitleTextStyle(context),
                     children: [
                       const TextSpan(text: "Хin chào) "),
                       TextSpan(
                         text: "Меня зовут Даниил!",
-                        style: subtitleTextStyle.copyWith(
+                        style: subtitleTextStyle(context).copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -102,14 +104,14 @@ class AboutPage extends StatelessWidget {
                               " Здесь вы найдете больше информации о моем опыте работы как "),
                       TextSpan(
                         text: "SEO-Специалиста",
-                        style: subtitleTextStyle.copyWith(
+                        style: subtitleTextStyle(context).copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       const TextSpan(text: " и также как "),
                       TextSpan(
                         text: "руководителя",
-                        style: subtitleTextStyle.copyWith(
+                        style: subtitleTextStyle(context).copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -117,21 +119,21 @@ class AboutPage extends StatelessWidget {
                           text: ".\n\nЯ рассматриваю предложения на позиции "),
                       TextSpan(
                         text: "Senior SEO Analyst",
-                        style: subtitleTextStyle.copyWith(
+                        style: subtitleTextStyle(context).copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       const TextSpan(text: " или "),
                       TextSpan(
                         text: "Head of SEO Department",
-                        style: subtitleTextStyle.copyWith(
+                        style: subtitleTextStyle(context).copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       const TextSpan(text: ". Ну и конечно же, я открыт к "),
                       TextSpan(
                         text: "предложениям по отдельным проектам",
-                        style: subtitleTextStyle.copyWith(
+                        style: subtitleTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -145,7 +147,7 @@ class AboutPage extends StatelessWidget {
                 ),
               ),
             ),
-            divider,
+            divider(context),
             Container(
               margin: marginBottom40,
             ),
@@ -154,7 +156,7 @@ class AboutPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom12,
                 child: Text("Немного о моих ценностях в работе",
-                    style: headlineSecondaryTextStyle),
+                    style: headlineSecondaryTextStyle(context)),
               ),
             ),
             Align(
@@ -165,10 +167,10 @@ class AboutPage extends StatelessWidget {
                     "В работе особенно ценю: качественную документацию, чёткие технические задания, профессиональную команду "
                     "и отлаженные процессы. Открыт к сотрудничеству и буду рад встрече!\n\n"
                     "Часто путешествую, поэтому рассматриваю только удалённый формат работы.",
-                    style: subtitleTextStyle),
+                    style: subtitleTextStyle(context)),
               ),
             ),
-            divider,
+            divider(context),
             Container(
               margin: marginBottom40,
             ),
@@ -176,14 +178,15 @@ class AboutPage extends StatelessWidget {
               alignment: Alignment.center,
               child: Container(
                 margin: marginBottom12,
-                child: Text("Мой опыт", style: headlineSecondaryTextStyle),
+                child: Text("Мой опыт",
+                    style: headlineSecondaryTextStyle(context)),
               ),
             ),
             Align(
               alignment: Alignment.center,
               child: Text(
                 calculateExperience(),
-                style: headlineSecondaryTextStyle.copyWith(
+                style: headlineSecondaryTextStyle(context).copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
@@ -192,7 +195,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "Zum Punkt (Январь 2023 — по настоящее время)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text("Senior SEO-специалист, GroupHead"),
               children: [
@@ -203,7 +207,7 @@ class AboutPage extends StatelessWidget {
                     "• Работаю над внедрением ИИ технологий в продвижении проектов\n"
                     "• Создаю инструкции по работе с Ai для seo-продвижения и работой с кодом проектов\n"
                     "• Руковожу командой SEO специалистов",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
@@ -211,7 +215,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "Molinos (Февраль 2022 — Декабрь 2022)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text("Middle SEO"),
               children: [
@@ -221,7 +226,7 @@ class AboutPage extends StatelessWidget {
                     "• Работа над задачами продвижения со стороны Senior ведущего проекта\n"
                     "• Составление технического и SEO аудита новых проектов\n"
                     "• Обучение",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
@@ -229,7 +234,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "Zharkov seo agency (Июнь 2021 — Февраль 2022)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text("SEO-специалист"),
               children: [
@@ -240,7 +246,7 @@ class AboutPage extends StatelessWidget {
                     "• Ведение 8+ проектов с сентября 2021\n"
                     "• Опыт работы с ограничениями Яндекса и их устранением\n"
                     "• Достижение значительных результатов в продвижении сайтов",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
@@ -248,7 +254,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "Тинькофф Инвестиции (Сентябрь 2020 — Июнь 2021)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text(
                   "Инвестиционный консультант (Тут я просто искал себя)"),
@@ -259,7 +266,7 @@ class AboutPage extends StatelessWidget {
                     "• Аналитика и ведение портфеля\n"
                     "• Создание трейд стратегии\n"
                     "• Помощь и консультация для действующих клиентов брокера",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
@@ -267,7 +274,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "Фриланс (Январь 2019 — Сентябрь 2020)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text("Full-stack web-разработчик"),
               children: [
@@ -275,7 +283,7 @@ class AboutPage extends StatelessWidget {
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     "• Разработка сайтов",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
@@ -283,7 +291,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "Plastic system LLC (Декабрь 2017 — Сентябрь 2020)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text("Ведущий web-администратор"),
               children: [
@@ -296,7 +305,7 @@ class AboutPage extends StatelessWidget {
                     "• Работа с Яндекс.Маркет и Google Ads\n"
                     "• Координация работы с подрядчиками (дизайнер, SEO-специалист, программист)\n"
                     "• Создание лендингов и сайтов компании",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
@@ -304,7 +313,8 @@ class AboutPage extends StatelessWidget {
             ExpansionTile(
               title: Text(
                 "EPAM Systems Inc. (Май 2019 — Август 2019)",
-                style: subtitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+                style: subtitleTextStyle(context)
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text("Тестировщик ПО"),
               children: [
@@ -313,12 +323,12 @@ class AboutPage extends StatelessWidget {
                   child: Text(
                     "• Производственная практика\n"
                     "• Разработка и тестирование ботов",
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                   ),
                 ),
               ],
             ),
-            divider,
+            divider(context),
             Container(
               margin: marginBottom40,
             ),
@@ -327,7 +337,7 @@ class AboutPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom12,
                 child: Text("Какой у меня подход к работе?",
-                    style: headlineSecondaryTextStyle),
+                    style: headlineSecondaryTextStyle(context)),
               ),
             ),
             Align(
@@ -338,7 +348,7 @@ class AboutPage extends StatelessWidget {
                     "Я верю в важность качественного кода, ТЗ по SMART и чистого дизайна. Мой подход заключается в том, чтобы создавать продукты, которые не только функциональные, но и приятны в использовании. \n\n"
                     "Всегда стремлюсь к лучшим практикам SEO - оптимизации, разработки и использую современные технологии. Также ценю обратную связь и считаю, что она помогает мне расти как SEO специалисту и разработчику. \n"
                     "Я открыт к новым идеям и всегда готов учиться, люблю работать в команде и считаю, что совместная работа приводит к лучшим результатам.",
-                    style: subtitleTextStyle),
+                    style: subtitleTextStyle(context)),
               ),
             ),
             Align(
@@ -347,10 +357,10 @@ class AboutPage extends StatelessWidget {
                 margin: marginBottom24,
                 child: Text(
                     "Я считаю, что каждый проект — это возможность для роста и обучения и стремлюсь к тому, чтобы каждый мой проект был не только успешным, но и полезным для пользователей. Знаю, что технологии могут изменить мир к лучшему, и хочу быть частью этого изменения.",
-                    style: subtitleTextStyle),
+                    style: subtitleTextStyle(context)),
               ),
             ),
-            dividerSmall,
+            dividerSmall(context),
             Container(
               margin: marginBottom24,
             ),
@@ -358,7 +368,7 @@ class AboutPage extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Container(
                 margin: marginBottom24,
-                child: Text("P.S.", style: subtitleTextStyle),
+                child: Text("P.S.", style: subtitleTextStyle(context)),
               ),
             ),
             Align(
@@ -367,7 +377,7 @@ class AboutPage extends StatelessWidget {
                 margin: marginBottom40,
                 child: RichText(
                   text: TextSpan(
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                     children: [
                       const TextSpan(
                         text:
@@ -375,7 +385,7 @@ class AboutPage extends StatelessWidget {
                       ),
                       TextSpan(
                         text: "@shastovscky",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -388,7 +398,7 @@ class AboutPage extends StatelessWidget {
                       ),
                       TextSpan(
                         text: "@yellolwapple",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -409,50 +419,32 @@ class AboutPage extends StatelessWidget {
               width: double.infinity,
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(
-                      maxWidth: 800), // Можно увеличить ширину для удобства
+                  constraints: const BoxConstraints(maxWidth: 800),
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     alignment: WrapAlignment.center,
                     children: [
-                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.telegram, color: Colors.black),
+                        icon: Icon(Icons.telegram,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram личный'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/switchleveler')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.campaign, color: Colors.black),
+                        icon: Icon(Icons.campaign,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram канал'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
-
-                      // --- КНОПКИ С ПОДПИСЬЮ (ИЗМЕНЕНА СТРУКТУРА LABEL) ---
-
-                      // Кнопка Instagram
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.camera_alt, color: Colors.black),
+                        icon: Icon(Icons.camera_alt,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -461,29 +453,19 @@ class AboutPage extends StatelessWidget {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical:
-                                  12), // Немного уменьшен вертикальный паддинг
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
-
-                      // Кнопка LinkedIn
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.work, color: Colors.black),
+                        icon: Icon(Icons.work,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -492,28 +474,19 @@ class AboutPage extends StatelessWidget {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
-
-                      // Кнопка YouTube
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.smart_display_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.smart_display_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -522,35 +495,20 @@ class AboutPage extends StatelessWidget {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
-
-                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.article_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.article_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('VC.RU'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://vc.ru/id1145025')),
                       ),
@@ -562,13 +520,10 @@ class AboutPage extends StatelessWidget {
           ].toMaxWidthSliver(),
           SliverFillRemaining(
             hasScrollBody: false,
-            child: MaxWidthBox(
-                maxWidth: 1200,
-                backgroundColor: Colors.white,
-                child: Container()),
+            child: MaxWidthBox(maxWidth: 1200, child: Container()),
           ),
           ...[
-            divider,
+            divider(context),
             const Footer(),
           ].toMaxWidthSliver(),
         ],

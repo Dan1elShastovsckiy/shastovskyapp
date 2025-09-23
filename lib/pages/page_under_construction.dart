@@ -2,7 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
 class PageUnderConstruction extends StatelessWidget {
@@ -17,11 +18,12 @@ class PageUnderConstruction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final theme = Theme.of(context);
 
     return Scaffold(
       // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      //backgroundColor: const Color.fromARGB(255, 255, 255, 255),// Убираем, чтобы использовать тему
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(
             isMobile ? 65 : 110), // Высота для десктопа исправлена
@@ -36,7 +38,7 @@ class PageUnderConstruction extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 40),
                 child: Text(
                   postTitle,
-                  style: headlineTextStyle.copyWith(fontSize: 32),
+                  style: headlineTextStyle(context).copyWith(fontSize: 32),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -49,7 +51,7 @@ class PageUnderConstruction extends StatelessWidget {
                 child: Text(
                   "Статья находится в работе у автора, скоро будет готова!\n\n"
                   "Сохраняйте сайт в закладки, чтобы не пропустить обновления.",
-                  style: bodyTextStyle.copyWith(fontSize: 18),
+                  style: bodyTextStyle(context).copyWith(fontSize: 18),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -66,7 +68,7 @@ class PageUnderConstruction extends StatelessWidget {
                       (route) => false,
                     );
                   },
-                  style: elevatedButtonStyle, // Используем общий стиль
+                  style: elevatedButtonStyle(context), // Используем общий стиль
                   child: const Text('Вернуться на главную'),
                 ),
               ),
@@ -75,7 +77,7 @@ class PageUnderConstruction extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Container(
                 margin: marginBottom24,
-                child: Text("P.S.", style: subtitleTextStyle),
+                child: Text("P.S.", style: subtitleTextStyle(context)),
               ),
             ),
             Align(
@@ -84,7 +86,7 @@ class PageUnderConstruction extends StatelessWidget {
                 margin: marginBottom40,
                 child: RichText(
                   text: TextSpan(
-                    style: bodyTextStyle,
+                    style: bodyTextStyle(context),
                     children: [
                       const TextSpan(
                         text:
@@ -92,7 +94,7 @@ class PageUnderConstruction extends StatelessWidget {
                       ),
                       TextSpan(
                         text: "@shastovscky",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -105,7 +107,7 @@ class PageUnderConstruction extends StatelessWidget {
                       ),
                       TextSpan(
                         text: "@yellolwapple",
-                        style: bodyTextStyle.copyWith(
+                        style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -127,50 +129,32 @@ class PageUnderConstruction extends StatelessWidget {
               width: double.infinity,
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(
-                      maxWidth: 800), // Можно увеличить ширину для удобства
+                  constraints: const BoxConstraints(maxWidth: 800),
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 16,
                     alignment: WrapAlignment.center,
                     children: [
-                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.telegram, color: Colors.black),
+                        icon: Icon(Icons.telegram,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram личный'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/switchleveler')),
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.campaign, color: Colors.black),
+                        icon: Icon(Icons.campaign,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('Telegram канал'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://t.me/shastovscky')),
                       ),
-
-                      // --- КНОПКИ С ПОДПИСЬЮ (ИЗМЕНЕНА СТРУКТУРА LABEL) ---
-
-                      // Кнопка Instagram
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.camera_alt, color: Colors.black),
+                        icon: Icon(Icons.camera_alt,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -179,29 +163,19 @@ class PageUnderConstruction extends StatelessWidget {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical:
-                                  12), // Немного уменьшен вертикальный паддинг
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://instagram.com/yellolwapple')),
                       ),
-
-                      // Кнопка LinkedIn
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.work, color: Colors.black),
+                        icon: Icon(Icons.work,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -210,28 +184,19 @@ class PageUnderConstruction extends StatelessWidget {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(Uri.parse(
                             'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
                       ),
-
-                      // Кнопка YouTube
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.smart_display_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.smart_display_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: Column(
-                          // Вместо Text используется Column
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -240,35 +205,20 @@ class PageUnderConstruction extends StatelessWidget {
                             Text(
                               'Запрещенная в РФ организация',
                               style: TextStyle(
-                                  fontSize: 9, color: Colors.grey.shade600),
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
                             ),
                           ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () => launchUrl(
                             Uri.parse('https://www.youtube.com/@itsmyadv')),
                       ),
-
-                      // --- Кнопки без подписи (остаются как были) ---
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.article_outlined,
-                            color: Colors.black),
+                        icon: Icon(Icons.article_outlined,
+                            color: theme.colorScheme.onSurface),
                         label: const Text('VC.RU'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                        ),
+                        style: elevatedButtonStyle(context),
                         onPressed: () =>
                             launchUrl(Uri.parse('https://vc.ru/id1145025')),
                       ),
@@ -280,13 +230,10 @@ class PageUnderConstruction extends StatelessWidget {
           ].toMaxWidthSliver(),
           SliverFillRemaining(
             hasScrollBody: false,
-            child: MaxWidthBox(
-                maxWidth: 1200,
-                backgroundColor: Colors.white,
-                child: Container()),
+            child: MaxWidthBox(maxWidth: 1200, child: Container()),
           ),
           ...[
-            divider,
+            divider(context),
             const Footer(),
           ].toMaxWidthSliver(),
         ],
