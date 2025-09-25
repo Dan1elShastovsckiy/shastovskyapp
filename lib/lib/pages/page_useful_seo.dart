@@ -34,6 +34,15 @@ class UsefulSeoPage extends StatefulWidget {
 class _UsefulSeoPageState extends State<UsefulSeoPage> {
   final List<UsefulArticle> _allArticles = [
     UsefulArticle(
+      title: "Полезные SEO-сервисы",
+      description:
+          "Интерактивная таблица с инструментами для внутренней, внешней и технической оптимизации, которые я использую в работе каждый день...",
+      imageUrl:
+          "assets/images/seo-guides/tools_preview.webp", // <-- превью-картинка
+      tags: ["Инструменты"],
+      routeName: SeoToolsPage.name, // <-- Ссылка на новую страницу
+    ),
+    UsefulArticle(
       title: "SEO в эпоху ИИ: Новые правила ранжирования",
       description:
           "Глубокое погружение в неочевидные факторы ранжирования, утечки Google и практические шаги для оптимизации в эру AI Overviews...",
@@ -71,6 +80,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
   String _selectedTag = "Все материалы";
   final List<String> _allTags = [
     "Все материалы",
+    "Инструменты",
     "Ai Seoшка",
     "Внутренняя оптимизация",
     "Внешняя оптимизация",
