@@ -4,7 +4,6 @@ import 'package:minimal/pages/page_georgia_post.dart'; // <<< 1. ИМПОРТ Н
 import 'package:minimal/pages/page_post.dart';
 import 'package:minimal/pages/page_under_construction.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart' hide MaxWidthBox;
 
 // Константы для постов
 const String moroccoTitle =

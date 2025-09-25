@@ -33,8 +33,8 @@ class TypographyPage extends StatelessWidget {
                 children: [
                   Theme(
                     data: theme.copyWith(dividerColor: Colors.transparent),
-                    child: Column(
-                      children: const [
+                    child: const Column(
+                      children: [
                         ListTile(
                           leading:
                               Icon(Icons.check_circle, color: Colors.green),

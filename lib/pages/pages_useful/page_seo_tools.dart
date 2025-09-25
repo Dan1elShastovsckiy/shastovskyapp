@@ -1,6 +1,5 @@
 // lib/pages/pages_useful/page_seo_tools.dart
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/service_card.dart';
@@ -8,8 +7,6 @@ import 'dart:ui';
 import 'package:minimal/data/seo_tools_data.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
-import 'package:responsive_framework/responsive_framework.dart'
-    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minimal/pages/pages.dart';
 

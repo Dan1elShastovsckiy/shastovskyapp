@@ -6,8 +6,6 @@ import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 // <<< ИСПРАВЛЕНИЕ: Добавлен необходимый импорт для MaxWidthBox и toMaxWidthSliver >>>
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart'
-    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
 class PostSeoAiPage extends StatefulWidget {

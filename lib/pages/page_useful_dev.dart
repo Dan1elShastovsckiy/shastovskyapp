@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart'
-    hide MaxWidthBox;
 
 class UsefulDevPage extends StatefulWidget {
   static const String name = 'useful/dev';
@@ -17,6 +15,15 @@ class UsefulDevPage extends StatefulWidget {
 
 class _UsefulDevPageState extends State<UsefulDevPage> {
   final List<UsefulArticle> _allArticles = [
+    // <<< Новая страница про паттерны проектирования >>>
+    UsefulArticle(
+      title: "Паттерны проектирования: Интерактивная галерея",
+      description:
+          "Изучайте паттерны в игровом стиле. Тапните на Singleton, Factory или Observer, чтобы увидеть код и простое объяснение...",
+      imageUrl: "assets/images/dev_article_3.webp",
+      tags: ["Flutter", "Архитектура", "Паттерны"],
+      routeName: DesignPatternsPage.name,
+    ),
     UsefulArticle(
       title: "Flutter Web & SEO: Полное руководство по SSG",
       description:
@@ -41,7 +48,8 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
     "Все материалы",
     "Flutter",
     "Архитектура",
-    "SEO"
+    "SEO",
+    "Паттерны" // <-- новый тег паттернов
   ];
 
   @override

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:minimal/utils/max_width_extension.dart' hide MaxWidthBox;
 
 // Убедитесь, что у вас есть этот класс в проекте, например в utils/max_width_extension.dart
 // Если его нет, раскомментируйте или создайте файл.
