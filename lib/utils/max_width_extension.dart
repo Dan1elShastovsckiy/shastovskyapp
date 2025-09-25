@@ -1,7 +1,6 @@
 // lib/utils/max_width_extension.dart
 
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 // Мы создадим виджет MaxWidthBox отдельно, чтобы избежать дублирования
 class MaxWidthBox extends StatelessWidget {
