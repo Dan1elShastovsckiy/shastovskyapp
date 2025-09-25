@@ -1,31 +1,56 @@
+// lib/pages/page_contacts.dart
+
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:minimal/utils/max_width_extension.dart'; // Убедимся, что импорт есть
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 
 class ContactsPage extends StatelessWidget {
   static const String name = 'contacts';
 
   const ContactsPage({super.key});
 
-  Widget _buildSocialButton(String label, IconData icon, String url) {
+  // <<< ИСПРАВЛЕНИЕ: Превращаем хелпер в метод класса, чтобы получить доступ к context >>>
+  Widget _buildSocialButton({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required String url,
+    Widget? subtitle,
+  }) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: 300,
       height: 80,
       child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.black, size: 32),
-        label: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
+        icon: Icon(icon, color: theme.colorScheme.onSurface, size: 32),
+        label: Align(
+          alignment: Alignment.centerLeft,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                subtitle,
+              ]
+            ],
           ),
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          side: const BorderSide(color: Colors.black),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+        style: elevatedButtonStyle(context).copyWith(
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          alignment: Alignment.centerLeft,
         ),
         onPressed: () => launchUrl(Uri.parse(url)),
       ),
@@ -37,348 +62,261 @@ class ContactsPage extends StatelessWidget {
     final isMobile = MediaQuery.of(context).size.width < 800;
     final theme = Theme.of(context);
 
+    Widget subtitleForbidden = Text(
+      'Запрещенная в РФ организация',
+      style: TextStyle(fontSize: 10, color: theme.colorScheme.secondary),
+    );
+
     return Scaffold(
-      // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      //backgroundColor: const Color.fromARGB(255, 255, 255, 255),// Убираем, чтобы использовать тему
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(
-            isMobile ? 65 : 110), // Высота для десктопа исправлена
+        preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(
         slivers: [
-          SliverList(
-            delegate: SliverChildListDelegate([
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  margin: marginBottom12,
-                  child: Text(" ", style: headlineTextStyle(context)),
-                ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  margin: marginBottom40,
-                  child: Column(
-                    children: [
-                      Text("Мои контакты",
-                          style: headlineTextStyle(context).copyWith(fontSize: 36)),
-                      const SizedBox(height: 8),
-                      Text("Контакты для сотрудничества",
-                          style: subtitleTextStyle(context).copyWith(fontSize: 18)),
-                    ],
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 800),
-                  margin: marginBottom40,
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Text(
-                          "📱",
-                          style: TextStyle(fontSize: 32),
-                        ),
-                        title: Text(
-                          "+7 991 *** ** 92",
-                          style:
-                              headlineSecondaryTextStyle(context).copyWith(fontSize: 24),
-                        ),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor:
-                                  Colors.white, // Белый фон всего меню
-                              title: const Text("Телефон для связи"),
-                              content: SelectableText(
-                                "+7 991 681-84-92",
-                                style: headlineSecondaryTextStyle(context).copyWith(
-                                    fontSize: 24),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Закрыть"),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      launchUrl(Uri.parse('tel:+79916818492')),
-                                  child: const Text("Позвонить"),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      ListTile(
-                        leading: const Text(
-                          "💬",
-                          style: TextStyle(fontSize: 32),
-                        ),
-                        title: Text(
-                          "+7 991 *** ** 92",
-                          style:
-                              headlineSecondaryTextStyle(context).copyWith(fontSize: 24),
-                        ),
-                        subtitle: Text(
-                          "WhatsApp",
-                          style: subtitleTextStyle(context).copyWith(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: Colors.white,
-                              title: const Text("WhatsApp"),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SelectableText(
-                                    "+7 991 681-84-92",
-                                    style: headlineSecondaryTextStyle(context).copyWith(
-                                        fontSize: 24),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "Вы можете написать мне в WhatsApp по этому номеру",
-                                    style: bodyTextStyle(context),
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Закрыть"),
-                                ),
-                                TextButton(
-                                  onPressed: () => launchUrl(
-                                      Uri.parse('https://wa.me/79916818492')),
-                                  child: const Text("Открыть WhatsApp"),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      ListTile(
-                        leading: const Text(
-                          "📧",
-                          style: TextStyle(fontSize: 32),
-                        ),
-                        title: Text(
-                          "shastovsckiy@gmail.com",
-                          style:
-                              headlineSecondaryTextStyle(context).copyWith(fontSize: 24),
-                        ),
-                        onTap: () => launchUrl(
-                            Uri.parse('mailto:shastovsckiy@gmail.com')),
-                      ),
-                      const SizedBox(height: 20),
-                      ListTile(
-                        leading: const Text(
-                          "💬",
-                          style: TextStyle(fontSize: 32),
-                        ),
-                        title: Text(
-                          "@switchleveler",
-                          style: headlineSecondaryTextStyle(context).copyWith(
-                            fontSize: 24,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        onTap: () =>
-                            launchUrl(Uri.parse('https://t.me/switchleveler')),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              divider(context),
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 40),
-                  child: Text("Все остальные мои профили в сети:",
-                      style: headlineSecondaryTextStyle(context).copyWith(fontSize: 28)),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(bottom: 60),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
+          // <<< ИСПРАВЛЕНИЕ: Используем новую, правильную структуру с SliverPadding >>>
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveBreakpoints.of(context).isMobile ? 24 : 48,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: MaxWidthBox(
+                maxWidth: 1200,
+                child: Column(
                   children: [
-                    // --- Кнопки без подписи (остаются без изменений) ---
-                    _buildSocialButton(
-                      "Telegram личный",
-                      Icons.telegram,
-                      'https://t.me/switchleveler',
-                    ),
-                    _buildSocialButton(
-                      "Telegram канал",
-                      Icons.campaign,
-                      'https://t.me/shastovscky',
-                    ),
-
-                    // --- Кнопки с подписью (модифицируем напрямую) ---
-
-                    // Кнопка Instagram
-                    SizedBox(
-                      width: 300,
-                      height: 80,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.camera_alt,
-                            color: Colors.black, size: 32),
-                        label: Align(
-                          // Выравниваем Column по левому краю
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Instagram',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Запрещенная в РФ организация',
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
+                    const SizedBox(height: 40),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        margin: marginBottom40,
+                        child: Column(
+                          children: [
+                            Text("Мои контакты",
+                                style: headlineTextStyle(context)
+                                    .copyWith(fontSize: 36)),
+                            const SizedBox(height: 8),
+                            Text("Контакты для сотрудничества",
+                                style: subtitleTextStyle(context)
+                                    .copyWith(fontSize: 18)),
+                          ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          alignment: Alignment.centerLeft,
-                        ),
-                        onPressed: () => launchUrl(
-                            Uri.parse('https://instagram.com/yellolwapple')),
                       ),
                     ),
-
-                    // Кнопка YouTube
-                    SizedBox(
-                      width: 300,
-                      height: 80,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.smart_display_outlined,
-                            color: Colors.black, size: 32),
-                        label: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'YouTube',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Запрещенная в РФ организация',
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.grey.shade600),
-                              ),
-                            ],
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      margin: marginBottom40,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Text("📱",
+                                style: TextStyle(fontSize: 32)),
+                            title: Text(
+                              "+7 991 *** ** 92",
+                              style: headlineSecondaryTextStyle(context)
+                                  .copyWith(fontSize: 24),
+                            ),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (dialogContext) => AlertDialog(
+                                  // <<< ИСПРАВЛЕНИЕ: Цвета и стили из темы >>>
+                                  backgroundColor: theme.colorScheme.surface,
+                                  title: Text("Телефон для связи",
+                                      style: headlineSecondaryTextStyle(
+                                          dialogContext)),
+                                  content: SelectableText(
+                                    "+7 991 681-84-92",
+                                    style: headlineSecondaryTextStyle(
+                                            dialogContext)
+                                        .copyWith(fontSize: 24),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(dialogContext),
+                                      child: const Text("Закрыть"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => launchUrl(
+                                          Uri.parse('tel:+79916818492')),
+                                      child: const Text("Позвонить"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          alignment: Alignment.centerLeft,
-                        ),
-                        onPressed: () => launchUrl(
-                            Uri.parse('https://www.youtube.com/@itsmyadv')),
+                          const SizedBox(height: 20),
+                          ListTile(
+                            leading: const Text("💬",
+                                style: TextStyle(fontSize: 32)),
+                            title: Text(
+                              "+7 991 *** ** 92",
+                              style: headlineSecondaryTextStyle(context)
+                                  .copyWith(fontSize: 24),
+                            ),
+                            subtitle: Text(
+                              "WhatsApp",
+                              style: subtitleTextStyle(context).copyWith(
+                                color: Colors.green,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (dialogContext) => AlertDialog(
+                                  backgroundColor: theme.colorScheme.surface,
+                                  title: Text("WhatsApp",
+                                      style: headlineSecondaryTextStyle(
+                                          dialogContext)),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SelectableText(
+                                        "+7 991 681-84-92",
+                                        style: headlineSecondaryTextStyle(
+                                                dialogContext)
+                                            .copyWith(fontSize: 24),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Вы можете написать мне в WhatsApp по этому номеру",
+                                        style: bodyTextStyle(dialogContext),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(dialogContext),
+                                      child: const Text("Закрыть"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => launchUrl(Uri.parse(
+                                          'https://wa.me/79916818492')),
+                                      child: const Text("Открыть WhatsApp"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          ListTile(
+                            leading: const Text("📧",
+                                style: TextStyle(fontSize: 32)),
+                            title: Text(
+                              "shastovsckiy@gmail.com",
+                              style: headlineSecondaryTextStyle(context)
+                                  .copyWith(fontSize: 24),
+                            ),
+                            onTap: () => launchUrl(
+                                Uri.parse('mailto:shastovsckiy@gmail.com')),
+                          ),
+                          const SizedBox(height: 20),
+                          ListTile(
+                            leading: const Text("💬",
+                                style: TextStyle(fontSize: 32)),
+                            title: Text(
+                              "@switchleveler",
+                              style:
+                                  headlineSecondaryTextStyle(context).copyWith(
+                                fontSize: 24,
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                            onTap: () => launchUrl(
+                                Uri.parse('https://t.me/switchleveler')),
+                          ),
+                        ],
                       ),
                     ),
-
-                    // Кнопка VC.RU (без подписи)
-                    _buildSocialButton(
-                      "VC.RU",
-                      Icons.article_outlined,
-                      'https://vc.ru/id1145025',
+                    divider(context),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 40),
+                        child: Text("Все остальные мои профили в сети:",
+                            style: headlineSecondaryTextStyle(context)
+                                .copyWith(fontSize: 28)),
+                      ),
                     ),
-
-                    // Кнопка LinkedIn
-                    SizedBox(
-                      width: 300,
-                      height: 80,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.work,
-                            color: Colors.black, size: 32),
-                        label: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'LinkedIn',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Запрещенная в РФ организация',
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.grey.shade600),
-                              ),
-                            ],
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 60),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Wrap(
+                        spacing: 20,
+                        runSpacing: 20,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _buildSocialButton(
+                            context: context,
+                            label: "Telegram личный",
+                            icon: Icons.telegram,
+                            url: 'https://t.me/switchleveler',
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.black),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          alignment: Alignment.centerLeft,
-                        ),
-                        onPressed: () => launchUrl(Uri.parse(
-                            'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
+                          _buildSocialButton(
+                            context: context,
+                            label: "Telegram канал",
+                            icon: Icons.campaign,
+                            url: 'https://t.me/shastovscky',
+                          ),
+                          _buildSocialButton(
+                            context: context,
+                            label: 'Instagram',
+                            icon: Icons.camera_alt,
+                            url: 'https://instagram.com/yellolwapple',
+                            subtitle: subtitleForbidden,
+                          ),
+                          _buildSocialButton(
+                            context: context,
+                            label: 'YouTube',
+                            icon: Icons.smart_display_outlined,
+                            url: 'https://www.youtube.com/@itsmyadv',
+                            subtitle: subtitleForbidden,
+                          ),
+                          _buildSocialButton(
+                            context: context,
+                            label: "VC.RU",
+                            icon: Icons.article_outlined,
+                            url: 'https://vc.ru/id1145025',
+                          ),
+                          _buildSocialButton(
+                            context: context,
+                            label: 'LinkedIn',
+                            icon: Icons.work,
+                            url:
+                                'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571',
+                            subtitle: subtitleForbidden,
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ]),
+            ),
           ),
-          const SliverFillRemaining(
+          SliverFillRemaining(
             hasScrollBody: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Footer(),
-              ],
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              child: MaxWidthBox(
+                maxWidth: 1200,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    divider(context),
+                    const Footer(),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
