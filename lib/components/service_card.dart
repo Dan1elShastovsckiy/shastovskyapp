@@ -1,6 +1,5 @@
 // lib/components/service_card.dart
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:minimal/models/service_model.dart';
 import 'package:url_launcher/url_launcher.dart';

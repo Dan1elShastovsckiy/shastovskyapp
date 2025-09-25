@@ -13,12 +13,9 @@ class AppTheme {
       primary: AppColors.light.primary,
       secondary: AppColors.light.secondary,
       surface: AppColors.light.surface,
-      background: AppColors.light.background,
       onPrimary: AppColors.light.onPrimary,
       onSecondary: AppColors.light.onSecondary,
       onSurface: AppColors.light.onSurface,
-      // У onBackground теперь тот же цвет, что и у onSurface
-      onBackground: AppColors.light.onSurface,
     ),
     textTheme: TextTheme(
       // Главный заголовок использует основной цвет текста
@@ -41,11 +38,9 @@ class AppTheme {
       primary: AppColors.dark.primary,
       secondary: AppColors.dark.secondary,
       surface: AppColors.dark.surface,
-      background: AppColors.dark.background,
       onPrimary: AppColors.dark.onPrimary,
       onSecondary: AppColors.dark.onSecondary,
       onSurface: AppColors.dark.onSurface,
-      onBackground: AppColors.dark.onSurface,
     ),
     textTheme: TextTheme(
       displayLarge: GoogleFonts.montserrat(color: AppColors.dark.onSurface, fontSize: 26, letterSpacing: 1.5, fontWeight: FontWeight.w300),
