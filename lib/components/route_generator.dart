@@ -22,6 +22,7 @@ class RouteGenerator {
             '/${UsefulPage.name}' => const UsefulPage(),
             '/${UsefulDevPage.name}' => const UsefulDevPage(),
             '/${UsefulSeoPage.name}' => const UsefulSeoPage(),
+            '/${SeoToolsPage.name}' => const SeoToolsPage(), // Новый маршрут для страницы SEO инструментов
             '/${PostFlutterSeoPage.name}' => const PostFlutterSeoPage(),
             '/${PostStateManagementPage.name}' =>
               const PostStateManagementPage(),
