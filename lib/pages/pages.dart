@@ -18,3 +18,5 @@ export 'pages_useful/page_linkbuilding_post.dart';
 export 'pages_useful/page_technical_audit_post.dart';
 export 'pages_useful/page_flutter_seo_post.dart';
 export 'pages_useful/page_state_management_post.dart';
+export 'pages_useful/page_seo_tools.dart';
+export '/models/service_model.dart';
