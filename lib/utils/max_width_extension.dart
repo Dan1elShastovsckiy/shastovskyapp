@@ -1,26 +1,23 @@
 // lib/utils/max_width_extension.dart
 
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
-// Мы создадим виджет MaxWidthBox отдельно, чтобы избежать дублирования
 class MaxWidthBox extends StatelessWidget {
   final double maxWidth;
   final Widget child;
-  final EdgeInsets padding;
-  // Убираем backgroundColor, он больше не нужен
-  
+  // Убираем padding и backgroundColor отсюда, они будут в расширении
+
   const MaxWidthBox({
-    super.key, 
-    required this.maxWidth, 
-    required this.child, 
-    this.padding = const EdgeInsets.symmetric(horizontal: 32)
+    super.key,
+    required this.maxWidth,
+    required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        padding: padding,
+      child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: child,
       ),
@@ -28,32 +25,37 @@ class MaxWidthBox extends StatelessWidget {
   }
 }
 
-
 extension MaxWidthExtension on List<Widget> {
   List<Widget> toMaxWidth() {
-    return [
-      MaxWidthBox(
+    return map(
+      (item) => MaxWidthBox(
         maxWidth: 1200,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: this,
-        ),
+        child: item,
       ),
-    ];
+    ).toList();
   }
 
   List<Widget> toMaxWidthSliver() {
     return [
       SliverToBoxAdapter(
-        child: MaxWidthBox(
-          maxWidth: 1200,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: this,
-          ),
-        ),
+        // <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Оборачиваем MaxWidthBox в Padding >>>
+        // Теперь отступы будут применяться ко всему блоку, а не к каждому элементу
+        child: Builder(builder: (context) {
+          // Делаем отступы адаптивными
+          final horizontalPadding =
+              ResponsiveBreakpoints.of(context).isMobile ? 24.0 : 48.0;
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: MaxWidthBox(
+              maxWidth: 1200,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: this,
+              ),
+            ),
+          );
+        }),
       ),
     ];
   }
