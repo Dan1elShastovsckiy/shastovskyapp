@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/theme_provider.dart';
 import 'package:provider/provider.dart';
 // <<< ШАГ 5.2: Больше не используем старые константы цветов напрямую >>>
-// import 'package:minimal/components/color.dart'; 
+// import 'package:minimal/components/color.dart';
 import 'package:minimal/components/spacing.dart';
 import 'package:minimal/components/text.dart';
 import 'package:minimal/components/typography.dart';
@@ -80,8 +80,7 @@ class Tag extends StatelessWidget {
       child: Text(
         tag,
         style: GoogleFonts.openSans(
-          color: Theme.of(context).colorScheme.surface, 
-          fontSize: 14),
+            color: Theme.of(context).colorScheme.surface, fontSize: 14),
       ),
     );
   }
@@ -123,24 +122,25 @@ class ReadMoreButton extends StatelessWidget {
 }
 
 // <<< ШАГ 5.6: Адаптируем цвета разделителей >>>
-Widget divider(BuildContext context) => Divider(color: Theme.of(context).dividerColor, thickness: 1);
+Widget divider(BuildContext context) =>
+    Divider(color: Theme.of(context).dividerColor, thickness: 1);
 Widget dividerSmall(BuildContext context) => Container(
       width: 40,
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1)),
+        border: Border(
+            bottom: BorderSide(
+                color: Theme.of(context).colorScheme.secondary, width: 1)),
       ),
     );
-
 
 List<Widget> authorSection(
     {required BuildContext context,
     String? imageUrl,
     String? name,
     String? bio}) {
-      
   // <<< ИСПРАВЛЕНИЕ: Переменная переписана в локальную функцию >>>
   void navigateToAbout() {
-      Navigator.pushNamed(context, '/${AboutPage.name}');
+    Navigator.pushNamed(context, '/${AboutPage.name}');
   }
 
   return [
@@ -177,7 +177,8 @@ List<Widget> authorSection(
                   InkWell(
                     onTap: navigateToAbout,
                     // <<< ШАГ 5.8: Заменяем жестко заданные стили на стили из темы >>>
-                    child: Text(name, style: headlineSecondaryTextStyle(context)),
+                    child:
+                        Text(name, style: headlineSecondaryTextStyle(context)),
                   ),
                 if (bio != null)
                   Padding(
@@ -271,7 +272,8 @@ class MinimalMenuBar extends StatelessWidget {
         padding: EdgeInsets.symmetric(
             vertical: isMobile ? 0 : 10, horizontal: isMobile ? 12 : 16),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
+          border:
+              Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -302,9 +304,11 @@ class MinimalMenuBar extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                   IconButton(
+                  IconButton(
                     icon: Icon(
-                      themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+                      themeProvider.isDarkMode
+                          ? Icons.wb_sunny_outlined
+                          : Icons.nightlight_round,
                       size: 24,
                       color: theme.colorScheme.onSurface,
                     ),
@@ -313,7 +317,8 @@ class MinimalMenuBar extends StatelessWidget {
                     },
                   ),
                   IconButton(
-                    icon: Icon(Icons.menu, size: 28, color: theme.colorScheme.onSurface),
+                    icon: Icon(Icons.menu,
+                        size: 28, color: theme.colorScheme.onSurface),
                     onPressed: () => Scaffold.of(context).openDrawer(),
                   ),
                 ],
@@ -329,8 +334,10 @@ class MinimalMenuBar extends StatelessWidget {
                       ..._buildMenuItems(context),
                       IconButton(
                         icon: Icon(
-                         themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-                         color: theme.colorScheme.onSurface,
+                          themeProvider.isDarkMode
+                              ? Icons.wb_sunny_outlined
+                              : Icons.nightlight_round,
+                          color: theme.colorScheme.onSurface,
                         ),
                         onPressed: () {
                           themeProvider.toggleTheme(!themeProvider.isDarkMode);
@@ -355,6 +362,7 @@ class MinimalMenuBar extends StatelessWidget {
         items: {
           "Разработка": '/${UsefulDevPage.name}',
           "SEO": '/${UsefulSeoPage.name}',
+          "Попробуй кодить": '/${TryCodingPage.name}', // <-- ДОБАВИТЬ
         },
       ),
       _buildMenuItem(context, "ОБО МНЕ",
@@ -478,7 +486,8 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
                 Text(widget.title, style: menuStyle),
                 const SizedBox(width: 4),
                 Icon(Icons.arrow_drop_down,
-                    size: 20, color: theme.colorScheme.onSurface.withAlpha(178)),
+                    size: 20,
+                    color: theme.colorScheme.onSurface.withAlpha(178)),
               ],
             ),
           ),
@@ -542,6 +551,13 @@ Drawer buildAppDrawer(BuildContext context) {
                 Navigator.pushNamed(context, '/${UsefulSeoPage.name}');
               },
             ),
+            ListTile(
+              title: const Text('Попробуй кодить'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/${TryCodingPage.name}');
+              },
+            ),
           ],
         ),
         // ... (остальные ListTile навигации)
@@ -577,13 +593,16 @@ Drawer buildAppDrawer(BuildContext context) {
         const Divider(),
         ListTile(
           leading: Icon(
-             themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-             color: theme.colorScheme.onSurface,
+            themeProvider.isDarkMode
+                ? Icons.wb_sunny_outlined
+                : Icons.nightlight_round,
+            color: theme.colorScheme.onSurface,
           ),
-          title: Text(themeProvider.isDarkMode ? 'Светлая тема' : 'Темная тема'),
+          title:
+              Text(themeProvider.isDarkMode ? 'Светлая тема' : 'Темная тема'),
           onTap: () {
-             themeProvider.toggleTheme(!themeProvider.isDarkMode);
-             Navigator.pop(context);
+            themeProvider.toggleTheme(!themeProvider.isDarkMode);
+            Navigator.pop(context);
           },
         ),
       ],
@@ -608,8 +627,9 @@ class Breadcrumbs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final breadcrumbStyle = bodyTextStyle(context).copyWith(color: Theme.of(context).colorScheme.secondary);
-    
+    final breadcrumbStyle = bodyTextStyle(context)
+        .copyWith(color: Theme.of(context).colorScheme.secondary);
+
     final List<InlineSpan> spans = [];
     for (int i = 0; i < items.length; i++) {
       final item = items[i];

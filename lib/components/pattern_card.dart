@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
-import 'package:highlight/languages/dart.dart';
 import 'package:minimal/models/design_pattern_model.dart';
 import 'package:minimal/components/typography.dart';
 import 'dart:ui';

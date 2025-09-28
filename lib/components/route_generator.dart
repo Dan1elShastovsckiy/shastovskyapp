@@ -22,6 +22,9 @@ class RouteGenerator {
             '/${UsefulPage.name}' => const UsefulPage(),
             '/${UsefulDevPage.name}' => const UsefulDevPage(),
             '/${UsefulSeoPage.name}' => const UsefulSeoPage(),
+            '/${TryCodingPage.name}' => const TryCodingPage(), // <-- ДОБАВИТЬ
+            '/${HtmlSandboxPage.name}' => const HtmlSandboxPage(), // Новый маршрут для HTML & CSS песочницы
+            //'/${JsSandboxPage.name}' => const JsSandboxPage(), // будущий маршрут для JS
             '/${SeoToolsPage.name}' =>
               const SeoToolsPage(), // Новый маршрут для страницы SEO инструментов
             '/${PostFlutterSeoPage.name}' => const PostFlutterSeoPage(),
