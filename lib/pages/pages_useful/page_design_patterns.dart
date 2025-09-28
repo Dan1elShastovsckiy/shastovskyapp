@@ -1,5 +1,4 @@
-// lib/pages/pages_useful/page_design_patterns.dart
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/pattern_card.dart';
@@ -45,228 +44,240 @@ class _DesignPatternsPageState extends State<DesignPatternsPage> {
       drawer: isMobile ? buildAppDrawer(context) : null,
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: MaxWidthBox(
-                maxWidth: 1200,
-                child: Column(
-                  children: [
-                    const Breadcrumbs(items: [
-                      BreadcrumbItem(text: "Главная", routeName: '/'),
-                      BreadcrumbItem(text: "Полезное", routeName: '/useful'),
-                      BreadcrumbItem(
-                          text: "Разработка", routeName: '/useful/dev'),
-                      BreadcrumbItem(text: "Паттерны"),
-                    ]),
-                    const SizedBox(height: 24),
-                    Text("Интерактивные паттерны проектирования",
-                        style: headlineTextStyle(context),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Паттерны — это не готовые классы или библиотеки, а проверенные временем решения типичных проблем в проектировании программ. Это как рецепты для кода. Нажмите на любой паттерн, чтобы увидеть его 'рецепт' и объяснение.",
-                      style: subtitleTextStyle(context),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+          // <<< ИСПОЛЬЗУЕМ ИСПРАВЛЕННОЕ РАСШИРЕНИЕ ДЛЯ ВЕРХНЕЙ ЧАСТИ >>>
+          ...[
+            const SizedBox(height: 24),
+            const Breadcrumbs(items: [
+              BreadcrumbItem(text: "Главная", routeName: '/'),
+              BreadcrumbItem(text: "Полезное", routeName: '/useful'),
+              BreadcrumbItem(text: "Разработка", routeName: '/useful/dev'),
+              BreadcrumbItem(text: "Паттерны"),
+            ]),
+            const SizedBox(height: 24),
+            Text("Интерактивные паттерны проектирования",
+                style: headlineTextStyle(context), textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            Text(
+              "Паттерны — это не готовые классы или библиотеки, а проверенные временем решения типичных проблем в проектировании программ. Это как рецепты для кода. Нажмите на любой паттерн (В любом месте прям можно:) ), чтобы увидеть его 'рецепт' и объяснение.",
+              style: subtitleTextStyle(context),
+              textAlign: TextAlign.center,
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(24.0),
-            sliver: SliverGrid.builder(
-              // <<< ИСПРАВЛЕНИЕ: Используем более гибкий делегат >>>
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 600, // Каждая карточка будет не шире 600px
-                mainAxisExtent:
-                    120, // <<< Задаем фиксированную высоту для карточек
-                crossAxisSpacing: 24,
-                mainAxisSpacing: 24,
-              ),
-              itemCount: designPatterns.length,
-              itemBuilder: (context, index) {
-                return PatternCard(pattern: designPatterns[index]);
-              },
-            ),
-          ),
+          ].toMaxWidthSliver(),
+
+          // <<< СЕТКА С КАРТОЧКАМИ ТЕПЕРЬ ТОЖЕ ВНУТРИ РАСШИРЕНИЯ >>>
           SliverToBoxAdapter(
             child: MaxWidthBox(
               maxWidth: 1200,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    Text("Особенности ООП в Dart",
-                        style: headlineTextStyle(context)),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Хотя Dart является классическим ООП-языком, похожим на C#, Java или Kotlin, он обладает рядом уникальных особенностей, которые влияют на реализацию паттернов. Понимание этих нюансов — ключ к написанию эффективного и идиоматичного кода.",
-                      style: bodyTextStyle(context),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildFeatureTile(
-                      context,
-                      icon: Icons.layers_clear,
-                      title: "Нет интерфейсов, но есть `implements`",
-                      content:
-                          "В Dart нет ключевого слова `interface`. Вместо этого любой класс (абстрактный или нет) может выступать в роли интерфейса. Когда класс `implements` другой класс, он обязан реализовать все его методы, но не наследует их код. Это мощный способ задать 'контракт', не навязывая конкретную реализацию.",
-                    ),
-                    _buildFeatureTile(
-                      context,
-                      icon: Icons.factory,
-                      title: "Factory-конструкторы",
-                      content:
-                          "В отличие от обычных конструкторов, `factory` не всегда создает новый экземпляр класса. Это позволяет реализовывать сложные сценарии, такие как возврат объекта из кэша (паттерн Singleton) или создание экземпляра подкласса в зависимости от входных данных (паттерн Abstract Factory).",
-                    ),
-                    _buildFeatureTile(
-                      context,
-                      icon: Icons.extension,
-                      title: "Миксины (Mixins) и Расширения (Extensions)",
-                      content:
-                          "Миксины позволяют 'подмешивать' функциональность в класс без наследования, решая проблему множественного наследования. Это идеально для добавления сквозных функций, например, логирования. Расширения, в свою очередь, дают возможность добавлять новые методы к уже существующим классам, даже из стандартной библиотеки, делая код более читаемым и выразительным.",
-                    ),
-                    _buildFeatureTile(
-                      context,
-                      icon: Icons.lock_outline,
-                      title: "Приватность и `const` конструкторы",
-                      content:
-                          "Приватность в Dart определяется просто: если имя поля или метода начинается с подчеркивания (`_`), оно приватно для своей библиотеки. Для создания неизменяемых объектов (immutability) используются `final` поля и `const` конструкторы, которые создают канонические, компилируемые на этапе сборки экземпляры, что повышает производительность.",
-                    ),
-                    const SizedBox(height: 40),
-                    const TagWrapper(tags: [
-                      Tag(tag: "Dart"),
-                      Tag(tag: "Паттерны"),
-                      Tag(tag: "Архитектура")
-                    ]),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 40),
-                      width: double.infinity,
-                      child: Center(
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 800),
-                          child: Wrap(
-                            spacing: 16,
-                            runSpacing: 16,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.telegram,
-                                    color: theme.colorScheme.onSurface),
-                                label: const Text('Telegram личный'),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(
-                                    Uri.parse('https://t.me/switchleveler')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.campaign,
-                                    color: theme.colorScheme.onSurface),
-                                label: const Text('Telegram канал'),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(
-                                    Uri.parse('https://t.me/shastovscky')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.camera_alt,
-                                    color: theme.colorScheme.onSurface),
-                                label: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Instagram'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Запрещенная в РФ организация',
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          color: theme.colorScheme.secondary),
-                                    ),
-                                  ],
-                                ),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(Uri.parse(
-                                    'https://instagram.com/yellolwapple')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.work,
-                                    color: theme.colorScheme.onSurface),
-                                label: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('LinkedIn'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Запрещенная в РФ организация',
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          color: theme.colorScheme.secondary),
-                                    ),
-                                  ],
-                                ),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(Uri.parse(
-                                    'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.smart_display_outlined,
-                                    color: theme.colorScheme.onSurface),
-                                label: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('YouTube'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Запрещенная в РФ организация',
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          color: theme.colorScheme.secondary),
-                                    ),
-                                  ],
-                                ),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(Uri.parse(
-                                    'https://www.youtube.com/@itsmyadv')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.article_outlined,
-                                    color: theme.colorScheme.onSurface),
-                                label: const Text('VC.RU'),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(
-                                    Uri.parse('https://vc.ru/id1145025')),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Breadcrumbs(items: [
-                      BreadcrumbItem(text: "Главная", routeName: '/'),
-                      BreadcrumbItem(text: "Полезное", routeName: '/useful'),
-                      BreadcrumbItem(
-                          text: "Разработка", routeName: '/useful/dev'),
-                      BreadcrumbItem(text: "Паттерны"),
-                    ]),
-                    ...authorSection(
-                      context: context,
-                      imageUrl: "assets/images/avatar_default.png",
-                      name: "Автор: Шастовский Даниил",
-                      bio:
-                          "SEO-специалист и Flutter-разработчик. Люблю находить элегантные решения для сложных задач, как в коде, так и в поисковой оптимизации.",
-                    ),
-                    divider(context),
-                    const Footer(),
-                  ],
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 24.0),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 600,
+                    mainAxisExtent: 120,
+                    crossAxisSpacing: 24,
+                    mainAxisSpacing: 24,
+                  ),
+                  itemCount: designPatterns.length,
+                  itemBuilder: (context, index) {
+                    return PatternCard(pattern: designPatterns[index]);
+                  },
                 ),
               ),
             ),
           ),
+
+          // <<< ИСПОЛЬЗУЕМ ИСПРАВЛЕННОЕ РАСШИРЕНИЕ ДЛЯ НИЖНЕЙ ЧАСТИ >>>
+          ...[
+            const SizedBox(height: 24),
+            Text("Особенности ООП в Dart", style: headlineTextStyle(context)),
+            const SizedBox(height: 16),
+            Text(
+              "Хотя Dart является классическим ООП-языком, похожим на C#, Java или Kotlin, он обладает рядом уникальных особенностей, которые влияют на реализацию паттернов. Понимание этих нюансов — ключ к написанию эффективного и идиоматичного кода.",
+              style: bodyTextStyle(context),
+            ),
+            const SizedBox(height: 24),
+            _buildFeatureTile(
+              context,
+              icon: Icons.layers_clear,
+              title: "Нет интерфейсов, но есть `implements`",
+              content:
+                  "В Dart нет ключевого слова `interface`. Вместо этого любой класс (абстрактный или нет) может выступать в роли интерфейса. Когда класс `implements` другой класс, он обязан реализовать все его методы, но не наследует их код. Это мощный способ задать 'контракт', не навязывая конкретную реализацию.",
+            ),
+            _buildFeatureTile(
+              context,
+              icon: Icons.factory,
+              title: "Factory-конструкторы",
+              content:
+                  "В отличие от обычных конструкторов, `factory` не всегда создает новый экземпляр класса. Это позволяет реализовывать сложные сценарии, такие как возврат объекта из кэша (паттерн Singleton) или создание экземпляра подкласса в зависимости от входных данных (паттерн Abstract Factory).",
+            ),
+            _buildFeatureTile(
+              context,
+              icon: Icons.extension,
+              title: "Миксины (Mixins) и Расширения (Extensions)",
+              content:
+                  "Миксины позволяют 'подмешивать' функциональность в класс без наследования, решая проблему множественного наследования. Это идеально для добавления сквозных функций, например, логирования. Расширения, в свою очередь, дают возможность добавлять новые методы к уже существующим классам, даже из стандартной библиотеки, делая код более читаемым и выразительным.",
+            ),
+            _buildFeatureTile(
+              context,
+              icon: Icons.lock_outline,
+              title: "Приватность и `const` конструкторы",
+              content:
+                  "Приватность в Dart определяется просто: если имя поля или метода начинается с подчеркивания (`_`), оно приватно для своей библиотеки. Для создания неизменяемых объектов (immutability) используются `final` поля и `const` конструкторы, которые создают канонические, компилируемые на этапе сборки экземпляры, что повышает производительность.",
+            ),
+            const SizedBox(height: 24),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: subtitleTextStyle(context),
+                children: [
+                  const TextSpan(
+                    text:
+                        "Эти особенности делают Dart гибким и мощным инструментом. Понимание их поможет вам писать чистый и эффективный код. Подробнее о паттернах можно узнать из ",
+                  ),
+                  TextSpan(
+                    text: "статьи на Хабре.",
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchUrl(Uri.parse(
+                            'https://habr.com/ru/companies/otus/articles/678714/'));
+                      },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+            const TagWrapper(tags: [
+              Tag(tag: "Dart"),
+              Tag(tag: "Паттерны"),
+              Tag(tag: "Архитектура")
+            ]),
+            Container(
+              margin: const EdgeInsets.only(bottom: 40),
+              width: double.infinity,
+              child: Center(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.telegram,
+                            color: theme.colorScheme.onSurface),
+                        label: const Text('Telegram личный'),
+                        style: elevatedButtonStyle(context),
+                        onPressed: () =>
+                            launchUrl(Uri.parse('https://t.me/switchleveler')),
+                      ),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.campaign,
+                            color: theme.colorScheme.onSurface),
+                        label: const Text('Telegram канал'),
+                        style: elevatedButtonStyle(context),
+                        onPressed: () =>
+                            launchUrl(Uri.parse('https://t.me/shastovscky')),
+                      ),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.camera_alt,
+                            color: theme.colorScheme.onSurface),
+                        label: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Instagram'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
+                            ),
+                          ],
+                        ),
+                        style: elevatedButtonStyle(context),
+                        onPressed: () => launchUrl(
+                            Uri.parse('https://instagram.com/yellolwapple')),
+                      ),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.work,
+                            color: theme.colorScheme.onSurface),
+                        label: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('LinkedIn'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
+                            ),
+                          ],
+                        ),
+                        style: elevatedButtonStyle(context),
+                        onPressed: () => launchUrl(Uri.parse(
+                            'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
+                      ),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.smart_display_outlined,
+                            color: theme.colorScheme.onSurface),
+                        label: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('YouTube'),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Запрещенная в РФ организация',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.secondary),
+                            ),
+                          ],
+                        ),
+                        style: elevatedButtonStyle(context),
+                        onPressed: () => launchUrl(
+                            Uri.parse('https://www.youtube.com/@itsmyadv')),
+                      ),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.article_outlined,
+                            color: theme.colorScheme.onSurface),
+                        label: const Text('VC.RU'),
+                        style: elevatedButtonStyle(context),
+                        onPressed: () =>
+                            launchUrl(Uri.parse('https://vc.ru/id1145025')),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Breadcrumbs(items: [
+              BreadcrumbItem(text: "Главная", routeName: '/'),
+              BreadcrumbItem(text: "Полезное", routeName: '/useful'),
+              BreadcrumbItem(text: "Разработка", routeName: '/useful/dev'),
+              BreadcrumbItem(text: "Паттерны"),
+            ]),
+            ...authorSection(
+              context: context,
+              imageUrl: "assets/images/avatar_default.png",
+              name: "Автор: Шастовский Даниил",
+              bio:
+                  "SEO-специалист и разработчик этого приложения. Люблю находить элегантные решения для сложных задач, как в коде, так и в поисковой оптимизации.",
+            ),
+            divider(context),
+            const Footer(),
+          ].toMaxWidthSliver(),
         ],
       ),
     );

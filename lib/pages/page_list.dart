@@ -159,8 +159,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/georgia_mountains.webp",
                   title: georgiaMountains1Title,
-                  description:
-                      Text(georgiaMountains1Description, style: bodyTextStyle(context)),
+                  description: Text(georgiaMountains1Description,
+                      style: bodyTextStyle(context)),
                   // <<< 3. ССЫЛКА ВЕДЕТ НА НОВУЮ СТРАНИЦУ >>>
                   onReadMore: () => Navigator.pushNamed(
                     context,
@@ -173,7 +173,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/kuala_lumpur.webp",
                   title: malaysiaTitle,
-                  description: Text(malaysiaDescription, style: bodyTextStyle(context)),
+                  description:
+                      Text(malaysiaDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
@@ -186,7 +187,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/abu_dhabi.webp",
                   title: dubaiTitle,
-                  description: Text(dubaiDescription, style: bodyTextStyle(context)),
+                  description:
+                      Text(dubaiDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
@@ -199,7 +201,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/me_istambul.webp",
                   title: turkeyTitle,
-                  description: Text(turkeyDescription, style: bodyTextStyle(context)),
+                  description:
+                      Text(turkeyDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
@@ -212,7 +215,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/vietnam_beach.webp",
                   title: vietnamTitle,
-                  description: Text(vietnamDescription, style: bodyTextStyle(context)),
+                  description:
+                      Text(vietnamDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
@@ -225,7 +229,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/me_similan_island_colored.webp",
                   title: phuketTitle,
-                  description: Text(phuketDescription, style: bodyTextStyle(context)),
+                  description:
+                      Text(phuketDescription, style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
@@ -238,8 +243,8 @@ class _ListPageState extends State<ListPage> {
                 ListItem(
                   imageUrl: "assets/images/me_georgia_mountains 2.webp",
                   title: georgiaMountains2Title,
-                  description:
-                      Text(georgiaMountains2Description, style: bodyTextStyle(context)),
+                  description: Text(georgiaMountains2Description,
+                      style: bodyTextStyle(context)),
                   onReadMore: () => Navigator.pushNamed(
                     context,
                     '/${PageUnderConstruction.name}',
@@ -253,9 +258,7 @@ class _ListPageState extends State<ListPage> {
             ),
             SliverFillRemaining(
               hasScrollBody: false,
-              child: MaxWidthBox(
-                  maxWidth: 1200,
-                  child: Container()),
+              child: MaxWidthBox(maxWidth: 1200, child: Container()),
             ),
             ...[
               divider(context),

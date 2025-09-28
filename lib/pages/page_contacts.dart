@@ -3,16 +3,31 @@
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:minimal/utils/max_width_extension.dart'; // Убедимся, что импорт есть
+import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
+import 'package:minimal/utils/meta_tag_service.dart';
 
-class ContactsPage extends StatelessWidget {
+class ContactsPage extends StatefulWidget {
   static const String name = 'contacts';
-
   const ContactsPage({super.key});
 
-  // <<< ИСПРАВЛЕНИЕ: Превращаем хелпер в метод класса, чтобы получить доступ к context >>>
+  @override
+  State<ContactsPage> createState() => _ContactsPageState();
+}
+
+class _ContactsPageState extends State<ContactsPage> {
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+        title: "Контакты | Даниил Шастовский",
+        description:
+            "Контакты для сотрудничества. Email, Telegram, WhatsApp и ссылки на все мои профили в социальных сетях.",
+        imageUrl:
+            "https://shastovsky.ru/assets/assets/images/avatar_default.png");
+  }
+
   Widget _buildSocialButton({
     required BuildContext context,
     required String label,
@@ -61,6 +76,10 @@ class ContactsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
     final theme = Theme.of(context);
+    final horizontalPadding =
+        ResponsiveValue(context, defaultValue: 24.0, conditionalValues: [
+      const Condition.largerThan(name: TABLET, value: 48.0),
+    ]).value;
 
     Widget subtitleForbidden = Text(
       'Запрещенная в РФ организация',
@@ -76,37 +95,29 @@ class ContactsPage extends StatelessWidget {
       ),
       body: CustomScrollView(
         slivers: [
-          // <<< ИСПРАВЛЕНИЕ: Используем новую, правильную структуру с SliverPadding >>>
           SliverPadding(
             padding: EdgeInsets.symmetric(
-              horizontal: ResponsiveBreakpoints.of(context).isMobile ? 24 : 48,
-            ),
+                horizontal: horizontalPadding, vertical: 24),
             sliver: SliverToBoxAdapter(
               child: MaxWidthBox(
                 maxWidth: 1200,
                 child: Column(
                   children: [
+                    const SizedBox(height: 16),
+                    Text("Мои контакты",
+                        style: headlineTextStyle(context).copyWith(
+                            fontSize: ResponsiveValue(context,
+                                defaultValue: 30.0,
+                                conditionalValues: [
+                              const Condition.largerThan(name: TABLET, value: 36.0)
+                            ]).value)),
+                    const SizedBox(height: 8),
+                    Text("Контакты для сотрудничества",
+                        style:
+                            subtitleTextStyle(context).copyWith(fontSize: 18)),
                     const SizedBox(height: 40),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        margin: marginBottom40,
-                        child: Column(
-                          children: [
-                            Text("Мои контакты",
-                                style: headlineTextStyle(context)
-                                    .copyWith(fontSize: 36)),
-                            const SizedBox(height: 8),
-                            Text("Контакты для сотрудничества",
-                                style: subtitleTextStyle(context)
-                                    .copyWith(fontSize: 18)),
-                          ],
-                        ),
-                      ),
-                    ),
                     Container(
                       constraints: const BoxConstraints(maxWidth: 800),
-                      margin: marginBottom40,
                       child: Column(
                         children: [
                           ListTile(
@@ -121,7 +132,6 @@ class ContactsPage extends StatelessWidget {
                               showDialog(
                                 context: context,
                                 builder: (dialogContext) => AlertDialog(
-                                  // <<< ИСПРАВЛЕНИЕ: Цвета и стили из темы >>>
                                   backgroundColor: theme.colorScheme.surface,
                                   title: Text("Телефон для связи",
                                       style: headlineSecondaryTextStyle(
@@ -237,19 +247,17 @@ class ContactsPage extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 40),
                     divider(context),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 40),
-                        child: Text("Все остальные мои профили в сети:",
-                            style: headlineSecondaryTextStyle(context)
-                                .copyWith(fontSize: 28)),
-                      ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 40),
+                      child: Text("Все остальные мои профили в сети:",
+                          textAlign: TextAlign.center,
+                          style: headlineSecondaryTextStyle(context)
+                              .copyWith(fontSize: 28)),
                     ),
                     Container(
                       margin: const EdgeInsets.only(bottom: 60),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Wrap(
                         spacing: 20,
                         runSpacing: 20,
@@ -305,17 +313,15 @@ class ContactsPage extends StatelessWidget {
           ),
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              child: MaxWidthBox(
-                maxWidth: 1200,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    divider(context),
-                    const Footer(),
-                  ],
-                ),
+            child: MaxWidthBox(
+              maxWidth: 1200,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Spacer(),
+                  divider(context),
+                  const Footer(),
+                ],
               ),
             ),
           ),

@@ -203,8 +203,8 @@ class PortfolioPage extends StatelessWidget {
                                 "В качестве Middle SEO-специалиста в составе сильной команды внес свой вклад в рост онлайн-продаж на +35% в крупнейших городах.",
                                 style: bodyTextStyle(context)),
                             const SizedBox(height: 16),
-                            _buildMetricImage(
-                                'assets/portfolio/sportmaster_metrics1.webp'),
+                            //_buildMetricImage(
+                                //'assets/portfolio/sportmaster_metrics1.webp'),
                             Text("Мои зоны ответственности:",
                                 style: boldTextStyle),
                             Text(

@@ -1,15 +1,32 @@
-// lib/pages/page_useful.dart
+// lib/pages/page_try_coding.dart
 
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
-import 'package:minimal/pages/pages.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:minimal/utils/max_width_extension.dart';
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
+import 'package:minimal/pages/pages.dart';
 
-class UsefulPage extends StatelessWidget {
-  static const String name = 'useful';
+class TryCodingPage extends StatefulWidget {
+  static const String name = 'useful/try-coding';
+  const TryCodingPage({super.key});
 
-  const UsefulPage({super.key});
+  @override
+  State<TryCodingPage> createState() => _TryCodingPageState();
+}
+
+class _TryCodingPageState extends State<TryCodingPage> {
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title: "Попробуй кодить | Интерактивные песочницы",
+      description:
+          "Экспериментируйте с HTML, CSS, JavaScript и Dart прямо в браузере без установки IDE. Идеально для обучения и быстрых тестов.",
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +34,14 @@ class UsefulPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      drawer: isMobile ? buildAppDrawer(context) : null,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
       ),
-      // ИЗМЕНЕНИЕ: Используем SingleChildScrollView для исправления меню
+      drawer: isMobile ? buildAppDrawer(context) : null,
+
+      // <<< ГЛАВНОЕ ИСПРАВЛЕНИЕ: ЗАМЕНА CustomScrollView НА SingleChildScrollView >>>
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -32,46 +50,41 @@ class UsefulPage extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 24),
-                // ДОБАВЛЕНО: Хлебные крошки
                 const Breadcrumbs(items: [
                   BreadcrumbItem(text: "Главная", routeName: '/'),
-                  BreadcrumbItem(text: "Полезное"),
+                  BreadcrumbItem(text: "Полезное", routeName: '/useful'),
+                  BreadcrumbItem(text: "Попробуй кодить"),
                 ]),
-                const SizedBox(height: 80),
-                Text("Полезное", style: headlineTextStyle(context)),
+                const SizedBox(height: 40),
+                Text("Попробуй кодить", style: headlineTextStyle(context)),
                 const SizedBox(height: 16),
-                Text(
-                  "Статьи, заметки и материалы по SEO и веб-разработке",
-                  style: subtitleTextStyle(context),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 60),
+                Text("Интерактивные песочницы для ваших экспериментов",
+                    style: subtitleTextStyle(context),
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 40),
+                _buildCategoryButton(
+                    context: context,
+                    icon: Icons.web,
+                    title: "Песочница HTML & CSS",
+                    subtitle: "Тестируйте верстку и стили",
+                    routeName: '/${HtmlSandboxPage.name}'),
+                const SizedBox(height: 24),
                 _buildCategoryButton(
                   context: context,
-                  icon: Icons.code_rounded,
-                  title: "Разработка",
-                  subtitle: "Flutter, Dart и веб-технологии",
-                  routeName: '/useful/dev', // Уточнил путь
+                  icon: Icons.javascript,
+                  title: "Песочница JavaScript",
+                  subtitle: "Скоро...",
+                  routeName: null,
                 ),
                 const SizedBox(height: 24),
                 _buildCategoryButton(
                   context: context,
-                  icon: Icons.travel_explore_rounded,
-                  title: "SEO",
-                  subtitle: "Оптимизация, контент и аналитика",
-                  routeName: '/useful/seo', // Уточнил путь
+                  icon: Icons.flutter_dash,
+                  title: "Песочница Dart & Flutter",
+                  subtitle: "Скоро...",
+                  routeName: null,
                 ),
-                const SizedBox(height: 24),
-                _buildCategoryButton(
-                  context: context,
-                  icon: Icons.terminal,
-                  title: "Попробуй кодить",
-                  subtitle: "Интерактивные песочницы для кода",
-                  routeName:
-                      '/${TryCodingPage.name}', // Используем новый правильный путь
-                ),
-                const SizedBox(height: 120),
-                // ВАШ БЛОК С АВТОРОМ И КНОПКАМИ, СОХРАНЕН БЕЗ ИЗМЕНЕНИЙ
+                const SizedBox(height: 80),
                 Container(
                   margin: const EdgeInsets.only(bottom: 40),
                   width: double.infinity,
