@@ -200,9 +200,29 @@ class Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
-      child: const Align(
-        alignment: Alignment.centerRight,
-        child: TextBody(text: "Copyright © 2025"),
+      // ИЗМЕНЕНИЕ: Используем Row для размещения двух элементов
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Разносим по краям
+        children: [
+          // <<< НОВАЯ ССЫЛКА НА ЗМЕЙКУ >>>
+          InkWell(
+            onTap: () => Navigator.pushNamed(context, '/favisnake'),
+            borderRadius: BorderRadius.circular(4),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextBody(text: "Play favisnake"),
+            ),
+          ),
+          // <<< ИЗМЕНЕННЫЙ COPYRIGHT >>>
+          InkWell(
+            onTap: () => Navigator.pushNamed(context, '/copyright'),
+            borderRadius: BorderRadius.circular(4),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextBody(text: "Copyright © 2025"),
+            ),
+          ),
+        ],
       ),
     );
   }
