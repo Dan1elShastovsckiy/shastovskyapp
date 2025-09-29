@@ -3,11 +3,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:minimal/components/route_generator.dart';
+import 'package:minimal/components/route_generator_release.dart';
 import 'package:minimal/components/theme.dart';
 import 'package:minimal/components/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:minimal/components/route_generator_debug.dart' as debug_router;
+import 'package:minimal/components/route_generator_release.dart'
+    as release_router;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +46,9 @@ class MyApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             debugShowCheckedModeBanner: false,
             initialRoute: '/',
-            onGenerateRoute: RouteGenerator.generateRoute,
+            onGenerateRoute: kReleaseMode
+                ? release_router.RouteGenerator.generateRoute
+                : debug_router.RouteGenerator.generateRoute,
           );
         },
       ),
