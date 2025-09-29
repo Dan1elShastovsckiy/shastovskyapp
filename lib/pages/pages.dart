@@ -9,6 +9,8 @@ export 'page_portfolio.dart';
 export 'page_post.dart';
 export 'page_typography.dart';
 export 'page_under_construction.dart';
+export 'page_copyright.dart';
+export 'page_favisnake.dart';
 
 // Экспорты для раздела "Полезное"
 export 'page_useful.dart';
