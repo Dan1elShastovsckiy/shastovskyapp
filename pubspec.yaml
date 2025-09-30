@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  flutter_web_plugins:
+    sdk: flutter
 #  responsive_framework:
 #    path: ../
   # Uncomment to build standalone project.
@@ -21,7 +24,23 @@ dependencies:
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.3.0
   flutter_web_optimizer: ^1.5.1
-  prerender: ^1.0.0
+  provider: ^6.0.0
+  flutter_highlight: ^0.7.0
+  highlight: ^0.7.0
+
+  # Для редактора кода с подсветкой синтаксиса
+  code_text_field: ^1.1.0
+
+  flutter_markdown: ^0.7.1 # Для отображения Markdown
+  
+  # Для отображения HTML/CSS превью
+  flutter_widget_from_html_core: ^0.15.2
+  
+  # Для запуска JS-кода в веб-вью
+  universal_html: ^2.2.4
+  webview_flutter: ^4.7.0 # для мобильных платформ в будущем
+  webview_flutter_web: ^0.2.2+4 # для веб
+  split_view: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -52,5 +71,9 @@ flutter:
     - assets/portfolio/
     - assets/images/marocco/
     - assets/images/georgia_1/
+    - assets/images/seo-ai-era/
+    - assets/images/seo-guides/
+    - assets/images/dev-guides/
+    - assets/images/service-logos/
     - assets/marocco_photos_pack.zip
     - assets/georgia_1_photos_pack.zip
