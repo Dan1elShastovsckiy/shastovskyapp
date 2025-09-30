@@ -2,6 +2,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 // <<< ИСПРАВЛЕНИЕ: Добавлен необходимый импорт для MaxWidthBox и toMaxWidthSliver >>>
@@ -622,6 +623,13 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 Tag(tag: "E-E-A-T"),
               ]),
             ),
+            // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
+            const RelatedArticles(
+              currentArticleRouteName:
+                  PostSeoAiPage.name, // Название ТЕКУЩЕЙ страницы
+              category: 'seo', // Категория, из которой показывать статьи
+            ),
+            const SizedBox(height: 40),
             Align(
               alignment: Alignment.centerLeft,
               child: Container(

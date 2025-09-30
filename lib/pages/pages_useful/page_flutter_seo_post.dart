@@ -1,6 +1,7 @@
 // lib/pages/page_flutter_seo_post.dart
 
 import 'package:flutter/gestures.dart';
+import 'package:minimal/components/related_articles.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
@@ -164,6 +165,13 @@ class _PostFlutterSeoPageState extends State<PostFlutterSeoPage> {
                 Tag(tag: "Web"),
               ]),
             ),
+            // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
+            const RelatedArticles(
+              currentArticleRouteName:
+                  PostFlutterSeoPage.name, // Название ТЕКУЩЕЙ страницы
+              category: 'dev', // Категория, из которой показывать статьи
+            ),
+            const SizedBox(height: 40),
             Align(
               alignment: Alignment.centerLeft,
               child: Container(

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/components/service_card.dart';
 import 'dart:ui';
 import 'package:minimal/data/seo_tools_data.dart';
@@ -137,6 +138,14 @@ class _SeoToolsPageState extends State<SeoToolsPage>
                       Tag(tag: "Инструменты"),
                       Tag(tag: "Сервисы"),
                     ]),
+                    // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
+                    const RelatedArticles(
+                      currentArticleRouteName:
+                          SeoToolsPage.name, // Название ТЕКУЩЕЙ страницы
+                      category:
+                          'seo', // Категория, из которой показывать статьи
+                    ),
+                    const SizedBox(height: 40),
                     Container(
                       margin: const EdgeInsets.only(bottom: 40),
                       width: double.infinity,

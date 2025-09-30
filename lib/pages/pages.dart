@@ -27,6 +27,7 @@ export 'pages_useful/page_state_management_post.dart';
 export 'pages_useful/page_seo_tools.dart';
 export '/models/service_model.dart';
 export 'pages_useful/page_design_patterns.dart';
+export 'pages_useful/page_sitemap_guide.dart';
 
 // Экспорты для раздела "Попробуй кодить"
 export 'page_try_coding.dart';

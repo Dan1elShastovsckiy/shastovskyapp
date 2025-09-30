@@ -2,6 +2,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
@@ -176,6 +177,13 @@ class _PostStateManagementPageState extends State<PostStateManagementPage> {
                 Tag(tag: "State Management"),
               ]),
             ),
+            // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
+            const RelatedArticles(
+              currentArticleRouteName:
+                  PostStateManagementPage.name, // Название ТЕКУЩЕЙ страницы
+              category: 'dev', // Категория, из которой показывать статьи
+            ),
+            const SizedBox(height: 40),
             Align(
               alignment: Alignment.centerLeft,
               child: Container(

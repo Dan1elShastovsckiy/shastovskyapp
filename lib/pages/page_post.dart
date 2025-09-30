@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minimal/utils/meta_tag_service.dart'; // Импортируем MetaTagService
@@ -524,6 +525,12 @@ class _PostPageState extends State<PostPage> {
                 Tag(tag: "Приключения"),
                 Tag(tag: "Роудтрип"),
               ]),
+            ),
+            // <<< ЭТОТ ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
+            const RelatedArticles(
+              currentArticleRouteName:
+                  PostPage.name, // Название ТЕКУЩЕЙ страницы
+              category: 'travel', // Категория, из которой показывать статьи
             ),
             Align(
               alignment: Alignment.centerLeft,

@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/pattern_card.dart';
+import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/data/design_patterns_data.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
@@ -158,6 +159,13 @@ class _DesignPatternsPageState extends State<DesignPatternsPage> {
               Tag(tag: "Паттерны"),
               Tag(tag: "Архитектура")
             ]),
+            // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
+            const RelatedArticles(
+              currentArticleRouteName:
+                  DesignPatternsPage.name, // Название ТЕКУЩЕЙ страницы
+              category: 'dev', // Категория, из которой показывать статьи
+            ),
+            const SizedBox(height: 40),
             Container(
               margin: const EdgeInsets.only(bottom: 40),
               width: double.infinity,

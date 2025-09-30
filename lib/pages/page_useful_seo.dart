@@ -29,8 +29,18 @@ class UsefulSeoPage extends StatefulWidget {
   State<UsefulSeoPage> createState() => _UsefulSeoPageState();
 }
 
+//SitemapGuidePage
 class _UsefulSeoPageState extends State<UsefulSeoPage> {
   final List<UsefulArticle> _allArticles = [
+    UsefulArticle(
+      title: "Всё про sitemap.xml: Как ее видят 'роботы'",
+      description:
+          "Что такое XML-карта сайта, как ее создать, настроить и проверить на ошибки. Подробный гид по sitemap.xml для новичков и профессионалов...",
+      imageUrl:
+          "assets/images/seo-guides/sitemap-main.webp", // <-- превью-картинка
+      tags: ["Техническое SEO", "Индексация"],
+      routeName: SitemapGuidePage.name,
+    ),
     UsefulArticle(
       title: "Полезные SEO-сервисы",
       description:
@@ -83,7 +93,8 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
     "Внутренняя оптимизация",
     "Внешняя оптимизация",
     "E-E-A-T",
-    "Техническое SEO"
+    "Техническое SEO",
+    "Индексация"
   ];
 
   @override
