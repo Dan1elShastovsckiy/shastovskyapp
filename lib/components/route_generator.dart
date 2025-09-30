@@ -14,6 +14,7 @@ import 'package:minimal/pages/page_georgia_post.dart';
 import 'package:minimal/pages/page_html_sandbox.dart';
 import 'package:minimal/pages/pages_useful/page_seo_tools.dart';
 import 'package:minimal/pages/pages_useful/page_flutter_seo_post.dart';
+import 'package:minimal/pages/pages_useful/page_sitemap_guide.dart';
 import 'package:minimal/pages/pages_useful/page_state_management_post.dart';
 import 'package:minimal/pages/pages_useful/page_design_patterns.dart';
 import 'package:minimal/pages/pages_useful/page_seo_ai_post.dart';
@@ -69,6 +70,8 @@ class RouteGenerator {
           page = const PostLinkbuildingPage();
         } else if (pathName == '/${PostTechnicalAuditPage.name}') {
           page = const PostTechnicalAuditPage();
+        } else if (pathName == '/${SitemapGuidePage.name}') {
+          page = const SitemapGuidePage();
         } else if (pathName == '/${AboutPage.name}') {
           page = const AboutPage();
         } else if (pathName == '/${PortfolioPage.name}') {
