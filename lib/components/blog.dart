@@ -208,6 +208,11 @@ class Footer extends StatelessWidget {
           InkWell(
             onTap: () => Navigator.pushNamed(context, '/favisnake'),
             borderRadius: BorderRadius.circular(4),
+            hoverColor: Colors.transparent, // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+            splashColor:
+                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ И ЭФФЕКТ КЛИКА
+            highlightColor:
+                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ ВСЁ НАВЕРНЯКА
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: TextBody(text: "Play favisnake"),
@@ -217,6 +222,11 @@ class Footer extends StatelessWidget {
           InkWell(
             onTap: () => Navigator.pushNamed(context, '/copyright'),
             borderRadius: BorderRadius.circular(4),
+            hoverColor: Colors.transparent, // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+            splashColor:
+                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ И ЭФФЕКТ КЛИКА
+            highlightColor:
+                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ ВСЁ НАВЕРНЯКА
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: TextBody(text: "Copyright © 2025"),

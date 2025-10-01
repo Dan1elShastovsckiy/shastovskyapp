@@ -12,6 +12,7 @@ import 'package:minimal/pages/page_not_found.dart';
 import 'package:minimal/pages/page_post.dart';
 import 'package:minimal/pages/page_georgia_post.dart';
 import 'package:minimal/pages/page_html_sandbox.dart';
+import 'package:minimal/pages/pages_useful/page_semantic_core_guide.dart';
 import 'package:minimal/pages/pages_useful/page_seo_tools.dart';
 import 'package:minimal/pages/pages_useful/page_flutter_seo_post.dart';
 import 'package:minimal/pages/pages_useful/page_sitemap_guide.dart';
@@ -56,6 +57,8 @@ class RouteGenerator {
           page = const HtmlSandboxPage();
         } else if (pathName == '/${SeoToolsPage.name}') {
           page = const SeoToolsPage();
+        } else if (pathName == '/${SemanticCoreGuidePage.name}') {
+          page = const SemanticCoreGuidePage();
         } else if (pathName == '/${PostFlutterSeoPage.name}') {
           page = const PostFlutterSeoPage();
         } else if (pathName == '/${PostStateManagementPage.name}') {
