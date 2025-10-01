@@ -2,6 +2,7 @@
 
 import 'package:minimal/components/article_model.dart';
 import 'package:minimal/pages/pages.dart';
+import 'package:minimal/pages/pages_useful/page_semantic_core_guide.dart';
 
 // Список всех статей на сайте для вывода в разделе "Полезное" и в блоке "Другие статьи"
 final List<Article> allArticles = [
@@ -29,6 +30,14 @@ final List<Article> allArticles = [
   ),
 
   // --- SEO СТАТЬИ ---
+  const Article(
+    title: "Как собирать семантическое ядро: современный подход",
+    description:
+        "Забудьте про перфекционизм. Узнайте, как быстро собрать рабочее ядро, запустить его в работу и дорабатывать на основе реальных данных.",
+    imageUrl: "assets/images/seo/semantic-core-main.webp",
+    routeName: SemanticCoreGuidePage.name,
+    category: 'seo',
+  ),
   const Article(
     title: "Всё про sitemap.xml: Как ее видят 'роботы'",
     description: "Подробный гид по sitemap.xml для новичков и профессионалов.",
