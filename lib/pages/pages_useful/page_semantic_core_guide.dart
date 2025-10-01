@@ -43,7 +43,8 @@ class _SemanticCoreGuidePageState extends State<SemanticCoreGuidePage> {
   void initState() {
     super.initState();
     MetaTagService().updateAllTags(
-      title: "Как собирать семантическое ядро? Современный подход",
+      title:
+          "Как собирать семантическое ядро? Современный подход | Блог Даниила Шастовского",
       description:
           "Практическое руководство по быстрому сбору семантики. Зачем нужны маски, какие инструменты использовать и почему идеальное ядро — это миф.",
       imageUrl:

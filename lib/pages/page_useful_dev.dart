@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart'; // <<< ИМПОРТ ДЛЯ МЕТА-ТЕГОВ
 
 class UsefulDevPage extends StatefulWidget {
   static const String name = 'useful/dev';
@@ -15,7 +16,6 @@ class UsefulDevPage extends StatefulWidget {
 
 class _UsefulDevPageState extends State<UsefulDevPage> {
   final List<UsefulArticle> _allArticles = [
-    // <<< Новая страница про паттерны проектирования >>>
     UsefulArticle(
       title: "Паттерны проектирования: Интерактивная галерея",
       description:
@@ -49,13 +49,22 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
     "Flutter",
     "Архитектура",
     "SEO",
-    "Паттерны" // <-- новый тег паттернов
+    "Паттерны"
   ];
 
   @override
   void initState() {
     super.initState();
     _filteredArticles = _allArticles;
+
+    // <<< ДОБАВЛЕН БЛОК С МЕТА-ТЕГАМИ >>>
+    MetaTagService().updateAllTags(
+      title: "Разработка | Статьи о Flutter, Dart и веб-технологиях",
+      description:
+          "Гайды, обзоры и практические советы по веб-разработке. Фокус на Flutter Web, Dart, SEO-аспектах и лучших практиках.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/flutter_logo.webp", // Убедитесь, что картинка существует
+    );
   }
 
   void _filterArticles(String tag) {
@@ -74,7 +83,6 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-    // <<< Получаем доступ к теме >>>
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -88,7 +96,6 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
         slivers: [
           ...[
             const SizedBox(height: 40),
-            // <<< Сохраняем ваши хлебные крошки >>>
             const Align(
               alignment: Alignment.centerLeft,
               child: Breadcrumbs(
@@ -116,7 +123,6 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
                     label: Text(tag),
                     selected: isSelected,
                     onSelected: (selected) => _filterArticles(tag),
-                    // <<< ИСПРАВЛЕНИЕ: Используем цвета из темы >>>
                     backgroundColor: theme.colorScheme.surface,
                     selectedColor: theme.colorScheme.primary,
                     labelStyle: TextStyle(

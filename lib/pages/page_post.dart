@@ -75,14 +75,14 @@ class _PostPageState extends State<PostPage> {
   @override
   void initState() {
     super.initState();
-    // <<< 2. ВЫЗЫВАЕМ ОБНОВЛЕНИЕ ТЕГОВ ПРИ ИНИЦИАЛИЗАЦИИ >>>
     MetaTagService().updateAllTags(
-        title: "МАРОККО: Заблудиться, чтобы найти себя",
-        description:
-            "История о том, как я потерялся в лабиринте улиц Марокко. Ароматы специй, крики зазывал, скрытые риады...",
-        // Важно: URL картинки должен быть абсолютным!
-        imageUrl:
-            "https://shastovsky.ru/assets/assets/images/me_sachara_desert.webp");
+      title:
+          "МАРОККО: Заблудиться, чтобы найти себя | Блог Даниила Шастовского",
+      description:
+          "История о том, как я потерялся в лабиринте улиц Марокко. Ароматы специй, крики зазывал, скрытые риады и сердце пустыни Сахара.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/me_sachara_desert.webp",
+    );
   }
 
   // НОВЫЙ ВИДЖЕТ-ХЕЛПЕР ДЛЯ БОЛЬШОЙ КНОПКИ

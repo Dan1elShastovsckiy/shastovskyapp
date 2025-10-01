@@ -2,6 +2,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:minimal/components/related_articles.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
@@ -31,6 +32,18 @@ class _PostFlutterSeoPageState extends State<PostFlutterSeoPage> {
     for (final imagePath in _pageImages) {
       precacheImage(AssetImage(imagePath), context);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title: "Flutter Web & SEO: Полное руководство | Блог Даниила Шастовского",
+      description:
+          "Как сделать ваш Flutter сайт видимым для поисковых систем. Настройка рендеринга, мета-теги, sitemap и pre-rendering.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/dev-guides/flutter_ssg_flowchart.webp",
+    );
   }
 
   @override

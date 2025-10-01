@@ -21,9 +21,10 @@ class _DesignPatternsPageState extends State<DesignPatternsPage> {
   void initState() {
     super.initState();
     MetaTagService().updateAllTags(
-      title: "Паттерны проектирования на Dart | Блог Даниила Шастовского",
+      title:
+          "Паттерны проектирования в Dart и Flutter | Блог Даниила Шастовского",
       description:
-          "Интерактивная галерея паттернов проектирования с примерами на Dart. Тапни на паттерн, чтобы увидеть код и объяснение.",
+          "Разбор основных паттернов проектирования (Singleton, Factory, Observer) с практическими примерами на языке Dart для Flutter-разработки.",
       imageUrl: "https://shastovsky.ru/assets/assets/images/dev_article_3.webp",
     );
   }

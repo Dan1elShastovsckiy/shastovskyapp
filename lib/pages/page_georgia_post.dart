@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostGeorgiaPage extends StatefulWidget {
@@ -58,6 +59,18 @@ class _PostGeorgiaPageState extends State<PostGeorgiaPage> {
     "assets/images/georgia_mountains.webp",
     "assets/images/avatar_default.webp",
   ];
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title:
+          "ГРУЗИЯ: Из Батуми в Кутаиси через горы | Блог Даниила Шастовского",
+      description:
+          "Первое знакомство с Грузией: апокалиптическая посадка в Батуми, огненная шаурма и хоррор-квест по ночным дорогам в деревню над облаками.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/georgia_mountains.webp",
+    );
+  }
 
   @override
   void didChangeDependencies() {

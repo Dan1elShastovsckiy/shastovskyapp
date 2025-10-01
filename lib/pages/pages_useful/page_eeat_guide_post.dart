@@ -6,6 +6,7 @@ import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostEeatGuidePage extends StatefulWidget {
@@ -30,6 +31,19 @@ class _PostEeatGuidePageState extends State<PostEeatGuidePage> {
     for (final imagePath in _pageImages) {
       precacheImage(AssetImage(imagePath), context);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title:
+          "E-E-A-T: Полный гид по экспертности для SEO | Блог Даниила Шастовского",
+      description:
+          "Разбираем факторы Experience, Expertise, Authoritativeness, and Trustworthiness. Как доказать Google, что ваш контент создан экспертом.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/seo-guides/eeat_components.webp",
+    );
   }
 
   @override

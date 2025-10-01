@@ -6,6 +6,7 @@ import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostTechnicalAuditPage extends StatefulWidget {
@@ -33,6 +34,19 @@ class _PostTechnicalAuditPageState extends State<PostTechnicalAuditPage> {
     for (final imagePath in _pageImages) {
       precacheImage(AssetImage(imagePath), context);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title:
+          "Технический аудит сайта: пошаговый чек-лист | Блог Даниила Шастовского",
+      description:
+          "От скорости загрузки до лог-файлов - разбираем в деталях. Находим и исправляем ошибки, которые мешают росту вашего сайта.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/seo-guides/techcheck_website_seo.webp",
+    );
   }
 
   // Вспомогательный виджет для создания кликабельных ссылок в тексте

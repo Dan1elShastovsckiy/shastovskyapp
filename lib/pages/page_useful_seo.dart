@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart'; // <<< ИМПОРТ ДЛЯ МЕТА-ТЕГОВ
 
 class UsefulArticle {
   final String title;
@@ -29,15 +30,13 @@ class UsefulSeoPage extends StatefulWidget {
   State<UsefulSeoPage> createState() => _UsefulSeoPageState();
 }
 
-//SemanticCoreGuidePage
 class _UsefulSeoPageState extends State<UsefulSeoPage> {
   final List<UsefulArticle> _allArticles = [
     UsefulArticle(
       title: "Как собирать семантическое ядро: современный подход",
       description:
           "Забудьте про перфекционизм. Узнайте, как быстро собрать рабочее ядро, запустить его в работу и дорабатывать на основе реальных данных...",
-      imageUrl:
-          "assets/images/seo/semantic-core-main.webp", // <-- превью-картинка
+      imageUrl: "assets/images/seo/semantic-core-main.webp",
       tags: ["Внутренняя оптимизация", "Семантика"],
       routeName: SemanticCoreGuidePage.name,
     ),
@@ -45,8 +44,7 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
       title: "Всё про sitemap.xml: Как ее видят 'роботы'",
       description:
           "Что такое XML-карта сайта, как ее создать, настроить и проверить на ошибки. Подробный гид по sitemap.xml для новичков и профессионалов...",
-      imageUrl:
-          "assets/images/seo-guides/sitemap-main.webp", // <-- превью-картинка
+      imageUrl: "assets/images/seo-guides/sitemap-main.webp",
       tags: ["Техническое SEO", "Индексация"],
       routeName: SitemapGuidePage.name,
     ),
@@ -54,17 +52,16 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
       title: "Полезные SEO-сервисы",
       description:
           "Интерактивная таблица с инструментами для внутренней, внешней и технической оптимизации, которые я использую в работе каждый день...",
-      imageUrl:
-          "assets/images/seo-guides/tools_preview.webp", // <-- превью-картинка
+      imageUrl: "assets/images/seo-guides/tools_preview.webp",
       tags: ["Инструменты"],
-      routeName: SeoToolsPage.name, // <-- Ссылка на новую страницу
+      routeName: SeoToolsPage.name,
     ),
     UsefulArticle(
       title: "SEO в эпоху ИИ: Новые правила ранжирования",
       description:
           "Глубокое погружение в неочевидные факторы ранжирования, утечки Google и практические шаги для оптимизации в эру AI Overviews...",
       imageUrl: "assets/images/seo-ai-era/eeat_diagram.webp",
-      tags: ["Ai Seoшка"],
+      tags: ["Ai Seoшка", "E-E-A-T", "Внутренняя оптимизация"],
       routeName: PostSeoAiPage.name,
     ),
     UsefulArticle(
@@ -111,6 +108,15 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
   void initState() {
     super.initState();
     _filteredArticles = _allArticles;
+
+    // <<< ДОБАВЛЕН БЛОК С МЕТА-ТЕГАМИ >>>
+    MetaTagService().updateAllTags(
+      title: "SEO | Статьи о поисковой оптимизации",
+      description:
+          "Все о SEO: технический аудит, линкбилдинг, работа с семантикой, E-E-A-T и влияние AI на поисковые системы. Практические руководства и чек-листы.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/seo_main.webp", // Убедитесь, что картинка существует
+    );
   }
 
   void _filterArticles(String tag) {
@@ -129,7 +135,6 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-    // <<< Получаем доступ к теме >>>
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -143,7 +148,6 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
         slivers: [
           ...[
             const SizedBox(height: 40),
-            // <<< Сохраняем ваши хлебные крошки >>>
             const Align(
               alignment: Alignment.centerLeft,
               child: Breadcrumbs(
@@ -171,7 +175,6 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
                     label: Text(tag),
                     selected: isSelected,
                     onSelected: (selected) => _filterArticles(tag),
-                    // <<< ИСПРАВЛЕНИЕ: Используем цвета из темы >>>
                     backgroundColor: theme.colorScheme.surface,
                     selectedColor: theme.colorScheme.primary,
                     labelStyle: TextStyle(

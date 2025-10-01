@@ -39,10 +39,13 @@ class _HtmlSandboxPageState extends State<HtmlSandboxPage> {
   @override
   void initState() {
     super.initState();
+    // <<< ЗАМЕНИТЕ ЭТОТ БЛОК >>>
     MetaTagService().updateAllTags(
-      title: "Песочница HTML & CSS | Блог Даниила Шастовского",
+      title: "Песочница HTML & CSS | Интерактивный редактор кода",
       description:
-          "Интерактивная песочница для верстки. Тестируйте HTML и CSS в реальном времени.",
+          "Тестируйте верстку и стили в реальном времени. Встроенный справочник и готовые примеры для быстрого старта в веб-разработке.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/seo-guides/techcheck_website_seo.webp", // <-- Добавлена картинка
     );
 
     _htmlController =

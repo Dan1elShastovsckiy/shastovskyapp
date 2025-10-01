@@ -1,14 +1,38 @@
+// lib/pages/page_about.dart
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart'; // <<< ИМПОРТ ДЛЯ МЕТА-ТЕГОВ
 import 'package:url_launcher/url_launcher.dart';
 
-class AboutPage extends StatelessWidget {
+// <<< ИЗМЕНЕНИЕ 1: StatelessWidget -> StatefulWidget >>>
+class AboutPage extends StatefulWidget {
   static const String name = 'about';
 
   const AboutPage({super.key});
 
+  @override
+  State<AboutPage> createState() => _AboutPageState();
+}
+
+// <<< ИЗМЕНЕНИЕ 2: СОЗДАН НОВЫЙ КЛАСС State >>>
+class _AboutPageState extends State<AboutPage> {
+  // <<< ИЗМЕНЕНИЕ 3: ДОБАВЛЕН initState С МЕТА-ТЕГАМИ >>>
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title: "Обо мне | Даниил Шастовский - SEO, разработка, путешествия",
+      description:
+          "Привет! Я Даниил, SEO-специалист и разработчик. Здесь я делюсь своим опытом в digital, историями из поездок и фотографиями.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/avatar_default.webp",
+    );
+  }
+
+  // <<< ИЗМЕНЕНИЕ 4: ВСЯ ЛОГИКА И ХЕЛПЕРЫ ПЕРЕНЕСЕНЫ СЮДА >>>
   String calculateExperience() {
     final startDate = DateTime(2017, 12);
     final now = DateTime.now();
@@ -43,24 +67,23 @@ class AboutPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      // Теперь buildAppDrawer берется из components.dart, и ошибки нет
       drawer: isMobile ? buildAppDrawer(context) : null,
-      //backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Убираем, чтобы использовать тему
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(
-            isMobile ? 65 : 110), // Высота для десктопа исправлена
+        preferredSize: Size.fromHeight(isMobile ? 65 : 110),
         child: const MinimalMenuBar(),
       ),
       body: CustomScrollView(
         slivers: [
           ...[
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                margin: marginBottom12,
-                child: Text(" ", style: headlineTextStyle(context)),
-              ),
+            const SizedBox(height: 24),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Breadcrumbs(items: [
+                BreadcrumbItem(text: "Главная", routeName: '/'),
+                BreadcrumbItem(text: "Обо мне"),
+              ]),
             ),
+            const SizedBox(height: 40),
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -68,17 +91,15 @@ class AboutPage extends StatelessWidget {
                 child: Text("Обо мне", style: headlineTextStyle(context)),
               ),
             ),
-            // <<< ИЗМЕНЕНИЕ: Добавлен блок с фотографией >>>
             Align(
               alignment: Alignment.center,
               child: Container(
                 margin: const EdgeInsets.only(top: 16, bottom: 24),
                 child: const CircleAvatar(
-                  radius: 64, // Задает размер круга 128x128 пикселей
+                  radius: 64,
                   backgroundImage:
                       AssetImage('assets/images/avatar_default.webp'),
-                  backgroundColor: Color(
-                      0xFFF5F5F5), // Фон на случай, если картинка не загрузится
+                  backgroundColor: Color(0xFFF5F5F5),
                 ),
               ),
             ),
@@ -87,6 +108,8 @@ class AboutPage extends StatelessWidget {
               child: Container(
                 margin: marginBottom24,
                 child: RichText(
+                  textAlign:
+                      TextAlign.center, // <-- Добавлено для центрирования
                   text: TextSpan(
                     style: subtitleTextStyle(context),
                     children: [
@@ -146,9 +169,7 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             divider(context),
-            Container(
-              margin: marginBottom40,
-            ),
+            const SizedBox(height: 40),
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -165,13 +186,13 @@ class AboutPage extends StatelessWidget {
                     "В работе особенно ценю: качественную документацию, чёткие технические задания, профессиональную команду "
                     "и отлаженные процессы. Открыт к сотрудничеству и буду рад встрече!\n\n"
                     "Часто путешествую, поэтому рассматриваю только удалённый формат работы.",
+                    textAlign:
+                        TextAlign.center, // <-- Добавлено для центрирования
                     style: subtitleTextStyle(context)),
               ),
             ),
             divider(context),
-            Container(
-              margin: marginBottom40,
-            ),
+            const SizedBox(height: 40),
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -190,6 +211,7 @@ class AboutPage extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16), // Отступ перед списком
             ExpansionTile(
               title: Text(
                 "Zum Punkt (Январь 2023 — по настоящее время)",
@@ -326,42 +348,9 @@ class AboutPage extends StatelessWidget {
                 ),
               ],
             ),
-            divider(context),
-            Container(
-              margin: marginBottom40,
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                margin: marginBottom12,
-                child: Text("Какой у меня подход к работе?",
-                    style: headlineSecondaryTextStyle(context)),
-              ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                margin: marginBottom24,
-                child: Text(
-                    "Я верю в важность качественного кода, ТЗ по SMART и чистого дизайна. Мой подход заключается в том, чтобы создавать продукты, которые не только функциональные, но и приятны в использовании. \n\n"
-                    "Всегда стремлюсь к лучшим практикам SEO - оптимизации, разработки и использую современные технологии. Также ценю обратную связь и считаю, что она помогает мне расти как SEO специалисту и разработчику. \n"
-                    "Я открыт к новым идеям и всегда готов учиться, люблю работать в команде и считаю, что совместная работа приводит к лучшим результатам.",
-                    style: subtitleTextStyle(context)),
-              ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                margin: marginBottom24,
-                child: Text(
-                    "Я считаю, что каждый проект — это возможность для роста и обучения и стремлюсь к тому, чтобы каждый мой проект был не только успешным, но и полезным для пользователей. Знаю, что технологии могут изменить мир к лучшему, и хочу быть частью этого изменения.",
-                    style: subtitleTextStyle(context)),
-              ),
-            ),
+            const SizedBox(height: 40),
             dividerSmall(context),
-            Container(
-              margin: marginBottom24,
-            ),
+            const SizedBox(height: 24),
             Align(
               alignment: Alignment.centerLeft,
               child: Container(

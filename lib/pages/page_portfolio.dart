@@ -3,33 +3,36 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-// Убедитесь, что у вас есть этот класс в проекте, например в utils/max_width_extension.dart
-// Если его нет, раскомментируйте или создайте файл.
-
-/*class MaxWidthBox extends StatelessWidget {
-  final double maxWidth;
-  final Widget child;
-  const MaxWidthBox({super.key, required this.maxWidth, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: child,
-      ),
-    );
-  }
-}*/
-
-class PortfolioPage extends StatelessWidget {
+// <<< ИЗМЕНЕНИЕ 1: StatelessWidget -> StatefulWidget >>>
+class PortfolioPage extends StatefulWidget {
   static const String name = 'portfolio';
 
   const PortfolioPage({super.key});
 
+  @override
+  State<PortfolioPage> createState() => _PortfolioPageState();
+}
+
+// <<< ИЗМЕНЕНИЕ 2: СОЗДАН НОВЫЙ КЛАСС State >>>
+class _PortfolioPageState extends State<PortfolioPage> {
+  // <<< ИЗМЕНЕНИЕ 3: ДОБАВЛЕН initState С МЕТА-ТЕГАМИ >>>
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title: "Портфолио | Проекты Даниила Шастовского",
+      description:
+          "Обзор моих ключевых проектов в области SEO-продвижения, веб-разработки и контент-стратегий. Результаты, кейсы и технологии.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/me_georgia_mountains_2.webp", // Убедитесь, что эта картинка существует
+    );
+  }
+
+  // <<< ИЗМЕНЕНИЕ 4: ВЕСЬ КОД UI ПЕРЕНЕСЕН СЮДА >>>
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
@@ -61,8 +64,8 @@ class PortfolioPage extends StatelessWidget {
                       alignment: Alignment.center,
                       child: Container(
                         margin: marginBottom12,
-                        child: Text("Проекты",
-                            style: headlineTextStyle(context)),
+                        child:
+                            Text("Проекты", style: headlineTextStyle(context)),
                       ),
                     ),
                     Align(
@@ -203,8 +206,6 @@ class PortfolioPage extends StatelessWidget {
                                 "В качестве Middle SEO-специалиста в составе сильной команды внес свой вклад в рост онлайн-продаж на +35% в крупнейших городах.",
                                 style: bodyTextStyle(context)),
                             const SizedBox(height: 16),
-                            //_buildMetricImage(
-                                //'assets/portfolio/sportmaster_metrics1.webp'),
                             Text("Мои зоны ответственности:",
                                 style: boldTextStyle),
                             Text(

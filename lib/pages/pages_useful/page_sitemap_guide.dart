@@ -46,7 +46,7 @@ class _SitemapGuidePageState extends State<SitemapGuidePage> {
       description:
           "Что такое XML-карта сайта, как ее создать, настроить и проверить на ошибки. Подробный гид по sitemap.xml для новичков и профессионалов.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/seo/sitemap-main.webp",
+          "https://shastovsky.ru/assets/assets/images/seo-guides/sitemap-main.webp",
     );
   }
 

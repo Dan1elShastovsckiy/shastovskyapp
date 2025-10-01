@@ -5,15 +5,37 @@ import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart'; // <<< ИМПОРТ ДЛЯ МЕТА-ТЕГОВ
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
-class TypographyPage extends StatelessWidget {
+// <<< ИЗМЕНЕНИЕ 1: StatelessWidget -> StatefulWidget >>>
+class TypographyPage extends StatefulWidget {
   static const String name = 'about-app';
 
   const TypographyPage({super.key});
 
+  @override
+  State<TypographyPage> createState() => _TypographyPageState();
+}
+
+// <<< ИЗМЕНЕНИЕ 2: СОЗДАН НОВЫЙ КЛАСС State >>>
+class _TypographyPageState extends State<TypographyPage> {
+  // <<< ИЗМЕНЕНИЕ 3: ДОБАВЛЕН initState С МЕТА-ТЕГАМИ >>>
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title: "Об этом сайте | Блог Даниила Шастовского на Flutter",
+      description:
+          "Узнайте, как и зачем был создан этот сайт. Технологии, цели проекта и планы по развитию (бэклог). Создано на Flutter.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/flutter_logo_preview.webp", // Рекомендую создать картинку
+    );
+  }
+
+  // <<< ИЗМЕНЕНИЕ 4: ВСЯ ЛОГИКА И ХЕЛПЕРЫ ПЕРЕНЕСЕНЫ СЮДА >>>
   void _showBacklogDialog(BuildContext context) {
     final theme = Theme.of(context);
     showDialog(
@@ -139,6 +161,11 @@ class TypographyPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 24),
+                    const Breadcrumbs(items: [
+                      BreadcrumbItem(text: "Главная", routeName: '/'),
+                      BreadcrumbItem(text: "Об этом сайте"),
+                    ]),
+                    const SizedBox(height: 40),
                     Align(
                       alignment: Alignment.center,
                       child: Container(
@@ -184,6 +211,9 @@ class TypographyPage extends StatelessWidget {
                       alignment: Alignment.center,
                       child: InkWell(
                         onTap: () => _showBacklogDialog(context),
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           child: Text(

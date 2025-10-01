@@ -6,6 +6,7 @@ import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostLinkbuildingPage extends StatefulWidget {
@@ -31,6 +32,19 @@ class _PostLinkbuildingPageState extends State<PostLinkbuildingPage> {
     for (final imagePath in _pageImages) {
       precacheImage(AssetImage(imagePath), context);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title:
+          "Стратегии линкбилдинга для сложных ниш | Блог Даниила Шастовского",
+      description:
+          "Белые и креативные стратегии получения обратных ссылок, которые работают. Digital PR, техника 'Небоскреба', HARO и другие методы.",
+      imageUrl:
+          "https://shastovsky.ru/assets/assets/images/seo-guides/skyscraper_technique_flowchart.webp",
+    );
   }
 
   @override

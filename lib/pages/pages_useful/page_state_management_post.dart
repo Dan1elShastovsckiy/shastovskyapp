@@ -6,6 +6,7 @@ import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostStateManagementPage extends StatefulWidget {
@@ -32,6 +33,18 @@ class _PostStateManagementPageState extends State<PostStateManagementPage> {
     for (final imagePath in _pageImages) {
       precacheImage(AssetImage(imagePath), context);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    MetaTagService().updateAllTags(
+      title:
+          "State Management в Flutter: Какой выбрать в 2025? | Блог Даниила Шастовского",
+      description:
+          "Provider, BLoC, Riverpod, GetX... Разбираем плюсы и минусы каждого подхода на реальных примерах.",
+      imageUrl: "https://shastovsky.ru/assets/assets/images/dev_article_2.webp",
+    );
   }
 
   @override
