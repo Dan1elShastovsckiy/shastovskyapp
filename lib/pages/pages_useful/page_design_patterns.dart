@@ -6,10 +6,7 @@ import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/data/design_patterns_data.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
-import 'package:responsive_framework/responsive_framework.dart'
-    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:minimal/pages/pages.dart';
 
 class DesignPatternsPage extends StatefulWidget {
   static const String name = 'useful/dev/design-patterns';

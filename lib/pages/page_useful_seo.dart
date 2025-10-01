@@ -29,9 +29,18 @@ class UsefulSeoPage extends StatefulWidget {
   State<UsefulSeoPage> createState() => _UsefulSeoPageState();
 }
 
-//SitemapGuidePage
+//SemanticCoreGuidePage
 class _UsefulSeoPageState extends State<UsefulSeoPage> {
   final List<UsefulArticle> _allArticles = [
+    UsefulArticle(
+      title: "Как собирать семантическое ядро: современный подход",
+      description:
+          "Забудьте про перфекционизм. Узнайте, как быстро собрать рабочее ядро, запустить его в работу и дорабатывать на основе реальных данных...",
+      imageUrl:
+          "assets/images/seo/semantic-core-main.webp", // <-- превью-картинка
+      tags: ["Внутренняя оптимизация", "Семантика"],
+      routeName: SemanticCoreGuidePage.name,
+    ),
     UsefulArticle(
       title: "Всё про sitemap.xml: Как ее видят 'роботы'",
       description:
@@ -94,7 +103,8 @@ class _UsefulSeoPageState extends State<UsefulSeoPage> {
     "Внешняя оптимизация",
     "E-E-A-T",
     "Техническое SEO",
-    "Индексация"
+    "Индексация",
+    "Семантика"
   ];
 
   @override

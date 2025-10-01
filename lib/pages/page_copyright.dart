@@ -4,7 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:responsive_framework/responsive_framework.dart' hide MaxWidthBox;
+import 'package:responsive_framework/responsive_framework.dart'
+    hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 
 class CopyrightPage extends StatelessWidget {
@@ -17,19 +18,14 @@ class CopyrightPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     const licenseText = '''
-DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-Version 2, December 2004
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
 
-Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
-
-Everyone is permitted to copy and distribute verbatim or modified
-copies of this license document, and changing it is allowed as long
-as the name is changed.
-
-DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
-0. You just DO WHAT THE FUCK YOU WANT TO.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ''';
 
     return Scaffold(
@@ -69,16 +65,16 @@ TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
                     children: [
                       const TextSpan(
                           text:
-                              "Полный текст лицензии доступен на официальном сайте: "),
+                              "You may obtain a copy of the License at / Полный текст лицензии доступен на официальном сайте: "),
                       TextSpan(
-                        text: "wtfpl.net",
+                        text: "apache.org",
                         style: bodyTextStyle(context).copyWith(
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () => launchUrl(
-                              Uri.parse('https://www.wtfpl.net/about/')),
+                          ..onTap = () => launchUrl(Uri.parse(
+                              'http://www.apache.org/licenses/LICENSE-2.0')),
                       ),
                     ],
                   ),
