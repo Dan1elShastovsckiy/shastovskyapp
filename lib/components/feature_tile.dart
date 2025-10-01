@@ -39,7 +39,10 @@ class FeatureTile extends StatelessWidget {
               styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                 p: bodyTextStyle(context), // Применяем ваш стиль к параграфам
                 listBullet: bodyTextStyle(context), // И к элементам списка
-                // Вы можете настроить и другие теги, если понадобится
+                code: bodyTextStyle(context).copyWith(
+                  fontFamily: 'monospace',
+                  backgroundColor: theme.colorScheme.surface.withOpacity(0.8),
+                ),
               ),
             ),
           ),
