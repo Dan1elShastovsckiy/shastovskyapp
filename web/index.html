@@ -1,26 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Shastovsky photos and SEO portfolio site">
+  
+  <title>SHASTOVSKY</title>
+  <meta name="title" content="Привет! Я Шастовский Даниил: тут Фотографии путешествий и обучение SEO">
+  <meta name="description" content="Это персональный сайт Даниила Шастовского. Авторские фотографии из путешествий, статьи по SEO-образованию для начинающих и портфолио проектов. Контакты для сотрудничества.">
 
-  <!-- iOS meta tags & icons -->
+  <!-- iOS meta tags and icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Shastovsky">
@@ -28,49 +18,144 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>SHASTOVSKY</title>
   <link rel="manifest" href="manifest.json">
-    <!-- мета-тег для автообновления -->
-  <!-- <meta http-equiv="refresh" content="30"> -->
-   <style>
+  
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Привет! Я Шастовский Даниил: тут Фотографии путешествий и обучение SEO">
+  <meta property="og:description" content="Персональный сайт Даниила Шастовского. Авторские фотографии, статьи по SEO, портфолио.">
+  <meta property="og:image" content="https://shastovsky.ru/assets/assets/images/me_sachara_desert.webp"> 
+  <meta property="og:url" content="https://shastovsky.ru/">
+  <meta property="og:site_name" content="SHASTOVSKY">
+  
+  <!-- <<< НАЧАЛО НОВЫХ СТИЛЕЙ ДЛЯ АНИМАЦИИ >>> -->
+  <style>
     body {
-      background-color: #F5F5F5; /* Цвет фона, как у вашего сайта */
+      background-color: #F5F5F5;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; 
     }
+
     .loader-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    .loader {
-      border: 8px solid #E0E0E0; /* Светло-серый круг */
-      border-top: 8px solid #242424; /* Темный цвет для вращающейся части */
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
+    
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #121212; }
+      .message { color: #BDBDBD; }
+      .cat { filter: invert(1); }
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    
+    .cat {
+      width: 400px;
+      height: 200px;
+      margin-bottom: 20px; /* Отступ между котом и текстом */
+      animation: walk-animation 0.8s steps(12) infinite;
+      background: url("./assets/images/cat_tiles.png") 0 0 no-repeat;
     }
+
+    @keyframes walk-animation {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: 0 -2400px; 
+      }
+    }
+
+    .message {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      color: #757575;
+      transition: opacity 0.5s ease-in-out;
+      opacity: 1; /* Начальная прозрачность */
+    }
+
+    /* Класс для плавного исчезания текста */
+    .message.fade-out {
+      opacity: 0;
+    }
+    
   </style>
+  <!-- <<< КОНЕЦ НОВЫХ СТИЛЕЙ >>> -->
+
 </head>
 <body>
-  <div class="loader-container">
-    <div class="loader"></div>
+  <div id="loader" class="loader-container">
+    <!-- Кот, который анимирует ходьбу на месте -->
+    <div class="cat"></div>
+    <!-- Сообщение для пользователя, которое будет меняться -->
+    <p id="loading-message" class="message"></p>
   </div>
+  
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- <<< ОБНОВЛЕННЫЙ СКРИПТ ДЛЯ РАНДОМНЫХ СООБЩЕНИЙ >>> -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker registered: ', reg))
-          .catch(err => console.error('SW registration failed: ', err));
-      });
+    const messages = [
+      "Привет! Это Flutter-приложение, ему нужно немного магии, чтобы ожить...",
+      "Собираю пиксели в единую картину. Почти готово!",
+      "Котёнок идёт по своим делам, пока я загружаю скрипты...",
+      "Это не баг, а фича... Ожидание — тоже часть приключения!",
+      "Почти на месте. Завариваю виртуальный кофе...",
+      "Flutter рисует каждый пиксель с любовью. Нужно мгновение...",
+      "Проверяю, все ли котики на месте...",
+      "Разгоняю пиксели до максимальной скорости...",
+      "Если долго смотреть на кота, он начнет смотреть на тебя.",
+      "Ш-ш-ш... Идет компиляция. Не спугните!",
+      "А вы знали, что этот сайт написан на Dart?",
+      "Создаю уютный цифровой уголок для вас...",
+      "Осталось совсем чуть-чуть. Честное кошачье!"
+    ];
+
+    const messageElement = document.getElementById("loading-message");
+    let currentIndex = Math.floor(Math.random() * messages.length);
+
+    // Функция для смены текста
+    function changeMessage() {
+      // 1. Добавляем класс, чтобы текст плавно исчез
+      messageElement.classList.add('fade-out');
+
+      // 2. Ждем окончания анимации исчезновения (500мс)
+      setTimeout(() => {
+        // 3. Выбираем следующий индекс (по кругу)
+        currentIndex = (currentIndex + 1) % messages.length;
+        // 4. Меняем текст
+        messageElement.textContent = messages[currentIndex];
+        // 5. Убираем класс, чтобы текст плавно появился
+        messageElement.classList.remove('fade-out');
+      }, 500);
     }
+
+    // Показываем первое случайное сообщение сразу
+    messageElement.textContent = messages[currentIndex];
+    
+    // Запускаем смену сообщений каждые 4,5 секунды
+    setInterval(changeMessage, 4500);
   </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "name": "SHASTOVSKY",
+    "url": "https://shastovsky.ru/",
+    "author": {
+      "@type": "Person",
+      "name": "Даниил Шастовский",
+      "url": "https://shastovsky.ru/about"
+    },
+    "description": "Персональный сайт Даниила Шастовского. Авторские фотографии из путешествий, статьи по SEO-образованию для начинающих и портфолио проектов.",
+    "publisher": {
+      "@type": "Person",
+      "name": "Даниил Шастовский"
+    }
+  }
+  </script>
+  
 </body>
 </html>
