@@ -27,6 +27,7 @@ dependencies:
   provider: ^6.0.0
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
+  collection: ^1.18.0 # Может понадобиться для deep equality
 
   # Для редактора кода с подсветкой синтаксиса
   code_text_field: ^1.1.0
@@ -77,3 +78,4 @@ flutter:
     - assets/images/service-logos/
     - assets/marocco_photos_pack.zip
     - assets/georgia_1_photos_pack.zip
+    - assets/images/seo/
