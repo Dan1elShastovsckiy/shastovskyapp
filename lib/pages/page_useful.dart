@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/pages/page_instruments.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -74,10 +75,10 @@ class UsefulPage extends StatelessWidget {
                 _buildCategoryButton(
                   context: context,
                   icon: Icons.analytics_rounded,
-                  title: "Анализатор текста",
-                  subtitle:
-                      "Анализ ключевых слов, LSI, объема и других параметров",
-                  routeName: '/useful/seo-analyzer', // Уточнил путь
+                  title: "Полезные инструменты для SEO",
+                  subtitle: "Полезные инструменты для вашей работы с SEO",
+                  routeName:
+                      '/${InstrumentsPage.name}', // Уточнил путь InstrumentsPage
                 ),
                 const SizedBox(height: 120),
                 // БЛОК С АВТОРОМ И КНОПКАМИ, СОХРАНЕН БЕЗ ИЗМЕНЕНИЙ

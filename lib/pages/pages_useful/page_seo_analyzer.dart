@@ -10,6 +10,7 @@ import 'package:responsive_framework/responsive_framework.dart'
 import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:minimal/pages/pages.dart';
 import 'dart:async';
+import 'package:snowball_stemmer/snowball_stemmer.dart'; // <<< стемматизатор
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -181,6 +182,14 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 1. ДОБАВЛЕНО ИЗОБРАЖЕНИЕ
+                Center(
+                  child: SizedBox(
+                    height: 200,
+                    child: Image.asset('assets/images/i_have_no_idea.webp'),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
                   "Этот инструмент создан для автоматизации проверки текстов на соответствие SEO-ТЗ. Процесс состоит из двух простых этапов:",
                   style: bodyTextStyle(context),
@@ -195,7 +204,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 MarkdownBody(
                   data: "1.  **Вставьте текст статьи** в левое поле.\n"
                       "2.  **Вставьте текст вашего ТЗ** в правое поле.\n"
-                      "3.  Нажмите кнопку **«Распарсить ТЗ»**. Инструмент автоматически попытается найти и извлечь основные требования: объем, мета-теги, структуру и списки ключевых слов.",
+                      "3.  Нажмите кнопку **«Распарсить ТЗ»**. Инструмент автоматически попытается найти и извлечь основные требования.",
                   styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                       p: bodyTextStyle(context),
                       listBullet: bodyTextStyle(context)),
@@ -210,12 +219,75 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 MarkdownBody(
                   data:
                       "1.  После парсинга ниже появятся **редактируемые поля** с извлеченными данными.\n"
-                      "2.  **Проверьте их!** Если парсер ошибся или не нашел какую-то секцию (например, из-за нестандартного заголовка в ТЗ), вы можете **вручную скорректировать** данные прямо в этих полях.\n"
-                      "3.  Когда все данные верны, нажмите **«Запустить финальный анализ»**.\n"
-                      "4.  Инструмент проведет полную проверку текста на соответствие скорректированным требованиям и выведет подробный отчет.",
+                      "2.  **Проверьте их!** Если парсер ошибся, вы можете **вручную скорректировать** данные.\n"
+                      "3.  Выберите **режим анализа** (пересечение, разовый или уникальный).\n"
+                      "4.  Когда все данные верны, нажмите **«Запустить финальный анализ»** и получите подробный отчет.",
                   styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                       p: bodyTextStyle(context),
                       listBullet: bodyTextStyle(context)),
+                ),
+                // 2. ДОБАВЛЕН БЛОК С ОПИСАНИЕМ ПОДСВЕТОК
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                Text("Обозначение подсветок в тексте",
+                    style: bodyTextStyle(context)
+                        .copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: bodyTextStyle(context),
+                          children: [
+                            TextSpan(
+                              text: "  Точное вхождение  ",
+                              style: TextStyle(
+                                  backgroundColor:
+                                      Colors.yellow.withOpacity(0.5)),
+                            ),
+                            const TextSpan(
+                                text: " — ключ найден в точной форме."),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      RichText(
+                        text: TextSpan(
+                          style: bodyTextStyle(context),
+                          children: [
+                            TextSpan(
+                              text: "  Тематическое слово  ",
+                              style: TextStyle(
+                                  backgroundColor:
+                                      Colors.lightBlue.withOpacity(0.4)),
+                            ),
+                            const TextSpan(
+                                text: " — LSI-слово в начальной форме."),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      RichText(
+                        text: TextSpan(
+                          style: bodyTextStyle(context),
+                          children: [
+                            TextSpan(
+                              text: "  Тематического слова  ",
+                              style: TextStyle(
+                                  backgroundColor:
+                                      Colors.lightGreen.withOpacity(0.5)),
+                            ),
+                            const TextSpan(
+                                text: " — LSI-слово в другой словоформе."),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -231,6 +303,25 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         );
       },
     );
+  }
+
+// 1. правильная инициализация класса Stemmer
+  final SnowballStemmer _stemmer = SnowballStemmer(Algorithm.russian);
+
+// 2. Исправленная функция с безопасным RegExp
+  String _stemText(String text) {
+    // Разбиваем текст на слова. Мы используем двойные кавычки для "сырой" строки,
+    // чтобы безопасно включить в нее одинарную кавычку.
+    final words = text.split(RegExp(r"(\s+|[.,!?—:;()" "'\-])"));
+
+    // Приводим каждое слово к его основе (стему)
+    final stemmedWords = words.map((word) {
+      if (word.trim().isEmpty) return word; // Сохраняем пробелы и знаки
+      return _stemmer.stem(word.toLowerCase());
+    });
+
+    // Собираем текст обратно
+    return stemmedWords.join('');
   }
 
   @override
@@ -850,16 +941,18 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     return count;
   }
 
+  // <<< НАЧАЛО ЗАМЕНЫ: ПОЛНОСТЬЮ ЗАМЕНИТЕ ВАШ МЕТОД НА ЭТОТ >>>
   List<MapEntry<KeywordRequirement, int>> _analyzeKeywords(
     String text,
     List<KeywordRequirement> requirements,
     String type,
     SearchMode mode,
-    List<List<int>> globalConsumedRanges, // Для режима "Уникальные"
+    List<List<int>> globalConsumedRanges,
   ) {
-    List<MapEntry<KeywordRequirement, int>> results = [];
+    // 1. Стемминг текста (если нужно)
+    final String textToAnalyze = (type == 'exact') ? text : _stemText(text);
 
-    // ИСПРАВЛЕНИЕ 1: Правильно определяем stopWords как Set<String>
+    List<MapEntry<KeywordRequirement, int>> results = [];
     const stopWords = {
       'и',
       'в',
@@ -878,33 +971,39 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       'через'
     };
 
-    // Создаем локальный список "занятых" диапазонов для режима "Разовые"
     List<List<int>> localConsumedRanges = [];
-    // Выбираем, с каким списком работать, в зависимости от режима
     final activeRanges = (mode == SearchMode.uniquePass)
         ? globalConsumedRanges
         : localConsumedRanges;
 
-    // Для режимов "Разовые" и "Уникальные" КРАЙНЕ ВАЖНО сначала искать длинные фразы
     if (mode != SearchMode.overlapping) {
       requirements.sort((a, b) => b.phrase.length.compareTo(a.phrase.length));
     }
 
     for (var req in requirements) {
       int count = 0;
-      final lowerText = text.toLowerCase();
-      final lowerPhrase = req.phrase.toLowerCase();
 
-      // Простой режим "Пересечение" - работает как раньше, но с пустым списком диапазонов
+      // 2. Стемминг фразы (если нужно)
+      final String phraseToSearch =
+          (type == 'exact') ? req.phrase : _stemText(req.phrase);
+
+      final lowerText = textToAnalyze.toLowerCase();
+      final lowerPhrase = phraseToSearch.toLowerCase();
+
+      // 3. ИСПРАВЛЕНИЕ: Определяем, нужно ли проверять границы слова.
+      // Только для "Точного вхождения" на оригинальном тексте.
+      final bool useWordBoundaryCheck = (type == 'exact');
+
       if (mode == SearchMode.overlapping) {
         if (type == 'exact' || type == 'thematic') {
-          count = _countOccurrences(text, req.phrase, true, []);
+          // Для 'thematic' передаем `false` в проверку границ
+          count = _countOccurrences(
+              textToAnalyze, phraseToSearch, useWordBoundaryCheck, []);
         } else if (type == 'diluted') {
-          final significantWords = req.phrase
-              .toLowerCase()
-              .replaceAll(RegExp(r'[,.!?]'), '')
+          final significantWords = phraseToSearch
               .split(' ')
-              .where((w) => w.isNotEmpty && !stopWords.contains(w))
+              .where(
+                  (w) => w.isNotEmpty && !stopWords.contains(w.toLowerCase()))
               .toList();
           if (significantWords.isEmpty) {
             results.add(MapEntry(req, 0));
@@ -912,9 +1011,10 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           }
           final sentences = text.split(RegExp(r'[.!?\n]'));
           for (var sentence in sentences) {
-            final lowerSentence = sentence.toLowerCase();
+            final stemmedSentence = _stemText(sentence);
+            // Для каждого слова в предложении передаем `false` в проверку границ
             if (significantWords.every((word) =>
-                _countOccurrences(lowerSentence, word, true, []) > 0)) {
+                _countOccurrences(stemmedSentence, word, false, []) > 0)) {
               count++;
             }
           }
@@ -922,27 +1022,28 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       } else {
         // Логика для "Разовых" и "Уникальных"
         if (type == 'exact' || type == 'thematic') {
-          // ИСПРАВЛЕНИЕ 2: Используем RegExp для поиска, чтобы получать правильный тип Match
+          // Для 'thematic' (LSI) поиск идет по основам слов (стеммам)
           for (final match
               in RegExp(RegExp.escape(lowerPhrase)).allMatches(lowerText)) {
             bool isOverlapping = activeRanges
                 .any((range) => match.start < range[1] && match.end > range[0]);
             if (isOverlapping) continue;
 
-            bool isStartBoundary =
-                (match.start == 0) || _isWordBoundary(lowerText, match.start);
-            bool isEndBoundary = (match.end == lowerText.length) ||
-                _isWordBoundary(lowerText, match.end);
-
-            if (isStartBoundary && isEndBoundary) {
-              count++;
-              activeRanges.add([match.start, match.end]); // Блокируем диапазон
+            // Проверяем границы только если это 'exact'
+            if (useWordBoundaryCheck) {
+              bool isStartBoundary =
+                  (match.start == 0) || _isWordBoundary(lowerText, match.start);
+              bool isEndBoundary = (match.end == lowerText.length) ||
+                  _isWordBoundary(lowerText, match.end);
+              if (!isStartBoundary || !isEndBoundary)
+                continue; // Если не целое слово, пропускаем
             }
+
+            count++;
+            activeRanges.add([match.start, match.end]);
           }
         } else if (type == 'diluted') {
-          final significantWords = req.phrase
-              .toLowerCase()
-              .replaceAll(RegExp(r'[,.!?]'), '')
+          final significantWords = lowerPhrase
               .split(' ')
               .where((w) => w.isNotEmpty && !stopWords.contains(w))
               .toList();
@@ -953,37 +1054,25 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           final sentences = text.split(RegExp(r'[.!?\n]'));
           int sentenceOffset = 0;
           for (var sentence in sentences) {
-            final lowerSentence = sentence.toLowerCase();
-
-            // Проверяем, не пересекается ли все предложение с уже занятыми диапазонами
+            final stemmedSentence = _stemText(sentence).toLowerCase();
             bool sentenceOverlaps = activeRanges.any((range) =>
                 sentenceOffset < range[1] &&
                 (sentenceOffset + sentence.length) > range[0]);
             if (sentenceOverlaps) {
               sentenceOffset += sentence.length + 1;
-              continue; // Пропускаем это предложение
+              continue;
             }
-
+            // Проверяем наличие всех слов-основ в основе предложения
             bool allWordsFound = significantWords.every((word) {
-              // ИСПРАВЛЕНИЕ 3: Используем RegExp для поиска, чтобы получать правильный тип Match
-              final wordMatches =
-                  RegExp(RegExp.escape(word)).allMatches(lowerSentence);
-              return wordMatches.any((match) {
-                bool isStartBoundary = (match.start == 0) ||
-                    _isWordBoundary(lowerSentence, match.start);
-                bool isEndBoundary = (match.end == lowerSentence.length) ||
-                    _isWordBoundary(lowerSentence, match.end);
-                return isStartBoundary && isEndBoundary;
-              });
+              // Границы здесь не нужны, так как ищем основу в основе
+              return _countOccurrences(stemmedSentence, word, false, []) > 0;
             });
-
             if (allWordsFound) {
               count++;
-              // Блокируем весь диапазон предложения
               activeRanges
                   .add([sentenceOffset, sentenceOffset + sentence.length]);
             }
-            sentenceOffset += sentence.length + 1; // +1 для разделителя
+            sentenceOffset += sentence.length + 1;
           }
         }
       }
@@ -994,55 +1083,103 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
 
   List<TextSpan> _buildHighlightedText(String text,
       List<KeywordRequirement> exact, List<KeywordRequirement> thematic) {
-    List<TextSpan> spans = [];
+    if (text.isEmpty) return [const TextSpan(text: '')];
 
+    // --- ШАГ 1: ПОДГОТОВКА ДАННЫХ ---
+
+    // Создаем множество LSI-ключей в их начальной форме (лемме/стеме) для быстрой проверки
+    final lsiStemsToHighlight =
+        thematic.map((req) => _stemText(req.phrase.toLowerCase())).toSet();
+
+    // Создаем карту для точных вхождений и LSI, которые совпали в начальной форме
     Map<String, Color> phrasesToHighlight = {};
     for (var req in exact) {
       phrasesToHighlight[req.phrase.toLowerCase()] =
-          // ignore: deprecated_member_use
           Colors.yellow.withOpacity(0.5);
     }
     for (var req in thematic) {
+      // Если LSI-слово еще не подсвечено как точное, подсвечиваем его голубым
       if (!phrasesToHighlight.containsKey(req.phrase.toLowerCase())) {
         phrasesToHighlight[req.phrase.toLowerCase()] =
             Colors.lightBlue.withOpacity(0.4);
       }
     }
 
-    if (phrasesToHighlight.isEmpty) {
+    if (phrasesToHighlight.isEmpty && lsiStemsToHighlight.isEmpty) {
       return [TextSpan(text: text)];
     }
 
-    final pattern =
-        phrasesToHighlight.keys.map((p) => RegExp.escape(p)).join('|');
-    final regex = RegExp(pattern, caseSensitive: false);
+    // --- ШАГ 2: СОЗДАНИЕ "КАРТЫ ПОДСВЕТКИ" ---
 
+    // Создаем список, где для каждого символа текста будет храниться цвет подсветки
+    List<Color?> highlightMap = List.filled(text.length, null);
+
+    // Сначала помечаем все найденные по основе LSI-слова зеленым цветом
+    // Мы ищем все слова в тексте (последовательности букв)
+    final wordRegex = RegExp(r'[\wА-Яа-я]+');
+    for (final match in wordRegex.allMatches(text)) {
+      final word = match.group(0)!;
+      final wordStem = _stemText(word.toLowerCase());
+
+      // Если основа слова есть в нашем списке LSI, помечаем его
+      if (lsiStemsToHighlight.contains(wordStem)) {
+        for (int i = match.start; i < match.end; i++) {
+          highlightMap[i] = Colors.lightGreen.withOpacity(0.5);
+        }
+      }
+    }
+
+    // Затем помечаем точные вхождения и LSI в начальной форме.
+    // Они имеют более высокий приоритет и "перезапишут" зеленую подсветку.
+    if (phrasesToHighlight.isNotEmpty) {
+      final pattern =
+          phrasesToHighlight.keys.map((p) => RegExp.escape(p)).join('|');
+      final regex = RegExp(pattern, caseSensitive: false);
+
+      for (var match in regex.allMatches(text)) {
+        final matchedPhrase = match.group(0)!.toLowerCase();
+        bool isStartBoundary =
+            (match.start == 0) || _isWordBoundary(text, match.start);
+        bool isEndBoundary =
+            (match.end == text.length) || _isWordBoundary(text, match.end);
+
+        if (isStartBoundary && isEndBoundary) {
+          final color = phrasesToHighlight[matchedPhrase];
+          for (int i = match.start; i < match.end; i++) {
+            highlightMap[i] = color;
+          }
+        }
+      }
+    }
+
+    // --- ШАГ 3: СБОРКА WIDGETSPAN ИЗ "КАРТЫ ПОДСВЕТКИ" ---
+
+    List<TextSpan> spans = [];
     int lastIndex = 0;
-    for (var match in regex.allMatches(text)) {
-      if (match.start > lastIndex) {
-        spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
-      }
-      final matchedPhrase = match.group(0)!.toLowerCase();
+    Color? lastColor;
 
-      bool isStartBoundary = (match.start == 0) ||
-          _isWordBoundary(text.toLowerCase(), match.start);
-      bool isEndBoundary = (match.end == text.length) ||
-          _isWordBoundary(text.toLowerCase(), match.end);
-
-      if (isStartBoundary && isEndBoundary) {
-        spans.add(TextSpan(
-          text: match.group(0)!,
-          style: TextStyle(backgroundColor: phrasesToHighlight[matchedPhrase]),
-        ));
-      } else {
-        spans.add(TextSpan(text: match.group(0)!));
+    for (int i = 0; i < text.length; i++) {
+      final currentColor = highlightMap[i];
+      if (currentColor != lastColor) {
+        if (i > lastIndex) {
+          spans.add(TextSpan(
+            text: text.substring(lastIndex, i),
+            style: TextStyle(backgroundColor: lastColor),
+          ));
+        }
+        lastIndex = i;
+        lastColor = currentColor;
       }
-      lastIndex = match.end;
     }
 
+    // Добавляем последний оставшийся фрагмент текста
     if (lastIndex < text.length) {
-      spans.add(TextSpan(text: text.substring(lastIndex)));
+      spans.add(TextSpan(
+        text: text.substring(lastIndex),
+        style: TextStyle(backgroundColor: lastColor),
+      ));
     }
+
     return spans;
   }
 

@@ -23,7 +23,7 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
   void initState() {
     super.initState();
     MetaTagService().updateAllTags(
-      title: "Полезные инструменты для SEO | Полезные инструменты для SEO",
+      title: "Полезные инструменты для SEO | Сайт Даниила Шастовского",
       description:
           "Полезные инструменты для SEO. Анализатор текста SEO, Генератор семантического ядра, Проверка внешних ссылок и многое другое.",
     );
