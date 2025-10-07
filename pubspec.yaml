@@ -27,6 +27,7 @@ dependencies:
   provider: ^6.0.0
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
+  snowball_stemmer: ^0.1.0
   collection: ^1.18.0 # Может понадобиться для deep equality
 
   # Для редактора кода с подсветкой синтаксиса
@@ -42,6 +43,16 @@ dependencies:
   webview_flutter: ^4.7.0 # для мобильных платформ в будущем
   webview_flutter_web: ^0.2.2+4 # для веб
   split_view: ^3.2.0
+
+  # Для обрабтки рич текста
+  flutter_quill: ^9.2.3
+  delta_markdown_converter: ^0.0.2
+  vsc_quill_delta_to_html: ^1.0.5
+  quill_html_converter: ^9.2.3
+  html: ^0.15.6
+  rtf: ^0.1.0
+  http: ^1.5.0
+
 
 dev_dependencies:
   flutter_test:
