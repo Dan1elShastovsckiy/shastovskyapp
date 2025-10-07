@@ -1,13 +1,12 @@
+/*
 // /lib/pages/pages_useful/page_seo_analyzer.dart
 
 import 'dart:convert';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart'; // <<<
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:flutter_quill/quill_delta.dart';
+import 'package:highlight/languages/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
@@ -19,18 +18,11 @@ import 'dart:async';
 import 'package:snowball_stemmer/snowball_stemmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:html/parser.dart' as html_parser;
-import 'package:html/dom.dart' as html_dom;
-// ИСПРАВЛЕНИЕ: убрали 'hide Text', так как оно больше не нужно
-import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'package:html2md/html2md.dart' as html2md;
-// ИСПРАВЛЕНИЕ: Этот импорт теперь не используется напрямую, но его наличие в pubspec.yaml
-// дает доступ к методу-расширению Document.fromHtml()
-// import 'package:quill_html_converter/quill_html_converter.dart';
 
-// --- МОДЕЛИ ДАННЫХ ---
-
+// --- МОДЕЛИ (без изменений) ---
 class KeywordRequirement {
   final String phrase;
   final int min;
@@ -38,13 +30,16 @@ class KeywordRequirement {
   KeywordRequirement(this.phrase, this.min, this.max);
 }
 
+// Контейнер для передачи данных в фоновый изолят
 class AnalysisPayload {
-  final List<dynamic> quillDelta;
+  final String markdownText;
+  final String plainText;
   final TzData tzData;
   final SearchMode searchMode;
 
   AnalysisPayload({
-    required this.quillDelta,
+    required this.markdownText,
+    required this.plainText,
     required this.tzData,
     required this.searchMode,
   });
@@ -87,7 +82,7 @@ class AnalysisResult {
   final String titleResult;
   final String descriptionResult;
   final String structureResult;
-  final List<YandexSpellerError> spellingErrors;
+  final List<YandexSpellerError> spellingErrors; // <<<
   final AnalysisCategoryResult exactInclusion;
   final AnalysisCategoryResult dilutedInclusion;
   final AnalysisCategoryResult thematicWords;
@@ -99,7 +94,7 @@ class AnalysisResult {
     required this.titleResult,
     required this.descriptionResult,
     required this.structureResult,
-    required this.spellingErrors,
+    required this.spellingErrors, // <<<
     required this.exactInclusion,
     required this.dilutedInclusion,
     required this.thematicWords,
@@ -126,6 +121,7 @@ class AnalysisCategoryResult {
   }
 }
 
+// 1. Модель для хранения ошибок от Яндекс.Спеллера
 class YandexSpellerError {
   final String word;
   final int pos;
@@ -150,436 +146,18 @@ class TextTzPair {
   AnalysisResult? analysisResult;
 }
 
-enum SearchMode {
-  overlapping,
-  singlePass,
-  uniquePass,
-}
-
-// <<< НАЧАЛО: ВСЯ ЛОГИКА АНАЛИЗА, ВЫНЕСЕННАЯ ДЛЯ РАБОТЫ В ИЗОЛЯТЕ >>>
-
-Future<Map<String, dynamic>> runAnalysisInIsolate(
-    AnalysisPayload payload) async {
-  final doc = Document.fromJson(payload.quillDelta);
-  final plainTextFromDelta = doc.toPlainText();
-  final converter =
-      QuillDeltaToHtmlConverter(List.castFrom(payload.quillDelta));
-  final html = converter.convert();
-  final markdownTextFromDelta = html2md.convert(html);
-
-  final stemmer = SnowballStemmer(Algorithm.russian);
-
-  String normalizeEyo(String text) => text.replaceAll('ё', 'е');
-
-  String stemText(String text) {
-    final words = text.split(RegExp(r"(\s+|[.,!?—:;()" "'\-])"));
-    final stemmedWords = words.map((word) {
-      if (word.trim().isEmpty) return word;
-      return stemmer.stem(word.toLowerCase());
-    });
-    return stemmedWords.join('');
-  }
-
-  bool isWordBoundary(String text, int index) {
-    if (index < 0 || index > text.length) return false;
-    if (index == 0 || index == text.length) return true;
-    final prevChar = text[index - 1];
-    final nextChar = text[index];
-    final boundaryChars = RegExp(r'[\s.,!?;:()\[\]"' '’]');
-    return boundaryChars.hasMatch(prevChar) || boundaryChars.hasMatch(nextChar);
-  }
-
-  List<KeywordRequirement> parseKeywordsFromText(String text) {
-    if (text.toLowerCase() == "не найдено" || text.isEmpty) return [];
-    List<KeywordRequirement> keywords = [];
-    final lines =
-        text.split('\n').where((line) => line.trim().isNotEmpty).toList();
-    final header1 = 'Ключевое слово'.toLowerCase();
-    final header2 = 'Количество упоминаний в тексте(раз(а))'.toLowerCase();
-    final contentLines = lines.where((line) {
-      final trimmedLower = line.trim().toLowerCase();
-      return trimmedLower.isNotEmpty &&
-          trimmedLower != header1 &&
-          trimmedLower != header2;
-    }).toList();
-    final countOnNextLineRegex = RegExp(r'^\((\d+)\)$');
-    final rangeRegex = RegExp(r'(.+?)\s*\((\d+)(?:-(\d+))?\)\s*$');
-    final tableRegex = RegExp(r'^(.*?)\s+\d+\s+раз\(?а?\)');
-
-    for (int i = 0; i < contentLines.length; i++) {
-      final currentLine = contentLines[i].trim();
-      if (i + 1 < contentLines.length) {
-        final nextLine = contentLines[i + 1].trim();
-        final match = countOnNextLineRegex.firstMatch(nextLine);
-        if (match != null) {
-          final phrase = currentLine.replaceAll(RegExp(r'[\.,;]$'), '');
-          final count = int.parse(match.group(1)!);
-          keywords.add(KeywordRequirement(phrase, count, count));
-          i++;
-          continue;
-        }
-      }
-      final rangeMatch = rangeRegex.firstMatch(currentLine);
-      if (rangeMatch != null) {
-        final phrase =
-            rangeMatch.group(1)!.trim().replaceAll(RegExp(r'[\.,;]$'), '');
-        final min = int.parse(rangeMatch.group(2)!);
-        final max =
-            rangeMatch.group(3) != null ? int.parse(rangeMatch.group(3)!) : min;
-        keywords.add(KeywordRequirement(phrase, min, max));
-        continue;
-      }
-      final tableMatch = tableRegex.firstMatch(currentLine);
-      if (tableMatch != null) {
-        final phrase =
-            tableMatch.group(1)!.trim().replaceAll(RegExp(r'[\.,;]$'), '');
-        final countString = RegExp(r'(\d+)').firstMatch(currentLine)!.group(1)!;
-        final count = int.parse(countString);
-        keywords.add(KeywordRequirement(phrase, count, count));
-        continue;
-      }
-      if (currentLine.isNotEmpty) {
-        keywords.add(KeywordRequirement(
-            currentLine.replaceAll(RegExp(r'[\.,;]$'), ''), 1, 999));
-      }
-    }
-    return keywords;
-  }
-
-  int countOccurrences(
-      String text, String phrase, bool exact, List<List<int>> consumedRanges) {
-    if (phrase.isEmpty) return 0;
-    int count = 0;
-    final lowerText = text.toLowerCase();
-    final lowerPhrase = phrase.toLowerCase();
-    for (final match in lowerPhrase.allMatches(lowerText)) {
-      bool isOverlapping = false;
-      for (final range in consumedRanges) {
-        if (match.start < range[1] && match.end > range[0]) {
-          isOverlapping = true;
-          break;
-        }
-      }
-      if (isOverlapping) continue;
-      if (exact) {
-        bool isStartBoundary =
-            (match.start == 0) || isWordBoundary(lowerText, match.start);
-        bool isEndBoundary = (match.end == lowerText.length) ||
-            isWordBoundary(lowerText, match.end);
-        if (isStartBoundary && isEndBoundary) {
-          count++;
-        }
-      } else {
-        count++;
-      }
-    }
-    return count;
-  }
-
-  List<MapEntry<KeywordRequirement, int>> analyzeKeywords(
-    String text,
-    List<KeywordRequirement> requirements,
-    String type,
-    SearchMode mode,
-    List<List<int>> globalConsumedRanges,
-  ) {
-    final String textToAnalyze = (type == 'exact') ? text : stemText(text);
-    List<MapEntry<KeywordRequirement, int>> results = [];
-    const stopWords = {
-      'и',
-      'в',
-      'на',
-      'с',
-      'к',
-      'по',
-      'о',
-      'у',
-      'за',
-      'из',
-      'для',
-      'от',
-      'до',
-      'без',
-      'через'
-    };
-    List<List<int>> localConsumedRanges = [];
-    final activeRanges = (mode == SearchMode.uniquePass)
-        ? globalConsumedRanges
-        : localConsumedRanges;
-
-    if (mode != SearchMode.overlapping) {
-      requirements.sort((a, b) => b.phrase.length.compareTo(a.phrase.length));
-    }
-
-    for (var req in requirements) {
-      int count = 0;
-      final String phraseToSearch =
-          (type == 'exact') ? req.phrase : stemText(req.phrase);
-      final lowerText = textToAnalyze.toLowerCase();
-      final lowerPhrase = phraseToSearch.toLowerCase();
-      final bool useWordBoundaryCheck = (type == 'exact');
-
-      if (mode == SearchMode.overlapping) {
-        if (type == 'exact' || type == 'thematic') {
-          count = countOccurrences(
-              textToAnalyze, phraseToSearch, useWordBoundaryCheck, []);
-        } else if (type == 'diluted') {
-          final significantWords = phraseToSearch
-              .split(' ')
-              .where(
-                  (w) => w.isNotEmpty && !stopWords.contains(w.toLowerCase()))
-              .toList();
-          if (significantWords.isEmpty) {
-            results.add(MapEntry(req, 0));
-            continue;
-          }
-          final sentences = text.split(RegExp(r'[.!?\n]'));
-          for (var sentence in sentences) {
-            final stemmedSentence = stemText(sentence);
-            if (significantWords.every((word) =>
-                countOccurrences(stemmedSentence, word, false, []) > 0)) {
-              count++;
-            }
-          }
-        }
-      } else {
-        if (type == 'exact' || type == 'thematic') {
-          for (final match
-              in RegExp(RegExp.escape(lowerPhrase)).allMatches(lowerText)) {
-            bool isOverlapping = activeRanges
-                .any((range) => match.start < range[1] && match.end > range[0]);
-            if (isOverlapping) continue;
-            if (useWordBoundaryCheck) {
-              bool isStartBoundary =
-                  (match.start == 0) || isWordBoundary(lowerText, match.start);
-              bool isEndBoundary = (match.end == lowerText.length) ||
-                  isWordBoundary(lowerText, match.end);
-              if (!isStartBoundary || !isEndBoundary) continue;
-            }
-            count++;
-            activeRanges.add([match.start, match.end]);
-          }
-        } else if (type == 'diluted') {
-          final significantWords = lowerPhrase
-              .split(' ')
-              .where((w) => w.isNotEmpty && !stopWords.contains(w))
-              .toList();
-          if (significantWords.isEmpty) {
-            results.add(MapEntry(req, 0));
-            continue;
-          }
-          final sentences = text.split(RegExp(r'[.!?\n]'));
-          int sentenceOffset = 0;
-          for (var sentence in sentences) {
-            final stemmedSentence = stemText(sentence).toLowerCase();
-            bool sentenceOverlaps = activeRanges.any((range) =>
-                sentenceOffset < range[1] &&
-                (sentenceOffset + sentence.length) > range[0]);
-            if (sentenceOverlaps) {
-              sentenceOffset += sentence.length + 1;
-              continue;
-            }
-            bool allWordsFound = significantWords.every((word) =>
-                countOccurrences(stemmedSentence, word, false, []) > 0);
-            if (allWordsFound) {
-              count++;
-              activeRanges
-                  .add([sentenceOffset, sentenceOffset + sentence.length]);
-            }
-            sentenceOffset += sentence.length + 1;
-          }
-        }
-      }
-      results.add(MapEntry(req, count));
-    }
-    return results;
-  }
-
-  List<GeneralRequirementResult> analyzeGeneralRequirements(
-      String text, String requirementText) {
-    List<GeneralRequirementResult> results = [];
-    final services = ['Уникальность', 'Главред', 'Тургенев', 'Спам', 'Вода'];
-    for (var service in services) {
-      final reqRegex =
-          RegExp(service + r'.*?(\d+[\.,]?\d*)', caseSensitive: false);
-      final actRegex = RegExp(service + r'[:\-—\s]*(\d+[\.,]?\d*)[/\d\s,]*%',
-          caseSensitive: false);
-      final reqMatch = reqRegex.firstMatch(requirementText);
-      final actMatch = actRegex.firstMatch(text);
-      final reqValue =
-          double.tryParse(reqMatch?.group(1)?.replaceAll(',', '.') ?? '');
-      final actValue =
-          double.tryParse(actMatch?.group(1)?.replaceAll(',', '.') ?? '');
-      if (reqValue != null) {
-        bool success = false;
-        String actualString = actMatch?.group(1) ?? 'Не найдено';
-        if (actValue != null) {
-          if (service == 'Уникальность' || service == 'Главред') {
-            success = actValue >= reqValue;
-          } else {
-            success = actValue <= reqValue;
-          }
-        }
-        String reqString = (service == 'Уникальность' || service == 'Главред')
-            ? '≥ $reqValue'
-            : '≤ $reqValue';
-        results.add(GeneralRequirementResult(
-            service, reqString, actualString, success));
-      }
-    }
-    final firstParagraph =
-        text.split('\n\n').first.replaceAll(RegExp(r'#+\s*'), '');
-    results.add(GeneralRequirementResult('Первый абзац', '≤ 500 симв.',
-        '${firstParagraph.length}', firstParagraph.length <= 500));
-    final hasList = text.contains(RegExp(r'^\s*[*-]|\d+\.', multiLine: true));
-    results.add(GeneralRequirementResult(
-        'Списки', 'Хотя бы 1', hasList ? 'Есть' : 'Нет', hasList));
-    final h2Count =
-        RegExp(r'(^##\s+.+)|(^.+\n-+$)', multiLine: true, caseSensitive: false)
-            .allMatches(text)
-            .length;
-    results.add(GeneralRequirementResult('Подзаголовки H2', 'Есть',
-        h2Count > 0 ? 'Найдено: $h2Count' : 'Нет', h2Count > 0));
-    return results;
-  }
-
-  String analyzeVolume(String text, String requirement) {
-    final currentVolume = text.replaceAll(' ', '').length;
-    final regex = RegExp(r'(\d+)');
-    final matches = regex.allMatches(requirement).toList();
-    if (matches.isEmpty) {
-      return 'Текущий объем: $currentVolume симв. Требование в ТЗ не найдено.';
-    }
-    final minVolume = int.parse(matches[0].group(1)!);
-    final maxVolume = matches.length > 1
-        ? int.parse(matches[1].group(1)!)
-        : minVolume + (minVolume * 0.2).round();
-    if (currentVolume >= minVolume && currentVolume <= maxVolume) {
-      return '✅ Объем соответствует: $currentVolume из $minVolume-$maxVolume симв. (без пробелов)';
-    } else if (currentVolume < minVolume) {
-      return '❌ Объем не соответствует: $currentVolume из $minVolume-$maxVolume симв. (нужно еще ${minVolume - currentVolume})';
-    } else {
-      return '❌ Объем не соответствует: $currentVolume из $minVolume-$maxVolume симв. (превышение на ${currentVolume - maxVolume})';
-    }
-  }
-
-  String analyzeMetaTag(String text, String requirement, String tagName) {
-    if (requirement.toLowerCase() == "не найдено" || requirement.isEmpty) {
-      return 'Требование для $tagName не найдено в ТЗ.';
-    }
-    if (text.toLowerCase().contains(requirement.toLowerCase().trim())) {
-      return '✅ $tagName найден в тексте.';
-    } else {
-      return '❌ $tagName не найден в тексте.';
-    }
-  }
-
-  String analyzeStructure(String text, String requirement) {
-    if (requirement.toLowerCase() == "не найдено" || requirement.isEmpty) {
-      return 'Требование по структуре не найдено в ТЗ.';
-    }
-    final List<String> requiredThemes = requirement
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) =>
-            line.isNotEmpty &&
-            line.length > 10 &&
-            !line.toLowerCase().startsWith('что писать') &&
-            !line.toLowerCase().startsWith('формат'))
-        .toList();
-    if (requiredThemes.isEmpty) {
-      return '⚠️ В ТЗ не найдено тем для проверки структуры.';
-    }
-    final h2Pattern = RegExp(r'(^##\s+(.+)$)|(^(.+)\n-+$)', multiLine: true);
-    final List<String> articleHeadings =
-        h2Pattern.allMatches(text).map((match) {
-      return (match.group(2) ?? match.group(4) ?? '').trim();
-    }).toList();
-    if (articleHeadings.isEmpty) {
-      return '⚠️ В тексте не найдено ни одного H2 заголовка в формате Markdown (## Заголовок).';
-    }
-    int foundCount = 0;
-    List<String> notFoundThemes = [];
-    for (var theme in requiredThemes) {
-      bool themeFound = false;
-      final themeKeywords = normalizeEyo(theme.toLowerCase())
-          .replaceAll(RegExp(r'[,.()?]'), '')
-          .split(' ')
-          .where((word) => word.length > 3)
-          .toSet();
-      if (themeKeywords.isEmpty) continue;
-      for (var heading in articleHeadings) {
-        final normalizedHeading = normalizeEyo(heading.toLowerCase());
-        if (themeKeywords
-            .every((keyword) => normalizedHeading.contains(keyword))) {
-          themeFound = true;
-          break;
-        }
-      }
-      if (themeFound) {
-        foundCount++;
-      } else {
-        notFoundThemes.add(theme);
-      }
-    }
-    final isOk = foundCount >= requiredThemes.length;
-    String result =
-        '${isOk ? '✅' : '⚠️'} Найдено соответствие для $foundCount из ${requiredThemes.length} тем структуры.';
-    if (notFoundThemes.isNotEmpty) {
-      result +=
-          '\nТемы без соответствия в заголовках: ${notFoundThemes.join("; ")}';
-    }
-    return result;
-  }
-
-  // --- Основной процесс анализа в изоляте ---
-  final markdownText = normalizeEyo(markdownTextFromDelta);
-  final plainText = normalizeEyo(plainTextFromDelta);
-  final tzData = payload.tzData;
-
-  final generalResults =
-      analyzeGeneralRequirements(markdownText, tzData.generalRequirements);
-  final volumeResult = analyzeVolume(plainText, tzData.volume);
-  final titleResult = analyzeMetaTag(plainText, tzData.metaTitle, "Title");
-  final descriptionResult =
-      analyzeMetaTag(plainText, tzData.metaDescription, "Description");
-  final structureResult = analyzeStructure(markdownText, tzData.structure);
-
-  final exactReqs = parseKeywordsFromText(tzData.exactKeywords);
-  final dilutedReqs = parseKeywordsFromText(tzData.dilutedKeywords);
-  final thematicReqs = parseKeywordsFromText(tzData.thematicWords);
-
-  List<List<int>> globalConsumedRanges = [];
-
-  final exactResult = analyzeKeywords(markdownText, exactReqs, 'exact',
-      payload.searchMode, globalConsumedRanges);
-  final dilutedResult = analyzeKeywords(markdownText, dilutedReqs, 'diluted',
-      payload.searchMode, globalConsumedRanges);
-  final thematicResult = analyzeKeywords(markdownText, thematicReqs, 'thematic',
-      payload.searchMode, globalConsumedRanges);
-
-  return {
-    'generalResults': generalResults,
-    'volumeResult': volumeResult,
-    'titleResult': titleResult,
-    'descriptionResult': descriptionResult,
-    'structureResult': structureResult,
-    'exactInclusion': AnalysisCategoryResult(exactResult),
-    'dilutedInclusion': AnalysisCategoryResult(dilutedResult),
-    'thematicWords': AnalysisCategoryResult(thematicResult),
-    'exactKeywords': exactReqs,
-    'thematicKeywords': thematicReqs,
-  };
-}
-
-// <<< КОНЕЦ БЛОКА ДЛЯ ИЗОЛЯТА >>>
-
 class SeoAnalyzerPage extends StatefulWidget {
   static const String name = 'useful/instruments/seo-analyzer';
   const SeoAnalyzerPage({super.key});
 
   @override
   State<SeoAnalyzerPage> createState() => _SeoAnalyzerPageState();
+}
+
+enum SearchMode {
+  overlapping,
+  singlePass,
+  uniquePass,
 }
 
 class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
@@ -663,83 +241,28 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     }
   }
 
-  void _recognizeStructure(QuillController controller) {
-    // Получаем текущий текст и разбиваем его на строки.
-    // LineSplitter() надежнее, чем split('\n'), так как работает с разными типами переносов строк.
-    final plainText = controller.document.toPlainText();
-    final lines = const LineSplitter().convert(plainText);
-
-    // Создаем новый, пустой Delta, который мы будем наполнять.
-    final newDelta = Delta();
-
-    for (final line in lines) {
-      final trimmedLine = line.trim();
-
-      // Если строка пустая, просто сохраняем перенос строки.
-      if (trimmedLine.isEmpty) {
-        newDelta.insert('\n');
-        continue;
-      }
-
-      // --- Правило 1: Распознаем пункты списка ---
-      // Если строка начинается с одного из маркеров...
-      if (trimmedLine.startsWith('•') ||
-          trimmedLine.startsWith('-') ||
-          trimmedLine.startsWith('*')) {
-        // Убираем маркер и пробел из начала строки
-        final lineContent = trimmedLine.substring(1).trim();
-        // Вставляем сам текст пункта
-        newDelta.insert(lineContent);
-        // А затем вставляем перенос строки с атрибутом "маркированный список".
-        // Это стандартный способ форматирования блоков в Quill.
-        newDelta.insert('\n', {'list': 'bullet'});
-      }
-      // --- Правило 2: Распознаем заголовки ---
-      // Эвристика: строка относительно короткая и не заканчивается знаком препинания.
-      else if (trimmedLine.length < 80 &&
-          !'.?!,:;'.contains(trimmedLine.substring(trimmedLine.length - 1))) {
-        newDelta.insert(trimmedLine);
-        // Применяем стиль "Заголовок 2" к переносу строки.
-        newDelta.insert('\n', {'header': 2});
-      }
-      // --- Правило 3: Все остальное считаем обычным параграфом ---
-      else {
-        // Просто вставляем строку с переносом без всяких атрибутов.
-        newDelta.insert(trimmedLine + '\n');
-      }
-    }
-
-    // ИСПРАВЛЕНИЕ: Используем правильный метод для полной замены содержимого редактора.
-    controller.document = Document.fromDelta(newDelta);
-
-    // Перемещаем курсор в конец, чтобы было удобно продолжать редактирование.
-    controller.moveCursorToEnd();
-  }
-
+  // --- НОВАЯ ЛОГИКА АНАЛИЗА ---
   Future<void> _runGlobalAnalysis() async {
-    // 1. Немедленно показываем оверлей.
     setState(() => _isLoading = true);
-
-    // 2. ВАЖНЫЙ ШАГ: Даем UI-потоку небольшую паузу (50 миллисекунд).
-    // Этого времени достаточно, чтобы Flutter успел не только показать,
-    // но и проиграть несколько кадров анимации лоадера.
     await Future.delayed(const Duration(milliseconds: 50));
 
-    // 3. Теперь, когда анимация уже точно идет, запускаем сам анализ.
-    // Мы вынесли его в отдельную асинхронную функцию для чистоты.
-    _performAnalysis();
-  }
-
-// Новая вспомогательная функция, которая содержит всю логику
-  Future<void> _performAnalysis() async {
     for (var pair in _pairs) {
-      // Эта операция все еще может вызвать очень короткое "подрагивание"
-      // на ОЧЕНЬ больших текстах, но оно будет минимальным, так как анимация уже запущена.
       final plainText = pair.textController.document.toPlainText();
       if (plainText.trim().isEmpty) {
-        pair.analysisResult = null;
         continue;
       }
+
+      final deltaOps = pair.textController.document.toDelta().toJson();
+      final converter = QuillDeltaToHtmlConverter(List.castFrom(deltaOps));
+      final html = converter.convert();
+      final markdownText = html2md.convert(html);
+
+      // ИСПРАВЛЕНИЕ 2: Нормализуем 'ё' в 'е' для всех текстов
+      final normalizedMarkdown = _normalizeEyo(markdownText);
+      final normalizedPlainText = _normalizeEyo(plainText);
+      // --- НОВЫЙ ВЫЗОВ ---
+      final List<YandexSpellerError> spellingErrors =
+          await _checkSpelling(normalizedPlainText);
 
       final tzData = TzData(
         volume: pair.volumeController.text,
@@ -754,153 +277,53 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
             "Не найдено",
       );
 
-      final payload = AnalysisPayload(
-        quillDelta: pair.textController.document.toDelta().toJson(),
-        tzData: tzData,
-        searchMode: _selectedMode,
-      );
+      final generalResults = _analyzeGeneralRequirements(
+          normalizedMarkdown, tzData.generalRequirements);
+      final volumeResult = _analyzeVolume(normalizedPlainText, tzData.volume);
+      final titleResult =
+          _analyzeMetaTag(normalizedPlainText, tzData.metaTitle, "Title");
+      final descriptionResult = _analyzeMetaTag(
+          normalizedPlainText, tzData.metaDescription, "Description");
+      final structureResult =
+          _analyzeStructure(normalizedMarkdown, tzData.structure);
 
-      final isolateFuture = compute(runAnalysisInIsolate, payload);
-      final spellingFuture = _checkSpelling(plainText);
+      final exactReqs = _parseKeywordsFromText(tzData.exactKeywords);
+      final dilutedReqs = _parseKeywordsFromText(tzData.dilutedKeywords);
+      final thematicReqs = _parseKeywordsFromText(tzData.thematicWords);
 
-      final isolateResult = await isolateFuture;
-      final spellingErrors = await spellingFuture;
+      List<List<int>> globalConsumedRanges = [];
 
-      final List<TextSpan> highlightedText = _buildHighlightedText(
-        plainText,
-        isolateResult['exactKeywords'],
-        isolateResult['thematicKeywords'],
-      );
+      final exactResult = _analyzeKeywords(normalizedMarkdown, exactReqs,
+          'exact', _selectedMode, globalConsumedRanges);
+      final dilutedResult = _analyzeKeywords(normalizedMarkdown, dilutedReqs,
+          'diluted', _selectedMode, globalConsumedRanges);
+      final thematicResult = _analyzeKeywords(normalizedMarkdown, thematicReqs,
+          'thematic', _selectedMode, globalConsumedRanges);
+
+      final highlightedText =
+          _buildHighlightedText(normalizedPlainText, exactReqs, thematicReqs);
 
       pair.analysisResult = AnalysisResult(
-        generalResults: isolateResult['generalResults'],
-        volumeResult: isolateResult['volumeResult'],
-        titleResult: isolateResult['titleResult'],
-        descriptionResult: isolateResult['descriptionResult'],
-        structureResult: isolateResult['structureResult'],
-        exactInclusion: isolateResult['exactInclusion'],
-        dilutedInclusion: isolateResult['dilutedInclusion'],
-        thematicWords: isolateResult['thematicWords'],
+        generalResults: generalResults,
+        volumeResult: volumeResult,
+        titleResult: titleResult,
+        descriptionResult: descriptionResult,
+        structureResult: structureResult,
+        exactInclusion: AnalysisCategoryResult(exactResult),
+        dilutedInclusion: AnalysisCategoryResult(dilutedResult),
+        thematicWords: AnalysisCategoryResult(thematicResult),
         highlightedText: highlightedText,
-        spellingErrors: spellingErrors,
+        spellingErrors: spellingErrors, // <<<
       );
     }
 
-    // Когда все анализы завершены, обновляем UI и выключаем лоадер
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    setState(() => _isLoading = false);
   }
 
-  /*/// "Очищает" HTML, скопированный из Google Docs, используя DOM-парсер
-  /// для надежной замены специфичных стилей на стандартные семантические теги.
-  String _sanitizeGoogleDocsHtml(String dirtyHtml) {
-    // 1. Парсим грязный HTML в объектную модель документа (DOM)
-    final document = html_parser.parse(dirtyHtml);
-
-    // 2. Ищем все теги <p> и пытаемся понять, не являются ли они заголовком или пунктом списка
-    final paragraphs = document.querySelectorAll('p');
-    for (final p in paragraphs) {
-      String innerText = p.text.trim();
-      if (innerText.isEmpty) continue;
-
-      // --- Логика для списков ---
-      // Если текст параграфа начинается с маркера списка
-      if (innerText.startsWith('•') ||
-          innerText.startsWith('-') ||
-          innerText.startsWith('*')) {
-        // Создаем новый, чистый элемент <li>
-        final newListItem = html_dom.Element.tag('li');
-        // Убираем маркер и лишние пробелы из текста и кладем его внутрь <li>
-        newListItem.innerHtml = innerText.substring(1).trim();
-        // Заменяем старый <p> на новый <li> в дереве документа
-        p.replaceWith(newListItem);
-        continue; // Переходим к следующему параграфу
-      }
-
-      // --- Логика для заголовков (основана на размере шрифта) ---
-      final span = p.querySelector('span');
-      if (span != null && span.attributes['style'] != null) {
-        final style = span.attributes['style']!;
-        // Ищем размер шрифта в стилях
-        final sizeMatch = RegExp(r'font-size:\s*(\d+)pt').firstMatch(style);
-        if (sizeMatch != null) {
-          final fontSize = int.parse(sizeMatch.group(1)!);
-          String? headingTag;
-
-          // Определяем тег заголовка по размеру шрифта (эти значения можно подстроить)
-          if (fontSize >= 20)
-            headingTag = 'h1';
-          else if (fontSize >= 16)
-            headingTag = 'h2';
-          else if (fontSize >= 14) headingTag = 'h3';
-
-          if (headingTag != null) {
-            final newHeading = html_dom.Element.tag(headingTag);
-            newHeading.innerHtml =
-                p.innerHtml; // Сохраняем внутренний HTML (с жирным и т.д.)
-            p.replaceWith(newHeading);
-            continue;
-          }
-        }
-      }
-    }
-
-    // 3. После обработки всех <p> оборачиваем группы <li> в <ul>
-    // Это нужно делать после основного цикла, чтобы не нарушать итерацию
-    String bodyHtml = document.body!.innerHtml;
-    bodyHtml = bodyHtml.replaceAllMapped(
-      RegExp(r'(<li>.*?</li>)+', dotAll: true),
-      (match) => '<ul>${match.group(0)}</ul>',
-    );
-
-    debugPrint("--- ОЧИЩЕННЫЙ HTML ---\n$bodyHtml\n--------------------");
-    return bodyHtml;
-  }*/
-
-  Future<void> _pasteHtml(QuillController controller) async {
-    String? clipboardText;
-    try {
-      // Мы все еще используем try-catch на случай других платформенных ошибок
-      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-      clipboardText = clipboardData?.text;
-    } catch (e) {
-      debugPrint("Не удалось прочитать буфер обмена: $e");
-      return;
-    }
-
-    if (clipboardText == null || clipboardText.isEmpty) {
-      return;
-    }
-
-    // Просто вставляем текст как есть
-    final selection = controller.selection;
-    controller.document.replace(
-        selection.start, selection.end - selection.start, clipboardText);
-  }
+  // --- ВСЕ ОСТАЛЬНЫЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 
   String _normalizeEyo(String text) {
     return text.replaceAll('ё', 'е');
-  }
-
-  String _stemText(String text) {
-    final words = text.split(RegExp(r"(\s+|[.,!?—:;()" "'\-])"));
-    final stemmedWords = words.map((word) {
-      if (word.trim().isEmpty) return word;
-      return _stemmer.stem(word.toLowerCase());
-    });
-    return stemmedWords.join('');
-  }
-
-  bool _isWordBoundary(String text, int index) {
-    if (index < 0 || index > text.length) return false;
-    if (index == 0 || index == text.length) return true;
-    final prevChar = text[index - 1];
-    final nextChar = text[index];
-    final boundaryChars = RegExp(r'[\s.,!?;:()\[\]"' '’]');
-    return boundaryChars.hasMatch(prevChar) || boundaryChars.hasMatch(nextChar);
   }
 
   void _showHelpDialog(BuildContext context) {
@@ -938,8 +361,9 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                         .copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 MarkdownBody(
+                  // ИСПРАВЛЕНИЕ 3: Обновленный текст инструкции
                   data:
-                      "1.  **Вставьте текст статьи** в левое поле. Используйте новую **иконку вставки на панели инструментов**, чтобы вставить текст из Google Docs/Word с сохранением форматирования.\n"
+                      "1.  **Вставьте текст статьи** в левое поле. Форматирование из Word/Google Docs при вставке может теряться.\n"
                       "2.  **Используйте панель инструментов** над полем ввода, чтобы быстро разметить **заголовки (H1, H2)** и **списки**.\n"
                       "3.  **Вставьте текст вашего ТЗ** в правое поле и нажмите **«Распарсить ТЗ»**.",
                   styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
@@ -1040,6 +464,16 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     );
   }
 
+  String _stemText(String text) {
+    final words = text.split(RegExp(r"(\s+|[.,!?—:;()" "'\-])"));
+    final stemmedWords = words.map((word) {
+      if (word.trim().isEmpty) return word;
+      return _stemmer.stem(word.toLowerCase());
+    });
+    return stemmedWords.join('');
+  }
+
+  // Метод для показа всплывающего окна с описанием
   void _showModeHelpDialog(String title, String content) {
     showDialog(
       context: context,
@@ -1067,18 +501,23 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
 
     final parsedData = TzData(
       volume: _parseSection(tz, ['Объем текста', 'Объем']) ?? "Не найдено",
+      // Ищем точные заголовки Title: и Description:
       metaTitle: _parseSection(tz, ['Title:', 'Title']) ?? "Не найдено",
       metaDescription:
           _parseSection(tz, ['Description:', 'Description']) ?? "Не найдено",
+      // Ищем именно "Структура текста", чтобы не спутать с упоминанием в "Общих требованиях"
       structure: _parseSection(
               tz, ['Структура текста', 'Примерная структура статьи']) ??
           "Не найдено",
+
+      // Извлекаем "сырой" текст ключей
       exactKeywords: _parseSection(tz, [
             'Ключевые фразы',
             'Ключи, которые нужно использовать в тексте',
             'Ключи'
           ]) ??
           "Не найдено",
+
       dilutedKeywords: _parseSection(
               tz, ['Слова из подсветки в выдаче', 'Разбавленное вхождение']) ??
           "Не найдено",
@@ -1097,8 +536,12 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     pair.titleController.text = parsedData.metaTitle;
     pair.descriptionController.text = parsedData.metaDescription;
     pair.structureController.text = parsedData.structure;
+
+    // <<< ФОРМАТИРУЕМ КЛЮЧИ ПЕРЕД ВСТАВКОЙ В ПОЛЕ >>>
     pair.exactKeywordsController.text =
         _formatKeywordsForField(parsedData.exactKeywords);
+
+    // Остальные списки оставляем как есть (они очищаются в _parseSection)
     pair.dilutedKeywordsController.text = parsedData.dilutedKeywords;
     pair.thematicWordsController.text = parsedData.thematicWords;
 
@@ -1108,6 +551,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     });
   }
 
+  // <<< ИСПРАВЛЕНИЕ: ДОБАВЛЕН НЕДОСТАЮЩИЙ МЕТОД >>>
   void _showError(String message) {
     setState(() => _isLoading = false);
     if (mounted) {
@@ -1120,7 +564,9 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
   String? _parseSection(String tzText, List<String> markers) {
     final tzLines = tzText.split('\n');
     int bestStartLine = -1;
+    String? foundMarker;
 
+    // 1. Ищем наиболее подходящую стартовую строку.
     for (int i = 0; i < tzLines.length; i++) {
       final trimmedLine = tzLines[i].trim();
       if (trimmedLine.isEmpty) continue;
@@ -1130,14 +576,20 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         final potentialHeader =
             trimmedLine.split(RegExp(r'[:\-—]')).first.trim().toLowerCase();
 
+        // ИЗМЕНЕНИЕ: Заменяем '==' на 'startsWith' для большей гибкости.
+        // Это позволяет находить заголовки, даже если в строке есть доп. текст, например "(...)"
         if (potentialHeader.startsWith(lowerMarker)) {
+          // Мы нашли подходящий заголовок. Запоминаем его и продолжаем поиск,
+          // чтобы найти самое последнее (а значит, самое релевантное) вхождение в ТЗ.
           bestStartLine = i;
+          foundMarker = marker;
         }
       }
     }
 
     if (bestStartLine == -1) return null;
 
+    // 2. Обработка однострочных полей (Title, Description)
     final startLineText = tzLines[bestStartLine].trim();
     final separatorMatch = RegExp(r'[:\-—]').firstMatch(startLineText);
 
@@ -1148,11 +600,14 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       if (content.isNotEmpty) return content;
     }
 
+    // 3. Сбор контента для многострочных секций
     List<String> contentLines = [];
     final lowerCaseMarkers =
         markers.map((m) => m.toLowerCase().replaceAll(':', '')).toList();
+
     final bool isParsingStructure =
         lowerCaseMarkers.any((m) => m.contains('структура'));
+
     List<String> stopMarkers = _allKnownMarkers
         .map((m) => m.toLowerCase().replaceAll(':', ''))
         .where((m) => !lowerCaseMarkers.contains(m))
@@ -1162,6 +617,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       stopMarkers.removeWhere((m) => m == 'h1' || m == 'h2');
     }
 
+    // Начинаем сбор со следующей строки после заголовка
     for (int i = bestStartLine + 1; i < tzLines.length; i++) {
       final currentLine = tzLines[i];
       final trimmedLine = currentLine.trim();
@@ -1179,6 +635,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         bool isNewSection = stopMarkers.any((stopMarker) {
           final potentialHeader =
               trimmedLine.split(RegExp(r'[:\-—]')).first.trim().toLowerCase();
+          // Здесь оставляем '==' для четкой остановки
           return potentialHeader == stopMarker;
         });
         if (isNewSection) break;
@@ -1189,6 +646,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
 
     String fullContent = contentLines.join('\n').trim();
 
+    // 4. Пост-обработка для списков слов (убираем вводные фразы)
     if (markers.any((m) =>
         m.toLowerCase().contains('подсветки') ||
         m.toLowerCase().contains('тематические'))) {
@@ -1213,11 +671,16 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     return fullContent.isEmpty ? null : fullContent;
   }
 
-  List<KeywordRequirement> _parseKeywordsFromTextForUI(String text) {
+  List<KeywordRequirement> _parseKeywordsFromText(String text) {
     if (text.toLowerCase() == "не найдено" || text.isEmpty) return [];
+
     List<KeywordRequirement> keywords = [];
     final lines =
         text.split('\n').where((line) => line.trim().isNotEmpty).toList();
+
+    // --- НОВАЯ ЛОГИКА ДЛЯ ДВУХСТРОЧНОГО ФОРМАТА ---
+
+    // 1. Отфильтровываем заголовки таблицы, чтобы они не стали ключами
     final header1 = 'Ключевое слово'.toLowerCase();
     final header2 = 'Количество упоминаний в тексте(раз(а))'.toLowerCase();
     final contentLines = lines.where((line) {
@@ -1226,23 +689,37 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           trimmedLower != header1 &&
           trimmedLower != header2;
     }).toList();
+
+    // Регулярное выражение для поиска количества на отдельной строке, например "(10)"
     final countOnNextLineRegex = RegExp(r'^\((\d+)\)$');
+
+    // Регулярные выражения для других форматов (как запасной вариант)
     final rangeRegex = RegExp(r'(.+?)\s*\((\d+)(?:-(\d+))?\)\s*$');
     final tableRegex = RegExp(r'^(.*?)\s+\d+\s+раз\(?а?\)');
 
+    // 2. Итерируем по отфильтрованным строкам, ища пары "ключ -> (количество)"
     for (int i = 0; i < contentLines.length; i++) {
       final currentLine = contentLines[i].trim();
+
+      // Проверяем, есть ли следующая строка и похожа ли она на "(число)"
       if (i + 1 < contentLines.length) {
         final nextLine = contentLines[i + 1].trim();
         final match = countOnNextLineRegex.firstMatch(nextLine);
+
         if (match != null) {
+          // Нашли пару!
           final phrase = currentLine.replaceAll(RegExp(r'[\.,;]$'), '');
           final count = int.parse(match.group(1)!);
+
           keywords.add(KeywordRequirement(phrase, count, count));
+
+          // Пропускаем следующую строку, так как мы ее уже обработали
           i++;
-          continue;
+          continue; // Переходим к следующей паре
         }
       }
+
+      // 3. Если пара не найдена, пробуем распознать другие форматы (для универсальности)
       final rangeMatch = rangeRegex.firstMatch(currentLine);
       if (rangeMatch != null) {
         final phrase =
@@ -1253,8 +730,10 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         keywords.add(KeywordRequirement(phrase, min, max));
         continue;
       }
+
       final tableMatch = tableRegex.firstMatch(currentLine);
       if (tableMatch != null) {
+        // Это для формата "ключ 10 раз(а)"
         final phrase =
             tableMatch.group(1)!.trim().replaceAll(RegExp(r'[\.,;]$'), '');
         final countString = RegExp(r'(\d+)').firstMatch(currentLine)!.group(1)!;
@@ -1262,23 +741,377 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         keywords.add(KeywordRequirement(phrase, count, count));
         continue;
       }
+
+      // 4. Если ничего не подошло, считаем, что это ключ с требованием "хотя бы 1 раз"
       if (currentLine.isNotEmpty) {
         keywords.add(KeywordRequirement(
             currentLine.replaceAll(RegExp(r'[\.,;]$'), ''), 1, 999));
       }
     }
+
     return keywords;
   }
 
+  // ИСПРАВЛЕНИЕ 4: Обновляем проверку на H2
+  List<GeneralRequirementResult> _analyzeGeneralRequirements(
+      String text, String requirementText) {
+    List<GeneralRequirementResult> results = [];
+    final services = ['Уникальность', 'Главред', 'Тургенев', 'Спам', 'Вода'];
+    for (var service in services) {
+      final reqRegex =
+          RegExp(service + r'.*?(\d+[\.,]?\d*)', caseSensitive: false);
+      final actRegex = RegExp(service + r'[:\-—\s]*(\d+[\.,]?\d*)[/\d\s,]*%',
+          caseSensitive: false);
+      final reqMatch = reqRegex.firstMatch(requirementText);
+      final actMatch = actRegex.firstMatch(text);
+      final reqValue =
+          double.tryParse(reqMatch?.group(1)?.replaceAll(',', '.') ?? '');
+      final actValue =
+          double.tryParse(actMatch?.group(1)?.replaceAll(',', '.') ?? '');
+      if (reqValue != null) {
+        bool success = false;
+        String actualString = actMatch?.group(1) ?? 'Не найдено';
+        if (actValue != null) {
+          if (service == 'Уникальность' || service == 'Главред') {
+            success = actValue >= reqValue;
+          } else {
+            success = actValue <= reqValue;
+          }
+        }
+        String reqString = (service == 'Уникальность' || service == 'Главред')
+            ? '≥ $reqValue'
+            : '≤ $reqValue';
+        results.add(GeneralRequirementResult(
+            service, reqString, actualString, success));
+      }
+    }
+    final firstParagraph =
+        text.split('\n\n').first.replaceAll(RegExp(r'#+\s*'), '');
+    results.add(GeneralRequirementResult('Первый абзац', '≤ 500 симв.',
+        '${firstParagraph.length}', firstParagraph.length <= 500));
+    final hasList = text.contains(RegExp(r'^\s*[*-]|\d+\.', multiLine: true));
+    results.add(GeneralRequirementResult(
+        'Списки', 'Хотя бы 1', hasList ? 'Есть' : 'Нет', hasList));
+
+    // ИЗМЕНЕНИЕ: Теперь ищем заголовки в двух форматах Markdown
+    final h2Count =
+        RegExp(r'(^##\s+.+)|(^.+\n-+$)', multiLine: true, caseSensitive: false)
+            .allMatches(text)
+            .length;
+    results.add(GeneralRequirementResult('Подзаголовки H2', 'Есть',
+        h2Count > 0 ? 'Найдено: $h2Count' : 'Нет', h2Count > 0));
+    return results;
+  }
+
   String _formatKeywordsForField(String rawText) {
-    final reqs = _parseKeywordsFromTextForUI(rawText);
-    if (reqs.isEmpty) return rawText;
+    final reqs = _parseKeywordsFromText(rawText);
+    if (reqs.isEmpty)
+      return rawText; // Возвращаем как есть, если не удалось распарсить
     return reqs.map((r) => "${r.phrase} (${r.min})").join('\n');
   }
 
+  String _analyzeVolume(String text, String requirement) {
+    final currentVolume = text.replaceAll(' ', '').length;
+    final regex = RegExp(r'(\d+)');
+    final matches = regex.allMatches(requirement).toList();
+    if (matches.isEmpty) {
+      return 'Текущий объем: $currentVolume симв. Требование в ТЗ не найдено.';
+    }
+    final minVolume = int.parse(matches[0].group(1)!);
+    final maxVolume = matches.length > 1
+        ? int.parse(matches[1].group(1)!)
+        : minVolume + (minVolume * 0.2).round();
+
+    if (currentVolume >= minVolume && currentVolume <= maxVolume) {
+      return '✅ Объем соответствует: $currentVolume из $minVolume-$maxVolume симв. (без пробелов)';
+    } else if (currentVolume < minVolume) {
+      return '❌ Объем не соответствует: $currentVolume из $minVolume-$maxVolume симв. (нужно еще ${minVolume - currentVolume})';
+    } else {
+      return '❌ Объем не соответствует: $currentVolume из $minVolume-$maxVolume симв. (превышение на ${currentVolume - maxVolume})';
+    }
+  }
+
+  String _analyzeMetaTag(String text, String requirement, String tagName) {
+    if (requirement.toLowerCase() == "не найдено" || requirement.isEmpty) {
+      return 'Требование для $tagName не найдено в ТЗ.';
+    }
+    if (text.toLowerCase().contains(requirement.toLowerCase().trim())) {
+      return '✅ $tagName найден в тексте.';
+    } else {
+      return '❌ $tagName не найден в тексте.';
+    }
+  }
+
+  // ИСПРАВЛЕНИЕ 4: Обновляем проверку структуры
+  String _analyzeStructure(String text, String requirement) {
+    if (requirement.toLowerCase() == "не найдено" || requirement.isEmpty) {
+      return 'Требование по структуре не найдено в ТЗ.';
+    }
+
+    // 1. Извлекаем все осмысленные строки из структуры ТЗ как "темы"
+    final List<String> requiredThemes = requirement
+        .split('\n')
+        .map((line) => line.trim())
+        // Убираем маркеры списков и короткие/служебные строки
+        .where((line) =>
+            line.isNotEmpty &&
+            line.length > 10 &&
+            !line.toLowerCase().startsWith('что писать') &&
+            !line.toLowerCase().startsWith('формат'))
+        .toList();
+
+    if (requiredThemes.isEmpty) {
+      return '⚠️ В ТЗ не найдено тем для проверки структуры.';
+    }
+
+    // 2. Извлекаем все H2 заголовки из текста статьи (из Markdown)
+    final h2Pattern = RegExp(r'(^##\s+(.+)$)|(^(.+)\n-+$)', multiLine: true);
+    final List<String> articleHeadings =
+        h2Pattern.allMatches(text).map((match) {
+      // Возвращаем текст заголовка из любой из двух групп
+      return (match.group(2) ?? match.group(4) ?? '').trim();
+    }).toList();
+
+    if (articleHeadings.isEmpty) {
+      return '⚠️ В тексте не найдено ни одного H2 заголовка в формате Markdown (## Заголовок).';
+    }
+
+    int foundCount = 0;
+    List<String> notFoundThemes = [];
+
+    // 3. Сопоставляем темы из ТЗ с заголовками в статье
+    for (var theme in requiredThemes) {
+      bool themeFound = false;
+
+      // Извлекаем ключевые слова из темы ТЗ (убираем предлоги, союзы, знаки)
+      final themeKeywords = _normalizeEyo(theme.toLowerCase())
+          .replaceAll(RegExp(r'[,.()?]'), '')
+          .split(' ')
+          .where((word) => word.length > 3) // Ищем только значимые слова
+          .toSet();
+
+      if (themeKeywords.isEmpty) continue;
+
+      // Ищем заголовок в статье, который содержит все ключевые слова из темы
+      for (var heading in articleHeadings) {
+        final normalizedHeading = _normalizeEyo(heading.toLowerCase());
+
+        if (themeKeywords
+            .every((keyword) => normalizedHeading.contains(keyword))) {
+          themeFound = true;
+          break; // Нашли подходящий заголовок, переходим к следующей теме
+        }
+      }
+
+      if (themeFound) {
+        foundCount++;
+      } else {
+        notFoundThemes.add(theme);
+      }
+    }
+
+    final isOk = foundCount >= requiredThemes.length;
+    String result =
+        '${isOk ? '✅' : '⚠️'} Найдено соответствие для $foundCount из ${requiredThemes.length} тем структуры.';
+    if (notFoundThemes.isNotEmpty) {
+      result +=
+          '\nТемы без соответствия в заголовках: ${notFoundThemes.join("; ")}';
+    }
+    return result;
+  }
+
+  bool _isWordBoundary(String text, int index) {
+    if (index < 0 || index > text.length) return false;
+    if (index == 0 || index == text.length) return true;
+    final prevChar = text[index - 1];
+    final nextChar = text[index];
+    final boundaryChars = RegExp(r'[\s.,!?;:()\[\]"' '’]');
+    return boundaryChars.hasMatch(prevChar) || boundaryChars.hasMatch(nextChar);
+  }
+
+  int _countOccurrences(
+      String text, String phrase, bool exact, List<List<int>> consumedRanges) {
+    if (phrase.isEmpty) return 0;
+    int count = 0;
+
+    final lowerText = text.toLowerCase();
+    final lowerPhrase = phrase.toLowerCase();
+
+    // Находим все потенциальные совпадения
+    for (final match in lowerPhrase.allMatches(lowerText)) {
+      bool isOverlapping = false;
+      // Проверяем, не пересекается ли найденное совпадение с уже "занятыми"
+      for (final range in consumedRanges) {
+        if (match.start < range[1] && match.end > range[0]) {
+          isOverlapping = true;
+          break;
+        }
+      }
+
+      if (isOverlapping) continue; // Если пересекается, пропускаем его
+
+      // Если включен точный поиск, проверяем границы слов
+      if (exact) {
+        bool isStartBoundary =
+            (match.start == 0) || _isWordBoundary(lowerText, match.start);
+        bool isEndBoundary = (match.end == lowerText.length) ||
+            _isWordBoundary(lowerText, match.end);
+        if (isStartBoundary && isEndBoundary) {
+          count++;
+        }
+      } else {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  List<MapEntry<KeywordRequirement, int>> _analyzeKeywords(
+    String text,
+    List<KeywordRequirement> requirements,
+    String type,
+    SearchMode mode,
+    List<List<int>> globalConsumedRanges,
+  ) {
+    // 1. Стемминг текста (если нужно)
+    final String textToAnalyze = (type == 'exact') ? text : _stemText(text);
+
+    List<MapEntry<KeywordRequirement, int>> results = [];
+    const stopWords = {
+      'и',
+      'в',
+      'на',
+      'с',
+      'к',
+      'по',
+      'о',
+      'у',
+      'за',
+      'из',
+      'для',
+      'от',
+      'до',
+      'без',
+      'через'
+    };
+
+    List<List<int>> localConsumedRanges = [];
+    final activeRanges = (mode == SearchMode.uniquePass)
+        ? globalConsumedRanges
+        : localConsumedRanges;
+
+    if (mode != SearchMode.overlapping) {
+      requirements.sort((a, b) => b.phrase.length.compareTo(a.phrase.length));
+    }
+
+    for (var req in requirements) {
+      int count = 0;
+
+      // 2. Стемминг фразы (если нужно)
+      final String phraseToSearch =
+          (type == 'exact') ? req.phrase : _stemText(req.phrase);
+
+      final lowerText = textToAnalyze.toLowerCase();
+      final lowerPhrase = phraseToSearch.toLowerCase();
+
+      // 3. ИСПРАВЛЕНИЕ: Определяем, нужно ли проверять границы слова.
+      // Только для "Точного вхождения" на оригинальном тексте.
+      final bool useWordBoundaryCheck = (type == 'exact');
+
+      if (mode == SearchMode.overlapping) {
+        if (type == 'exact' || type == 'thematic') {
+          // Для 'thematic' передаем `false` в проверку границ
+          count = _countOccurrences(
+              textToAnalyze, phraseToSearch, useWordBoundaryCheck, []);
+        } else if (type == 'diluted') {
+          final significantWords = phraseToSearch
+              .split(' ')
+              .where(
+                  (w) => w.isNotEmpty && !stopWords.contains(w.toLowerCase()))
+              .toList();
+          if (significantWords.isEmpty) {
+            results.add(MapEntry(req, 0));
+            continue;
+          }
+          final sentences = text.split(RegExp(r'[.!?\n]'));
+          for (var sentence in sentences) {
+            final stemmedSentence = _stemText(sentence);
+            // Для каждого слова в предложении передаем `false` в проверку границ
+            if (significantWords.every((word) =>
+                _countOccurrences(stemmedSentence, word, false, []) > 0)) {
+              count++;
+            }
+          }
+        }
+      } else {
+        // Логика для "Разовых" и "Уникальных"
+        if (type == 'exact' || type == 'thematic') {
+          // Для 'thematic' (LSI) поиск идет по основам слов (стеммам)
+          for (final match
+              in RegExp(RegExp.escape(lowerPhrase)).allMatches(lowerText)) {
+            bool isOverlapping = activeRanges
+                .any((range) => match.start < range[1] && match.end > range[0]);
+            if (isOverlapping) continue;
+
+            // Проверяем границы только если это 'exact'
+            if (useWordBoundaryCheck) {
+              bool isStartBoundary =
+                  (match.start == 0) || _isWordBoundary(lowerText, match.start);
+              bool isEndBoundary = (match.end == lowerText.length) ||
+                  _isWordBoundary(lowerText, match.end);
+              if (!isStartBoundary || !isEndBoundary)
+                continue; // Если не целое слово, пропускаем
+            }
+
+            count++;
+            activeRanges.add([match.start, match.end]);
+          }
+        } else if (type == 'diluted') {
+          final significantWords = lowerPhrase
+              .split(' ')
+              .where((w) => w.isNotEmpty && !stopWords.contains(w))
+              .toList();
+          if (significantWords.isEmpty) {
+            results.add(MapEntry(req, 0));
+            continue;
+          }
+          final sentences = text.split(RegExp(r'[.!?\n]'));
+          int sentenceOffset = 0;
+          for (var sentence in sentences) {
+            final stemmedSentence = _stemText(sentence).toLowerCase();
+            bool sentenceOverlaps = activeRanges.any((range) =>
+                sentenceOffset < range[1] &&
+                (sentenceOffset + sentence.length) > range[0]);
+            if (sentenceOverlaps) {
+              sentenceOffset += sentence.length + 1;
+              continue;
+            }
+            // Проверяем наличие всех слов-основ в основе предложения
+            bool allWordsFound = significantWords.every((word) {
+              // Границы здесь не нужны, так как ищем основу в основе
+              return _countOccurrences(stemmedSentence, word, false, []) > 0;
+            });
+            if (allWordsFound) {
+              count++;
+              activeRanges
+                  .add([sentenceOffset, sentenceOffset + sentence.length]);
+            }
+            sentenceOffset += sentence.length + 1;
+          }
+        }
+      }
+      results.add(MapEntry(req, count));
+    }
+    return results;
+  }
+
+  // 2. Функция для проверки текста через API Яндекс.Спеллера
   Future<List<YandexSpellerError>> _checkSpelling(String text) async {
     if (text.trim().isEmpty) return [];
+
+    // ИСПРАВЛЕНИЕ: Очищаем текст от невидимых символов Quill перед отправкой
     final cleanedText = text.replaceAll('\u2028', '\n');
+
     const int maxTextLength = 9500;
     List<YandexSpellerError> allErrors = [];
 
@@ -1309,9 +1142,10 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           }
         }
       } catch (e) {
-        debugPrint("Ошибка при обращении к Яндекс.Спеллер: $e");
+        print("Ошибка при обращении к Яндекс.Спеллер: $e");
       }
     }
+
     return allErrors;
   }
 
@@ -1319,15 +1153,20 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       List<KeywordRequirement> exact, List<KeywordRequirement> thematic) {
     if (text.isEmpty) return [const TextSpan(text: '')];
 
+    // --- ШАГ 1: ПОДГОТОВКА ДАННЫХ ---
+
+    // Создаем множество LSI-ключей в их начальной форме (лемме/стеме) для быстрой проверки
     final lsiStemsToHighlight =
         thematic.map((req) => _stemText(req.phrase.toLowerCase())).toSet();
 
+    // Создаем карту для точных вхождений и LSI, которые совпали в начальной форме
     Map<String, Color> phrasesToHighlight = {};
     for (var req in exact) {
       phrasesToHighlight[req.phrase.toLowerCase()] =
           Colors.yellow.withOpacity(0.5);
     }
     for (var req in thematic) {
+      // Если LSI-слово еще не подсвечено как точное, подсвечиваем его голубым
       if (!phrasesToHighlight.containsKey(req.phrase.toLowerCase())) {
         phrasesToHighlight[req.phrase.toLowerCase()] =
             Colors.lightBlue.withOpacity(0.4);
@@ -1338,13 +1177,19 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       return [TextSpan(text: text)];
     }
 
+    // --- ШАГ 2: СОЗДАНИЕ "КАРТЫ ПОДСВЕТКИ" ---
+
+    // Создаем список, где для каждого символа текста будет храниться цвет подсветки
     List<Color?> highlightMap = List.filled(text.length, null);
 
+    // Сначала помечаем все найденные по основе LSI-слова зеленым цветом
+    // Мы ищем все слова в тексте (последовательности букв)
     final wordRegex = RegExp(r'[\wА-Яа-я]+');
     for (final match in wordRegex.allMatches(text)) {
       final word = match.group(0)!;
       final wordStem = _stemText(word.toLowerCase());
 
+      // Если основа слова есть в нашем списке LSI, помечаем его
       if (lsiStemsToHighlight.contains(wordStem)) {
         for (int i = match.start; i < match.end; i++) {
           highlightMap[i] = Colors.lightGreen.withOpacity(0.5);
@@ -1352,6 +1197,8 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       }
     }
 
+    // Затем помечаем точные вхождения и LSI в начальной форме.
+    // Они имеют более высокий приоритет и "перезапишут" зеленую подсветку.
     if (phrasesToHighlight.isNotEmpty) {
       final pattern =
           phrasesToHighlight.keys.map((p) => RegExp.escape(p)).join('|');
@@ -1373,6 +1220,8 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       }
     }
 
+    // --- ШАГ 3: СБОРКА WIDGETSPAN ИЗ "КАРТЫ ПОДСВЕТКИ" ---
+
     List<TextSpan> spans = [];
     int lastIndex = 0;
     Color? lastColor;
@@ -1391,6 +1240,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       }
     }
 
+    // Добавляем последний оставшийся фрагмент текста
     if (lastIndex < text.length) {
       spans.add(TextSpan(
         text: text.substring(lastIndex),
@@ -1415,6 +1265,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       ),
       drawer: isMobile ? buildAppDrawer(context) : null,
       body: Stack(
+        // 1. Оборачиваем все в Stack
         children: [
           SingleChildScrollView(
             child: Padding(
@@ -1440,6 +1291,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                     const SizedBox(height: 16),
                     RichText(
                       text: TextSpan(
+                        // Этот стиль будет применен ко всему тексту по умолчанию
                         style: subtitleTextStyle(context),
                         children: <TextSpan>[
                           const TextSpan(
@@ -1448,10 +1300,14 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           ),
                           TextSpan(
                             text: 'ПРИМЕР/ШАБЛОН ПОЛНОЦЕННОГО РАБОТАЮЩЕГО ТЗ',
+                            // Стиль для самой ссылки (синий цвет и подчеркивание)
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary, // Используем основной цвет темы
                               decoration: TextDecoration.underline,
                             ),
+                            // Обработчик нажатия на эту часть текста
                             recognizer: TapGestureRecognizer()
                               ..onTap = () async {
                                 final url = Uri.parse(
@@ -1459,6 +1315,8 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                                 if (await canLaunchUrl(url)) {
                                   await launchUrl(url);
                                 } else {
+                                  // Можно добавить обработку ошибки, если ссылка не открылась
+                                  // например, показать SnackBar
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content:
@@ -1470,6 +1328,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                         ],
                       ),
                     ),
+                    // <<< БЛОК С КНОПКОЙ >>>
                     const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -1530,6 +1389,11 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                         onPressed: _isLoading ? null : _runGlobalAnalysis,
                       ),
                     ),
+                    /*if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),*/
                     if (_pairs.any((p) => p.analysisResult != null)) ...[
                       const SizedBox(height: 40),
                       divider(context),
@@ -1558,14 +1422,17 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               ),
             ),
           ),
-          _buildLoadingOverlay(),
+          _buildLoadingOverlay(), // 2. Добавляем оверлей загрузки
         ],
       ),
     );
   }
 
+  // ИСПРАВЛЕНИЕ 1: Выравниваем размеры полей
   Widget _buildTextTzPairWidget(int index, ThemeData theme) {
     final pair = _pairs[index];
+    // Общая высота для редактора и его тулбара
+    const double editorBlockHeight = 350;
     const double editorHeight = 300;
 
     return Card(
@@ -1596,16 +1463,6 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                       QuillToolbar.simple(
                         configurations: QuillSimpleToolbarConfigurations(
                           controller: pair.textController,
-                          customButtons: [
-                            QuillToolbarCustomButtonOptions(
-                              icon: Icon(Icons.paste),
-                              tooltip: "Вставить с форматированием",
-                              onPressed: () {
-                                // <<< ИСПРАВЛЕНО ЗДЕСЬ
-                                _pasteHtml(pair.textController);
-                              },
-                            ),
-                          ],
                           sharedConfigurations: const QuillSharedConfigurations(
                             locale: Locale('ru'),
                           ),
@@ -1629,39 +1486,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-// Кнопка 1: Вставить текст
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.paste),
-                            label: const Text("Вставить текст"),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                            ),
-                            onPressed: () {
-                              _pasteHtml(pair.textController);
-                            },
-                          ),
-                          const SizedBox(width: 16), // Отступ между кнопками
-// Кнопка 2: Распознать структуру
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.auto_fix_high),
-                            label: const Text("Распознать структуру"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange.shade700,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                            ),
-                            onPressed: () {
-                              _recognizeStructure(pair.textController);
-                            },
-                          ),
-                        ],
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -1673,13 +1498,16 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                       Text("Техническое задание",
                           style: headlineSecondaryTextStyle(context)),
                       const SizedBox(height: 8),
-                      SizedBox(
-                        height: 400,
+                      // Оборачиваем TextField в Container с фиксированной высотой
+                      Container(
+                        height: 400, // <-- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ЗДЕСЬ
                         child: TextField(
                           controller: pair.tzController,
-                          maxLines: null,
-                          expands: true,
-                          textAlignVertical: TextAlignVertical.top,
+                          maxLines: null, // null позволяет тексту переноситься
+                          expands:
+                              true, // Заставляет TextField занять всю высоту Container
+                          textAlignVertical: TextAlignVertical
+                              .top, // Выравниваем текст по верху
                           style: bodyTextStyle(context),
                           decoration: InputDecoration(
                             hintText: "Вставьте ТЗ...",
@@ -1700,16 +1528,9 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
             ),
             const SizedBox(height: 16),
             Center(
-              child: ElevatedButton.icon(
-                // Меняем на ElevatedButton.icon
-                icon: const Icon(Icons.manage_search), // Добавляем иконку
-                label: const Text("Распарсить это ТЗ"),
-                style: ElevatedButton.styleFrom(
-                  // Добавляем стиль
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                ),
+              child: ElevatedButton(
                 onPressed: () => _parseTzForPair(index),
+                child: const Text("Распарсить это ТЗ"),
               ),
             ),
             if (pair.parsedTz != null)
@@ -1730,6 +1551,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         Text("Проверьте и скорректируйте данные из ТЗ",
             style: headlineSecondaryTextStyle(context)),
         const SizedBox(height: 16),
+        // <<< ИЗМЕНЕНИЕ: ИСПОЛЬЗУЕМ КОНТРОЛЛЕРЫ ИЗ `pair` ВМЕСТО ГЛОБАЛЬНЫХ >>>
         _buildEditableField(context, pair.volumeController, "Объем текста"),
         const SizedBox(height: 16),
         _buildEditableField(context, pair.titleController, "Метатег Title"),
@@ -1748,6 +1570,31 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         const SizedBox(height: 16),
         _buildEditableField(
             context, pair.thematicWordsController, "Тематические слова (LSI)"),
+      ],
+    );
+  }
+
+  Widget _buildInputField(BuildContext context,
+      TextEditingController controller, String label, String hint, int? lines) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: headlineSecondaryTextStyle(context)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: lines,
+          style: bodyTextStyle(context),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: subtitleTextStyle(context),
+            border: const OutlineInputBorder(),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary, width: 2.0),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -1875,6 +1722,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     );
   }
 
+  // Метод для создания виджета с переключателями
   Widget _buildSearchModeSelector() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24.0),
@@ -1886,6 +1734,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
             style: headlineSecondaryTextStyle(context),
           ),
           const SizedBox(height: 8),
+          // Опция "Пересечение вхождений"
           RadioListTile<SearchMode>(
             title: Row(
               children: [
@@ -1905,6 +1754,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               if (value != null) setState(() => _selectedMode = value);
             },
           ),
+          // Опция "Разовые вхождения"
           RadioListTile<SearchMode>(
             title: Row(
               children: [
@@ -1924,6 +1774,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               if (value != null) setState(() => _selectedMode = value);
             },
           ),
+          // Опция "Уникальные вхождения"
           RadioListTile<SearchMode>(
             title: Row(
               children: [
@@ -1969,13 +1820,15 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         ),
         const SizedBox(height: 8),
         ...errors.map((error) {
+          // Показываем контекст вокруг ошибки для наглядности
           int start = error.pos - 20;
           if (start < 0) start = 0;
-          final text = _pairs.first.textController.document.toPlainText();
           int end = error.pos + error.len + 20;
-          if (end > text.length) {
-            end = text.length;
+          if (end > _pairs.first.textController.document.toPlainText().length) {
+            // Упрощенно, берем текст из первой пары
+            end = _pairs.first.textController.document.toPlainText().length;
           }
+          final text = _pairs.first.textController.document.toPlainText();
           final contextText = text.substring(start, end);
 
           return Card(
@@ -2078,6 +1931,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       ],
     );
   }
+  // <<< НАЧАЛО ВСТАВКИ: ВСТАВЬТЕ НОВЫЙ МЕТОД ПРЯМО СЮДА >>>
 
   Widget _buildLoadingOverlay() {
     return AnimatedSwitcher(
@@ -2111,3 +1965,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     );
   }
 }
+
+
+
+*/
