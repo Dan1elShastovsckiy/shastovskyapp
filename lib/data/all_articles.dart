@@ -2,11 +2,18 @@
 
 import 'package:minimal/components/article_model.dart';
 import 'package:minimal/pages/pages.dart';
-import 'package:minimal/pages/pages_useful/page_semantic_core_guide.dart';
 
 // Список всех статей на сайте для вывода в разделе "Полезное" и в блоке "Другие статьи"
 final List<Article> allArticles = [
   // --- DEV СТАТЬИ ---
+  const Article(
+    title: "Под капотом SEO-анализатора: история разработки",
+    description:
+        "Путь от идеи и простого прототипа до асинхронного приложения.",
+    imageUrl: "assets/images/dev/seo_analyzer_story/ui_thread_isolate.webp",
+    routeName: PostSeoAnalyzerDevStory.name,
+    category: 'dev',
+  ),
   const Article(
     title: "Flutter Web & SEO: Полное руководство",
     description: "Как сделать ваш Flutter сайт видимым для поисковых систем.",
@@ -33,7 +40,7 @@ final List<Article> allArticles = [
   const Article(
     title: "Как собирать семантическое ядро: современный подход",
     description:
-        "Забудьте про перфекционизм. Узнайте, как быстро собрать рабочее ядро, запустить его в работу и дорабатывать на основе реальных данных.",
+        "Забудьте про перфекционизм. Узнайте, как быстро собрать рабочее ядро и запустить его в работу.",
     imageUrl: "assets/images/seo/semantic-core-main.webp",
     routeName: SemanticCoreGuidePage.name,
     category: 'seo',
