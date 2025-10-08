@@ -1,6 +1,7 @@
 // /lib/components/route_generator.dart
 
 import 'package:flutter/material.dart';
+import 'package:minimal/pages/page_instruments.dart';
 
 // --- ИМПОРТИРУЕМ ВСЕ СТРАНИЦЫ НАПРЯМУЮ, БЕЗ `deferred as` ---
 import 'package:minimal/pages/page_list.dart';
@@ -12,7 +13,9 @@ import 'package:minimal/pages/page_not_found.dart';
 import 'package:minimal/pages/page_post.dart';
 import 'package:minimal/pages/page_georgia_post.dart';
 import 'package:minimal/pages/page_html_sandbox.dart';
+import 'package:minimal/pages/pages_useful/dev/page_seo_analyzer_dev_story.dart';
 import 'package:minimal/pages/pages_useful/page_semantic_core_guide.dart';
+import 'package:minimal/pages/pages_useful/page_seo_analyzer_en.dart';
 import 'package:minimal/pages/pages_useful/page_seo_tools.dart';
 import 'package:minimal/pages/pages_useful/page_flutter_seo_post.dart';
 import 'package:minimal/pages/pages_useful/page_sitemap_guide.dart';
@@ -22,6 +25,7 @@ import 'package:minimal/pages/pages_useful/page_seo_ai_post.dart';
 import 'package:minimal/pages/pages_useful/page_eeat_guide_post.dart';
 import 'package:minimal/pages/pages_useful/page_linkbuilding_post.dart';
 import 'package:minimal/pages/pages_useful/page_technical_audit_post.dart';
+import 'package:minimal/pages/pages_useful/page_seo_analyzer.dart'; // <-- новая страница анализатор
 import 'package:minimal/pages/page_about.dart';
 import 'package:minimal/pages/page_portfolio.dart';
 import 'package:minimal/pages/page_typography.dart';
@@ -38,7 +42,7 @@ class RouteGenerator {
         final String pathName = Uri.parse(settings.name ?? '/').path;
         Widget page;
 
-        // Простая и надежная цепочка if/else if
+        // Простая и надежная цепочка if/else if PostSeoAnalyzerDevStory
         if (pathName == '/' || pathName == '/${ListPage.name}') {
           page = const ListPage();
         } else if (pathName == '/${UsefulPage.name}') {
@@ -49,6 +53,8 @@ class RouteGenerator {
           page = const UsefulSeoPage();
         } else if (pathName == '/${TryCodingPage.name}') {
           page = const TryCodingPage();
+        } else if (pathName == '/${InstrumentsPage.name}') {
+          page = const InstrumentsPage();
         } else if (pathName == '/${PostPage.name}') {
           page = const PostPage();
         } else if (pathName == '/${PostGeorgiaPage.name}') {
@@ -63,6 +69,8 @@ class RouteGenerator {
           page = const PostFlutterSeoPage();
         } else if (pathName == '/${PostStateManagementPage.name}') {
           page = const PostStateManagementPage();
+        } else if (pathName == '/${PostSeoAnalyzerDevStory.name}') {
+          page = const PostSeoAnalyzerDevStory();
         } else if (pathName == '/${DesignPatternsPage.name}') {
           page = const DesignPatternsPage();
         } else if (pathName == '/${PostSeoAiPage.name}') {
@@ -75,6 +83,10 @@ class RouteGenerator {
           page = const PostTechnicalAuditPage();
         } else if (pathName == '/${SitemapGuidePage.name}') {
           page = const SitemapGuidePage();
+        } else if (pathName == '/${SeoAnalyzerPage.name}') {
+          page = const SeoAnalyzerPage();
+        } else if (pathName == '/${SeoAnalyzerPageEn.name}') {
+          page = const SeoAnalyzerPageEn();
         } else if (pathName == '/${AboutPage.name}') {
           page = const AboutPage();
         } else if (pathName == '/${PortfolioPage.name}') {

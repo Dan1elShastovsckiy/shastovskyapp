@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // <<< ШАГ 5.1: Импортируем провайдер для доступа к состоянию темы >>>
 import 'package:minimal/components/theme_provider.dart';
+import 'package:minimal/pages/page_instruments.dart';
 import 'package:provider/provider.dart';
 // <<< ШАГ 5.2: Больше не используем старые константы цветов напрямую >>>
 // import 'package:minimal/components/color.dart';
@@ -393,6 +394,7 @@ class MinimalMenuBar extends StatelessWidget {
           "Разработка": '/${UsefulDevPage.name}',
           "SEO": '/${UsefulSeoPage.name}',
           "Попробуй кодить": '/${TryCodingPage.name}', // <-- ДОБАВИТЬ
+          "Инструменты SEO": '/${InstrumentsPage.name}', // <-- анализ текста
         },
       ),
       _buildMenuItem(context, "ОБО МНЕ",
@@ -586,6 +588,13 @@ Drawer buildAppDrawer(BuildContext context) {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/${TryCodingPage.name}');
+              },
+            ),
+            ListTile(
+              title: const Text('Инструменты SEO'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/${InstrumentsPage.name}');
               },
             ),
           ],
