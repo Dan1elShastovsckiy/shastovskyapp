@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/components/share_buttons_block.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
@@ -238,6 +239,9 @@ class _SitemapGuidePageState extends State<SitemapGuidePage> {
               Tag(tag: "Яндекс"),
               Tag(tag: "Техническое SEO"),
             ]),
+            const SizedBox(height: 20),
+            const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
+            const SizedBox(height: 40),
             const RelatedArticles(
               currentArticleRouteName: SitemapGuidePage.name,
               category: 'seo',

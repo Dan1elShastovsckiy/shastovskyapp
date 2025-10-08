@@ -12,6 +12,7 @@ import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:highlight/languages/xml.dart' as lang_xml;
 import 'package:highlight/languages/css.dart' as lang_css;
 import 'package:minimal/components/components.dart';
+import 'package:minimal/components/share_buttons_block.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:minimal/pages/pages.dart';
@@ -716,6 +717,8 @@ class _HtmlSandboxPageState extends State<HtmlSandboxPage> {
                       routeName: '/${TryCodingPage.name}'),
                   BreadcrumbItem(text: "Песочница HTML/CSS"),
                 ]),
+                const SizedBox(height: 40),
+                const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
                 const SizedBox(height: 40),
                 Container(
                   margin: const EdgeInsets.only(bottom: 40),

@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/components/share_buttons_block.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
@@ -351,6 +352,9 @@ class _PostSeoAiPageState extends State<PostSeoAiPage> {
                 Tag(tag: "E-E-A-T"),
               ]),
             ),
+            const SizedBox(height: 20),
+            const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
+            const SizedBox(height: 40),
             const RelatedArticles(
               currentArticleRouteName: PostSeoAiPage.name,
               category: 'seo',

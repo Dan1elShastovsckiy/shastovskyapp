@@ -16,6 +16,15 @@ class UsefulDevPage extends StatefulWidget {
 
 class _UsefulDevPageState extends State<UsefulDevPage> {
   final List<UsefulArticle> _allArticles = [
+    // Новый анонс статьи
+    UsefulArticle(
+      title: "Под капотом SEO-анализатора: история разработки",
+      description:
+          "Путь от идеи и простого прототипа до асинхронного Flutter-приложения с парсером, стеммингом и отзывчивым UI. Глубокое погружение в решение реальных проблем.",
+      imageUrl: "assets/images/dev/seo_analyzer_story/ui_thread_isolate.webp",
+      tags: ["Flutter", "Разработка", "Производительность", "UI/UX"],
+      routeName: PostSeoAnalyzerDevStory.name,
+    ),
     UsefulArticle(
       title: "Паттерны проектирования: Интерактивная галерея",
       description:
@@ -47,9 +56,12 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
   final List<String> _allTags = [
     "Все материалы",
     "Flutter",
+    "Разработка", // Новый тег
     "Архитектура",
+    "Производительность", // Новый тег
+    "UI/UX", // Новый тег
     "SEO",
-    "Паттерны"
+    "Паттерны",
   ];
 
   @override
@@ -63,7 +75,7 @@ class _UsefulDevPageState extends State<UsefulDevPage> {
       description:
           "Гайды, обзоры и практические советы по веб-разработке. Фокус на Flutter Web, Dart, SEO-аспектах и лучших практиках.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/flutter_logo.webp", // Убедитесь, что картинка существует
+          "https://shastovsky.ru/assets/assets/images/flutter_logo.webp", //
     );
   }
 

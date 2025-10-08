@@ -3,6 +3,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/related_articles.dart';
+import 'package:minimal/components/share_buttons_block.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
@@ -181,6 +182,9 @@ class _PostLinkbuildingPageState extends State<PostLinkbuildingPage> {
                 Tag(tag: "Линкбилдинг"),
               ]),
             ),
+            const SizedBox(height: 20),
+            const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
+            const SizedBox(height: 40),
             // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
             const RelatedArticles(
               currentArticleRouteName:

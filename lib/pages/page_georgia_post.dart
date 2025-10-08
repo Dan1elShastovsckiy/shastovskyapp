@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/related_articles.dart';
+import 'package:minimal/components/share_buttons_block.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -355,6 +356,9 @@ class _PostGeorgiaPageState extends State<PostGeorgiaPage> {
                 Tag(tag: "Роудтрип"),
               ]),
             ),
+            const SizedBox(height: 20),
+            const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
+            const SizedBox(height: 40),
             // <<< ЭТОТ ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
             const RelatedArticles(
               currentArticleRouteName:

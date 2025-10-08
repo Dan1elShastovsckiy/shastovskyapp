@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/components/service_card.dart';
+import 'package:minimal/components/share_buttons_block.dart';
 import 'dart:ui';
 import 'package:minimal/data/seo_tools_data.dart';
 import 'package:minimal/utils/max_width_extension.dart';
@@ -138,6 +139,9 @@ class _SeoToolsPageState extends State<SeoToolsPage>
                       Tag(tag: "Инструменты"),
                       Tag(tag: "Сервисы"),
                     ]),
+                    const SizedBox(height: 20),
+                    const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
+                    const SizedBox(height: 40),
                     // <<< ВИДЖЕТ ДЛЯ ПОКАЗА СВЯЗАННЫХ СТАТЕЙ >>>
                     const RelatedArticles(
                       currentArticleRouteName:

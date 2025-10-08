@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/pages/pages_useful/page_seo_analyzer.dart';
+import 'package:minimal/pages/pages_useful/page_seo_analyzer_en.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
-import 'package:minimal/pages/pages.dart';
 
 class InstrumentsPage extends StatefulWidget {
   static const String name = 'useful/instruments';
@@ -57,7 +57,8 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
                   BreadcrumbItem(text: "Инструменты SEO"),
                 ]),
                 const SizedBox(height: 40),
-                Text("Полезные инструменты для SEO", style: headlineTextStyle(context)),
+                Text("Полезные инструменты для SEO",
+                    style: headlineTextStyle(context)),
                 const SizedBox(height: 16),
                 Text("Полезные инструменты для вашей работы с SEO",
                     style: subtitleTextStyle(context),
@@ -69,6 +70,13 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
                     title: "Анализатор текста SEO",
                     subtitle: "Просто закиньте текст и ТЗ для анализа",
                     routeName: '/${SeoAnalyzerPage.name}'),
+                const SizedBox(height: 24),
+                _buildCategoryButton(
+                    context: context,
+                    icon: Icons.web,
+                    title: "SEO English Text Analyzer",
+                    subtitle: "Just drop in text and terms for analysis",
+                    routeName: '/${SeoAnalyzerPageEn.name}'),
                 const SizedBox(height: 24),
                 _buildCategoryButton(
                   context: context,

@@ -29,6 +29,7 @@ export '/models/service_model.dart';
 export 'pages_useful/page_design_patterns.dart';
 export 'pages_useful/page_sitemap_guide.dart';
 export 'pages_useful/page_semantic_core_guide.dart';
+export 'package:minimal/pages/pages_useful/dev/page_seo_analyzer_dev_story.dart';
 
 // Экспорты для раздела "Попробуй кодить"
 export 'page_try_coding.dart';

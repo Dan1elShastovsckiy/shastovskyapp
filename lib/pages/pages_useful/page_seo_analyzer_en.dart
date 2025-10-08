@@ -1,7 +1,6 @@
-// /lib/pages/pages_useful/page_seo_analyzer.dart
+// /lib/pages/pages_useful/page_seo_analyzer_en.dart
 
 import 'dart:convert';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -18,16 +17,11 @@ import 'package:minimal/utils/meta_tag_service.dart';
 import 'dart:async';
 import 'package:snowball_stemmer/snowball_stemmer.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// ИСПРАВЛЕНИЕ: убрали 'hide Text', так как оно больше не нужно
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'package:html2md/html2md.dart' as html2md;
-// ИСПРАВЛЕНИЕ: Этот импорт теперь не используется напрямую, но его наличие в pubspec.yaml
-// дает доступ к методу-расширению Document.fromHtml()
-// import 'package:quill_html_converter/quill_html_converter.dart';
 
-// --- МОДЕЛИ ДАННЫХ ---
+// --- DATA MODELS (Language Agnostic) ---
 
 class KeywordRequirement {
   final String phrase;
@@ -154,9 +148,9 @@ enum SearchMode {
   uniquePass,
 }
 
-// <<< НАЧАЛО: ВСЯ ЛОГИКА АНАЛИЗА, ВЫНЕСЕННАЯ ДЛЯ РАБОТЫ В ИЗОЛЯТЕ >>>
+// <<< START: ISOLATE ANALYSIS LOGIC (ADAPTED FOR ENGLISH) >>>
 
-Future<Map<String, dynamic>> runAnalysisInIsolate(
+Future<Map<String, dynamic>> runAnalysisInIsolateEn(
     AnalysisPayload payload) async {
   final doc = Document.fromJson(payload.quillDelta);
   final plainTextFromDelta = doc.toPlainText();
@@ -165,9 +159,7 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
   final html = converter.convert();
   final markdownTextFromDelta = html2md.convert(html);
 
-  final stemmer = SnowballStemmer(Algorithm.russian);
-
-  String normalizeEyo(String text) => text.replaceAll('ё', 'е');
+  final stemmer = SnowballStemmer(Algorithm.english);
 
   String stemText(String text) {
     final words = text.split(RegExp(r"(\s+|[.,!?—:;()" "'-])"));
@@ -188,12 +180,12 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
   }
 
   List<KeywordRequirement> parseKeywordsFromText(String text) {
-    if (text.toLowerCase() == "не найдено" || text.isEmpty) return [];
+    if (text.toLowerCase() == "not found" || text.isEmpty) return [];
     List<KeywordRequirement> keywords = [];
     final lines =
         text.split('\n').where((line) => line.trim().isNotEmpty).toList();
-    final header1 = 'Ключевое слово'.toLowerCase();
-    final header2 = 'Количество упоминаний в тексте(раз(а))'.toLowerCase();
+    final header1 = 'keyword'.toLowerCase();
+    final header2 = 'mentions (count)'.toLowerCase();
     final contentLines = lines.where((line) {
       final trimmedLower = line.trim().toLowerCase();
       return trimmedLower.isNotEmpty &&
@@ -202,7 +194,6 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
     }).toList();
     final countOnNextLineRegex = RegExp(r'^\((\d+)\)$');
     final rangeRegex = RegExp(r'(.+?)\s*\((\d+)(?:-(\d+))?\)\s*$');
-    final tableRegex = RegExp(r'^(.*?)\s+\d+\s+раз\(?а?\)');
 
     for (int i = 0; i < contentLines.length; i++) {
       final currentLine = contentLines[i].trim();
@@ -225,15 +216,6 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
         final max =
             rangeMatch.group(3) != null ? int.parse(rangeMatch.group(3)!) : min;
         keywords.add(KeywordRequirement(phrase, min, max));
-        continue;
-      }
-      final tableMatch = tableRegex.firstMatch(currentLine);
-      if (tableMatch != null) {
-        final phrase =
-            tableMatch.group(1)!.trim().replaceAll(RegExp(r'[\.,;]$'), '');
-        final countString = RegExp(r'(\d+)').firstMatch(currentLine)!.group(1)!;
-        final count = int.parse(countString);
-        keywords.add(KeywordRequirement(phrase, count, count));
         continue;
       }
       if (currentLine.isNotEmpty) {
@@ -284,21 +266,20 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
     final String textToAnalyze = (type == 'exact') ? text : stemText(text);
     List<MapEntry<KeywordRequirement, int>> results = [];
     const stopWords = {
-      'и',
-      'в',
-      'на',
-      'с',
-      'к',
-      'по',
-      'о',
-      'у',
-      'за',
-      'из',
-      'для',
-      'от',
-      'до',
-      'без',
-      'через'
+      'a',
+      'an',
+      'the',
+      'and',
+      'or',
+      'but',
+      'for',
+      'in',
+      'on',
+      'at',
+      'to',
+      'from',
+      'with',
+      'by'
     };
     List<List<int>> localConsumedRanges = [];
     final activeRanges = (mode == SearchMode.uniquePass)
@@ -396,7 +377,12 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
   List<GeneralRequirementResult> analyzeGeneralRequirements(
       String text, String requirementText) {
     List<GeneralRequirementResult> results = [];
-    final services = ['Уникальность', 'Главред', 'Тургенев', 'Спам', 'Вода'];
+    final services = [
+      'Uniqueness',
+      'Readability',
+      'Spam Score',
+      'Water Content'
+    ];
     for (var service in services) {
       final reqRegex =
           RegExp(service + r'.*?(\d+[\.,]?\d*)', caseSensitive: false);
@@ -410,15 +396,15 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
           double.tryParse(actMatch?.group(1)?.replaceAll(',', '.') ?? '');
       if (reqValue != null) {
         bool success = false;
-        String actualString = actMatch?.group(1) ?? 'Не найдено';
+        String actualString = actMatch?.group(1) ?? 'Not found';
         if (actValue != null) {
-          if (service == 'Уникальность' || service == 'Главред') {
+          if (service == 'Uniqueness' || service == 'Readability') {
             success = actValue >= reqValue;
           } else {
             success = actValue <= reqValue;
           }
         }
-        String reqString = (service == 'Уникальность' || service == 'Главред')
+        String reqString = (service == 'Uniqueness' || service == 'Readability')
             ? '≥ $reqValue'
             : '≤ $reqValue';
         results.add(GeneralRequirementResult(
@@ -427,17 +413,17 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
     }
     final firstParagraph =
         text.split('\n\n').first.replaceAll(RegExp(r'#+\s*'), '');
-    results.add(GeneralRequirementResult('Первый абзац', '≤ 500 симв.',
+    results.add(GeneralRequirementResult('First Paragraph', '≤ 500 chars',
         '${firstParagraph.length}', firstParagraph.length <= 500));
     final hasList = text.contains(RegExp(r'^\s*[*-]|\d+\.', multiLine: true));
     results.add(GeneralRequirementResult(
-        'Списки', 'Хотя бы 1', hasList ? 'Есть' : 'Нет', hasList));
+        'Lists', 'At least 1', hasList ? 'Present' : 'Absent', hasList));
     final h2Count =
         RegExp(r'(^##\s+.+)|(^.+\n-+$)', multiLine: true, caseSensitive: false)
             .allMatches(text)
             .length;
-    results.add(GeneralRequirementResult('Подзаголовки H2', 'Есть',
-        h2Count > 0 ? 'Найдено: $h2Count' : 'Нет', h2Count > 0));
+    results.add(GeneralRequirementResult('H2 Subheadings', 'Present',
+        h2Count > 0 ? 'Found: $h2Count' : 'None', h2Count > 0));
     return results;
   }
 
@@ -446,35 +432,35 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
     final regex = RegExp(r'(\d+)');
     final matches = regex.allMatches(requirement).toList();
     if (matches.isEmpty) {
-      return 'Текущий объем: $currentVolume симв. Требование в ТЗ не найдено.';
+      return 'Current volume: $currentVolume chars. Requirement not found in TechSpec.';
     }
     final minVolume = int.parse(matches[0].group(1)!);
     final maxVolume = matches.length > 1
         ? int.parse(matches[1].group(1)!)
         : minVolume + (minVolume * 0.2).round();
     if (currentVolume >= minVolume && currentVolume <= maxVolume) {
-      return '✅ Объем соответствует: $currentVolume из $minVolume-$maxVolume симв. (без пробелов)';
+      return '✅ Volume matches: $currentVolume of $minVolume-$maxVolume chars (no spaces)';
     } else if (currentVolume < minVolume) {
-      return '❌ Объем не соответствует: $currentVolume из $minVolume-$maxVolume симв. (нужно еще ${minVolume - currentVolume})';
+      return '❌ Volume does not match: $currentVolume of $minVolume-$maxVolume chars (need ${minVolume - currentVolume} more)';
     } else {
-      return '❌ Объем не соответствует: $currentVolume из $minVolume-$maxVolume симв. (превышение на ${currentVolume - maxVolume})';
+      return '❌ Volume does not match: $currentVolume of $minVolume-$maxVolume chars (exceeded by ${currentVolume - maxVolume})';
     }
   }
 
   String analyzeMetaTag(String text, String requirement, String tagName) {
-    if (requirement.toLowerCase() == "не найдено" || requirement.isEmpty) {
-      return 'Требование для $tagName не найдено в ТЗ.';
+    if (requirement.toLowerCase() == "not found" || requirement.isEmpty) {
+      return 'Requirement for $tagName not found in TechSpec.';
     }
     if (text.toLowerCase().contains(requirement.toLowerCase().trim())) {
-      return '✅ $tagName найден в тексте.';
+      return '✅ $tagName found in the text.';
     } else {
-      return '❌ $tagName не найден в тексте.';
+      return '❌ $tagName not found in the text.';
     }
   }
 
   String analyzeStructure(String text, String requirement) {
-    if (requirement.toLowerCase() == "не найдено" || requirement.isEmpty) {
-      return 'Требование по структуре не найдено в ТЗ.';
+    if (requirement.toLowerCase() == "not found" || requirement.isEmpty) {
+      return 'Structure requirements not found in TechSpec.';
     }
     final List<String> requiredThemes = requirement
         .split('\n')
@@ -482,11 +468,11 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
         .where((line) =>
             line.isNotEmpty &&
             line.length > 10 &&
-            !line.toLowerCase().startsWith('что писать') &&
-            !line.toLowerCase().startsWith('формат'))
+            !line.toLowerCase().startsWith('what to write') &&
+            !line.toLowerCase().startsWith('format'))
         .toList();
     if (requiredThemes.isEmpty) {
-      return '⚠️ В ТЗ не найдено тем для проверки структуры.';
+      return '⚠️ No themes found in TZ to check structure against.';
     }
     final h2Pattern = RegExp(r'(^##\s+(.+)$)|(^(.+)\n-+$)', multiLine: true);
     final List<String> articleHeadings =
@@ -494,20 +480,21 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
       return (match.group(2) ?? match.group(4) ?? '').trim();
     }).toList();
     if (articleHeadings.isEmpty) {
-      return '⚠️ В тексте не найдено ни одного H2 заголовка в формате Markdown (## Заголовок).';
+      return '⚠️ No H2 headings found in Markdown format (## Heading) in the text.';
     }
     int foundCount = 0;
     List<String> notFoundThemes = [];
     for (var theme in requiredThemes) {
       bool themeFound = false;
-      final themeKeywords = normalizeEyo(theme.toLowerCase())
+      final themeKeywords = theme
+          .toLowerCase()
           .replaceAll(RegExp(r'[,.()?]'), '')
           .split(' ')
           .where((word) => word.length > 3)
           .toSet();
       if (themeKeywords.isEmpty) continue;
       for (var heading in articleHeadings) {
-        final normalizedHeading = normalizeEyo(heading.toLowerCase());
+        final normalizedHeading = heading.toLowerCase();
         if (themeKeywords
             .every((keyword) => normalizedHeading.contains(keyword))) {
           themeFound = true;
@@ -522,17 +509,16 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
     }
     final isOk = foundCount >= requiredThemes.length;
     String result =
-        '${isOk ? '✅' : '⚠️'} Найдено соответствие для $foundCount из ${requiredThemes.length} тем структуры.';
+        '${isOk ? '✅' : '⚠️'} Found correspondence for $foundCount of ${requiredThemes.length} structure themes.';
     if (notFoundThemes.isNotEmpty) {
       result +=
-          '\nТемы без соответствия в заголовках: ${notFoundThemes.join("; ")}';
+          '\nThemes with no correspondence in headings: ${notFoundThemes.join("; ")}';
     }
     return result;
   }
 
-  // --- Основной процесс анализа в изоляте ---
-  final markdownText = normalizeEyo(markdownTextFromDelta);
-  final plainText = normalizeEyo(plainTextFromDelta);
+  final markdownText = markdownTextFromDelta;
+  final plainText = plainTextFromDelta;
   final tzData = payload.tzData;
 
   final generalResults =
@@ -570,62 +556,59 @@ Future<Map<String, dynamic>> runAnalysisInIsolate(
   };
 }
 
-// <<< КОНЕЦ БЛОКА ДЛЯ ИЗОЛЯТА >>>
-
-class SeoAnalyzerPage extends StatefulWidget {
-  static const String name = 'useful/instruments/seo-analyzer';
-  const SeoAnalyzerPage({super.key});
+class SeoAnalyzerPageEn extends StatefulWidget {
+  static const String name = 'useful/instruments/seo-analyzer-en';
+  const SeoAnalyzerPageEn({super.key});
 
   @override
-  State<SeoAnalyzerPage> createState() => _SeoAnalyzerPageState();
+  State<SeoAnalyzerPageEn> createState() => _SeoAnalyzerPageEnState();
 }
 
-class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
+class _SeoAnalyzerPageEnState extends State<SeoAnalyzerPageEn> {
   final List<TextTzPair> _pairs = [TextTzPair()];
   bool _isLoading = false;
   SearchMode _selectedMode = SearchMode.overlapping;
 
   static const List<String> _allKnownMarkers = [
-    'Объем текста',
-    'Объем',
+    'Volume',
+    'Text Volume',
     'Title:',
     'Title',
-    'Метатег Title',
+    'Meta Title',
     'Description:',
     'Description',
-    'Метатег Description',
+    'Meta Description',
     'H1:',
     'H1',
-    'Мета-теги',
-    'Структура текста',
-    'Примерная структура статьи',
-    'Ключевые фразы',
-    'Ключи, которые нужно использовать в тексте',
-    'Ключи',
-    'Слова из подсветки в выдаче',
-    'Разбавленное вхождение',
-    'Тематические слова использовать в любой форме',
-    'Тематикозадающие слова / LSI',
+    'Meta Tags',
+    'Structure',
+    'Article Structure',
+    'Example Structure',
+    'Keywords',
+    'Key Phrases',
+    'Exact Keywords',
+    'Diluted Keywords',
+    'Thematic Words',
+    'LSI Keywords',
     'LSI',
-    'Тематические слова',
-    'Общие требования к тексту',
-    'Тема/H1',
-    'Страница URL',
-    'Частые вопросы (FAQ)',
-    'Перелинковка',
-    'Примеры конкурентов',
-    'Примечание'
+    'General Requirements',
+    'Theme/H1',
+    'Page URL',
+    'FAQ',
+    'Notes',
+    'Competitor Examples',
+    'Note'
   ];
 
-  final SnowballStemmer _stemmer = SnowballStemmer(Algorithm.russian);
+  final SnowballStemmer _stemmer = SnowballStemmer(Algorithm.english);
 
   @override
   void initState() {
     super.initState();
     MetaTagService().updateAllTags(
-      title: "SEO Анализатор текста | Инструменты Даниила Шастовского",
+      title: "SEO Text Analyzer | Daniil Shastovsky's Tools",
       description:
-          "Бесплатный онлайн-инструмент для проверки соответствия текста SEO-ТЗ. Анализ ключевых слов, LSI, объема и других параметров.",
+          "A free online tool to check text compliance with SEO technical specifications. Analyzes keywords, LSI, volume, and other parameters.",
     );
   }
 
@@ -662,77 +645,44 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
   }
 
   void _recognizeStructure(QuillController controller) {
-    // Получаем текущий текст и разбиваем его на строки.
-    // LineSplitter() надежнее, чем split('\n'), так как работает с разными типами переносов строк.
     final plainText = controller.document.toPlainText();
     final lines = const LineSplitter().convert(plainText);
-
-    // Создаем новый, пустой Delta, который мы будем наполнять.
     final newDelta = Delta();
 
     for (final line in lines) {
       final trimmedLine = line.trim();
 
-      // Если строка пустая, просто сохраняем перенос строки.
       if (trimmedLine.isEmpty) {
         newDelta.insert('\n');
         continue;
       }
 
-      // --- Правило 1: Распознаем пункты списка ---
-      // Если строка начинается с одного из маркеров...
       if (trimmedLine.startsWith('•') ||
           trimmedLine.startsWith('-') ||
           trimmedLine.startsWith('*')) {
-        // Убираем маркер и пробел из начала строки
         final lineContent = trimmedLine.substring(1).trim();
-        // Вставляем сам текст пункта
         newDelta.insert(lineContent);
-        // А затем вставляем перенос строки с атрибутом "маркированный список".
-        // Это стандартный способ форматирования блоков в Quill.
         newDelta.insert('\n', {'list': 'bullet'});
-      }
-      // --- Правило 2: Распознаем заголовки ---
-      // Эвристика: строка относительно короткая и не заканчивается знаком препинания.
-      else if (trimmedLine.length < 80 &&
+      } else if (trimmedLine.length < 80 &&
           !'.?!,:;'.contains(trimmedLine.substring(trimmedLine.length - 1))) {
         newDelta.insert(trimmedLine);
-        // Применяем стиль "Заголовок 2" к переносу строки.
         newDelta.insert('\n', {'header': 2});
-      }
-      // --- Правило 3: Все остальное считаем обычным параграфом ---
-      else {
-        // Просто вставляем строку с переносом без всяких атрибутов.
+      } else {
         newDelta.insert('$trimmedLine\n');
       }
     }
-
-    // ИСПРАВЛЕНИЕ: Используем правильный метод для полной замены содержимого редактора.
     controller.document = Document.fromDelta(newDelta);
-
-    // Перемещаем курсор в конец, чтобы было удобно продолжать редактирование.
     controller.moveCursorToEnd();
   }
 
   Future<void> _runGlobalAnalysis() async {
-    // 1. Немедленно показываем оверлей.
     setState(() => _isLoading = true);
-
-    // 2. ВАЖНЫЙ ШАГ: Даем UI-потоку небольшую паузу (50 миллисекунд).
-    // Этого времени достаточно, чтобы Flutter успел не только показать,
-    // но и проиграть несколько кадров анимации лоадера.
     await Future.delayed(const Duration(milliseconds: 50));
-
-    // 3. Теперь, когда анимация уже точно идет, запускаем сам анализ.
-    // Мы вынесли его в отдельную асинхронную функцию для чистоты.
     _performAnalysis();
   }
 
-// Новая вспомогательная функция, которая содержит всю логику
   Future<void> _performAnalysis() async {
     for (var pair in _pairs) {
-      // Эта операция все еще может вызвать очень короткое "подрагивание"
-      // на ОЧЕНЬ больших текстах, но оно будет минимальным, так как анимация уже запущена.
       final plainText = pair.textController.document.toPlainText();
       if (plainText.trim().isEmpty) {
         pair.analysisResult = null;
@@ -747,9 +697,9 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         exactKeywords: pair.exactKeywordsController.text,
         dilutedKeywords: pair.dilutedKeywordsController.text,
         thematicWords: pair.thematicWordsController.text,
-        generalRequirements: _parseSection(
-                pair.tzController.text, ['Общие требования к тексту']) ??
-            "Не найдено",
+        generalRequirements:
+            _parseSection(pair.tzController.text, ['General Requirements']) ??
+                "Not found",
       );
 
       final payload = AnalysisPayload(
@@ -758,7 +708,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         searchMode: _selectedMode,
       );
 
-      final isolateFuture = compute(runAnalysisInIsolate, payload);
+      final isolateFuture = compute(runAnalysisInIsolateEn, payload);
       final spellingFuture = _checkSpelling(plainText);
 
       final isolateResult = await isolateFuture;
@@ -784,7 +734,6 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       );
     }
 
-    // Когда все анализы завершены, обновляем UI и выключаем лоадер
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -792,80 +741,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     }
   }
 
-  /*/// "Очищает" HTML, скопированный из Google Docs, используя DOM-парсер
-  /// для надежной замены специфичных стилей на стандартные семантические теги.
-  String _sanitizeGoogleDocsHtml(String dirtyHtml) {
-    // 1. Парсим грязный HTML в объектную модель документа (DOM)
-    final document = html_parser.parse(dirtyHtml);
-
-    // 2. Ищем все теги <p> и пытаемся понять, не являются ли они заголовком или пунктом списка
-    final paragraphs = document.querySelectorAll('p');
-    for (final p in paragraphs) {
-      String innerText = p.text.trim();
-      if (innerText.isEmpty) continue;
-
-      // --- Логика для списков ---
-      // Если текст параграфа начинается с маркера списка
-      if (innerText.startsWith('•') ||
-          innerText.startsWith('-') ||
-          innerText.startsWith('*')) {
-        // Создаем новый, чистый элемент <li>
-        final newListItem = html_dom.Element.tag('li');
-        // Убираем маркер и лишние пробелы из текста и кладем его внутрь <li>
-        newListItem.innerHtml = innerText.substring(1).trim();
-        // Заменяем старый <p> на новый <li> в дереве документа
-        p.replaceWith(newListItem);
-        continue; // Переходим к следующему параграфу
-      }
-
-      // --- Логика для заголовков (основана на размере шрифта) ---
-      final span = p.querySelector('span');
-      if (span != null && span.attributes['style'] != null) {
-        final style = span.attributes['style']!;
-        // Ищем размер шрифта в стилях
-        final sizeMatch = RegExp(r'font-size:\s*(\d+)pt').firstMatch(style);
-        if (sizeMatch != null) {
-          final fontSize = int.parse(sizeMatch.group(1)!);
-          String? headingTag;
-
-          // Определяем тег заголовка по размеру шрифта (эти значения можно подстроить)
-          if (fontSize >= 20)
-            headingTag = 'h1';
-          else if (fontSize >= 16)
-            headingTag = 'h2';
-          else if (fontSize >= 14) headingTag = 'h3';
-
-          if (headingTag != null) {
-            final newHeading = html_dom.Element.tag(headingTag);
-            newHeading.innerHtml =
-                p.innerHtml; // Сохраняем внутренний HTML (с жирным и т.д.)
-            p.replaceWith(newHeading);
-            continue;
-          }
-        }
-      }
-    }
-
-    // 3. После обработки всех <p> оборачиваем группы <li> в <ul>
-    // Это нужно делать после основного цикла, чтобы не нарушать итерацию
-    String bodyHtml = document.body!.innerHtml;
-    bodyHtml = bodyHtml.replaceAllMapped(
-      RegExp(r'(<li>.*?</li>)+', dotAll: true),
-      (match) => '<ul>${match.group(0)}</ul>',
-    );
-
-    debugPrint("--- ОЧИЩЕННЫЙ HTML ---\n$bodyHtml\n--------------------");
-    return bodyHtml;
-  }*/
-
   Future<void> _pasteHtml(QuillController controller) async {
     String? clipboardText;
     try {
-      // Мы все еще используем try-catch на случай других платформенных ошибок
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
       clipboardText = clipboardData?.text;
     } catch (e) {
-      debugPrint("Не удалось прочитать буфер обмена: $e");
+      debugPrint("Failed to read clipboard: $e");
       return;
     }
 
@@ -873,18 +755,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       return;
     }
 
-    // Просто вставляем текст как есть
     final selection = controller.selection;
     controller.document.replace(
         selection.start, selection.end - selection.start, clipboardText);
   }
 
-  String _normalizeEyo(String text) {
-    return text.replaceAll('ё', 'е');
-  }
-
   String _stemText(String text) {
-    final words = text.split(RegExp(r"(\s+|[.,!?—:;()" "'-])"));
+    final words = text.split(RegExp(r"(\s+|[.,!?—:;()'" "'-])"));
     final stemmedWords = words.map((word) {
       if (word.trim().isEmpty) return word;
       return _stemmer.stem(word.toLowerCase());
@@ -910,7 +787,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           backgroundColor: theme.colorScheme.surface,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: Text("Как пользоваться анализатором",
+          title: Text("How to use the analyzer",
               style: headlineSecondaryTextStyle(context)),
           content: SingleChildScrollView(
             child: Column(
@@ -925,21 +802,21 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "Этот инструмент создан для автоматизации проверки текстов на соответствие SEO-ТЗ.",
+                  "This tool is designed to automate checking texts for compliance with SEO technical specifications (TechSpec).",
                   style: bodyTextStyle(context),
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
-                Text("Этап 1: Вставка и форматирование",
+                Text("Step 1: Input and Formatting",
                     style: bodyTextStyle(context)
                         .copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 MarkdownBody(
                   data:
-                      "1.  **Вставьте текст статьи** в левое поле. Используйте новую **иконку вставки на панели инструментов**, чтобы вставить текст из Google Docs/Word с сохранением форматирования.\n"
-                      "2.  **Используйте панель инструментов** над полем ввода, чтобы быстро разметить **заголовки (H1, H2)** и **списки**.\n"
-                      "3.  **Вставьте текст вашего ТЗ** в правое поле и нажмите **«Распарсить ТЗ»**.",
+                      "1.  **Paste the article text** into the left field. Formatting from Word/Google Docs might be lost on paste.\n"
+                      "2.  **Use the toolbar** above the input field to quickly mark up **headings (H1, H2)** and **lists**.\n"
+                      "3.  **Paste your TechSpec text** into the right field and click **\"Parse This TZ\"**.",
                   styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                       p: bodyTextStyle(context),
                       listBullet: bodyTextStyle(context)),
@@ -947,15 +824,15 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
-                Text("Этап 2: Проверка и Анализ",
+                Text("Step 2: Verification and Analysis",
                     style: bodyTextStyle(context)
                         .copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 MarkdownBody(
                   data:
-                      "1.  После парсинга ниже появятся **редактируемые поля**. Проверьте и при необходимости **скорректируйте** данные.\n"
-                      "2.  Выберите подходящий **режим анализа** (рекомендуемый — «Разовые вхождения»).\n"
-                      "3.  Нажмите **«Запустить глобальный анализ»** и получите подробный отчет.",
+                      "1.  After parsing, **editable fields** will appear below. Check and **correct** the data if necessary.\n"
+                      "2.  Choose a suitable **analysis mode** (recommended — \"Single Pass\").\n"
+                      "3.  Click **\"Run Global Analysis\"** to get a detailed report.",
                   styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                       p: bodyTextStyle(context),
                       listBullet: bodyTextStyle(context)),
@@ -963,7 +840,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
-                Text("Обозначение подсветок в тексте",
+                Text("Text Highlighting Legend",
                     style: bodyTextStyle(context)
                         .copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
@@ -977,13 +854,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           style: bodyTextStyle(context),
                           children: [
                             TextSpan(
-                              text: "  Точное вхождение  ",
+                              text: "  Exact Match  ",
                               style: TextStyle(
                                   backgroundColor:
                                       Colors.yellow.withOpacity(0.5)),
                             ),
                             const TextSpan(
-                                text: " — ключ найден в точной форме."),
+                                text: " — keyword found in its exact form."),
                           ],
                         ),
                       ),
@@ -993,13 +870,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           style: bodyTextStyle(context),
                           children: [
                             TextSpan(
-                              text: "  Тематическое слово  ",
+                              text: "  Thematic Word  ",
                               style: TextStyle(
                                   backgroundColor:
                                       Colors.lightBlue.withOpacity(0.4)),
                             ),
                             const TextSpan(
-                                text: " — LSI-слово в начальной форме."),
+                                text: " — LSI word in its base form."),
                           ],
                         ),
                       ),
@@ -1009,13 +886,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           style: bodyTextStyle(context),
                           children: [
                             TextSpan(
-                              text: "  Тематического слова  ",
+                              text: "  Thematic Word Form  ",
                               style: TextStyle(
                                   backgroundColor:
                                       Colors.lightGreen.withOpacity(0.5)),
                             ),
                             const TextSpan(
-                                text: " — LSI-слово в другой словоформе."),
+                                text: " — LSI word in a different form."),
                           ],
                         ),
                       ),
@@ -1027,7 +904,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           ),
           actions: [
             TextButton(
-              child: const Text("Все понятно!"),
+              child: const Text("Got it!"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -1046,7 +923,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         content: Text(content, style: bodyTextStyle(context)),
         actions: [
           TextButton(
-            child: const Text("Понятно"),
+            child: const Text("OK"),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -1059,36 +936,34 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     final String tz = pair.tzController.text;
     if (tz.isEmpty || tz.length > 35000 || tz.contains('<script')) {
       _showError(
-          "Поле ТЗ №${index + 1} пустое, превышает 35000 символов или содержит <script>.");
+          "TechSpec field #${index + 1} is empty, exceeds 35,000 characters, or contains a <script> tag.");
       return;
     }
 
     final parsedData = TzData(
-      volume: _parseSection(tz, ['Объем текста', 'Объем']) ?? "Не найдено",
-      metaTitle: _parseSection(tz, ['Title:', 'Title']) ?? "Не найдено",
-      metaDescription:
-          _parseSection(tz, ['Description:', 'Description']) ?? "Не найдено",
-      structure: _parseSection(
-              tz, ['Структура текста', 'Примерная структура статьи']) ??
-          "Не найдено",
+      volume: _parseSection(tz, ['Volume', 'Text Volume']) ?? "Not found",
+      metaTitle:
+          _parseSection(tz, ['Title:', 'Title', 'Meta Title']) ?? "Not found",
+      metaDescription: _parseSection(
+              tz, ['Description:', 'Description', 'Meta Description']) ??
+          "Not found",
+      structure:
+          _parseSection(tz, ['Structure', 'Article Structure']) ?? "Not found",
       exactKeywords: _parseSection(tz, [
-            'Ключевые фразы',
-            'Ключи, которые нужно использовать в тексте',
-            'Ключи'
+            'Keywords',
+            'Key Phrases',
+            'Exact Keywords',
           ]) ??
-          "Не найдено",
-      dilutedKeywords: _parseSection(
-              tz, ['Слова из подсветки в выдаче', 'Разбавленное вхождение']) ??
-          "Не найдено",
+          "Not found",
+      dilutedKeywords: _parseSection(tz, ['Diluted Keywords']) ?? "Not found",
       thematicWords: _parseSection(tz, [
-            'Тематические слова использовать в любой форме',
-            'Тематикозадающие слова / LSI',
+            'Thematic Words',
+            'LSI Keywords',
             'LSI',
-            'Тематические слова'
           ]) ??
-          "Не найдено",
+          "Not found",
       generalRequirements:
-          _parseSection(tz, ['Общие требования к тексту']) ?? "Не найдено",
+          _parseSection(tz, ['General Requirements']) ?? "Not found",
     );
 
     pair.volumeController.text = parsedData.volume;
@@ -1150,7 +1025,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     final lowerCaseMarkers =
         markers.map((m) => m.toLowerCase().replaceAll(':', '')).toList();
     final bool isParsingStructure =
-        lowerCaseMarkers.any((m) => m.contains('структура'));
+        lowerCaseMarkers.any((m) => m.contains('structure'));
     List<String> stopMarkers = _allKnownMarkers
         .map((m) => m.toLowerCase().replaceAll(':', ''))
         .where((m) => !lowerCaseMarkers.contains(m))
@@ -1188,8 +1063,8 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     String fullContent = contentLines.join('\n').trim();
 
     if (markers.any((m) =>
-        m.toLowerCase().contains('подсветки') ||
-        m.toLowerCase().contains('тематические'))) {
+        m.toLowerCase().contains('thematic') ||
+        m.toLowerCase().contains('lsi'))) {
       final lines = fullContent.split('\n');
       int listStartIndex = -1;
       for (int i = 0; i < lines.length; i++) {
@@ -1198,7 +1073,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
             (line.isNotEmpty && !line.contains(' ') && line.length < 30) ||
             (line.isNotEmpty &&
                 RegExp(r'^\S.*\S$').hasMatch(line) &&
-                !line.toLowerCase().startsWith('используя'))) {
+                !line.toLowerCase().startsWith('use'))) {
           listStartIndex = i;
           break;
         }
@@ -1212,12 +1087,12 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
   }
 
   List<KeywordRequirement> _parseKeywordsFromTextForUI(String text) {
-    if (text.toLowerCase() == "не найдено" || text.isEmpty) return [];
+    if (text.toLowerCase() == "not found" || text.isEmpty) return [];
     List<KeywordRequirement> keywords = [];
     final lines =
         text.split('\n').where((line) => line.trim().isNotEmpty).toList();
-    final header1 = 'Ключевое слово'.toLowerCase();
-    final header2 = 'Количество упоминаний в тексте(раз(а))'.toLowerCase();
+    final header1 = 'keyword'.toLowerCase();
+    final header2 = 'mentions (count)'.toLowerCase();
     final contentLines = lines.where((line) {
       final trimmedLower = line.trim().toLowerCase();
       return trimmedLower.isNotEmpty &&
@@ -1226,7 +1101,6 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     }).toList();
     final countOnNextLineRegex = RegExp(r'^\((\d+)\)$');
     final rangeRegex = RegExp(r'(.+?)\s*\((\d+)(?:-(\d+))?\)\s*$');
-    final tableRegex = RegExp(r'^(.*?)\s+\d+\s+раз\(?а?\)');
 
     for (int i = 0; i < contentLines.length; i++) {
       final currentLine = contentLines[i].trim();
@@ -1249,15 +1123,6 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         final max =
             rangeMatch.group(3) != null ? int.parse(rangeMatch.group(3)!) : min;
         keywords.add(KeywordRequirement(phrase, min, max));
-        continue;
-      }
-      final tableMatch = tableRegex.firstMatch(currentLine);
-      if (tableMatch != null) {
-        final phrase =
-            tableMatch.group(1)!.trim().replaceAll(RegExp(r'[\.,;]$'), '');
-        final countString = RegExp(r'(\d+)').firstMatch(currentLine)!.group(1)!;
-        final count = int.parse(countString);
-        keywords.add(KeywordRequirement(phrase, count, count));
         continue;
       }
       if (currentLine.isNotEmpty) {
@@ -1291,7 +1156,8 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           Uri.parse(
               'https://speller.yandex.net/services/spellservice.json/checkText'),
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: 'lang=ru&format=plain&text=${Uri.encodeComponent(textChunk)}',
+          // ADAPTED: Changed language to English
+          body: 'lang=en&format=plain&text=${Uri.encodeComponent(textChunk)}',
         );
 
         if (response.statusCode == 200) {
@@ -1307,7 +1173,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           }
         }
       } catch (e) {
-        debugPrint("Ошибка при обращении к Яндекс.Спеллер: $e");
+        debugPrint("Error contacting Yandex.Speller: $e");
       }
     }
     return allErrors;
@@ -1338,7 +1204,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
 
     List<Color?> highlightMap = List.filled(text.length, null);
 
-    final wordRegex = RegExp(r'[\wА-Яа-я]+');
+    final wordRegex = RegExp(r'(.+?)\s*\((\d+)(?:-(\d+))?\)\s*$');
     for (final match in wordRegex.allMatches(text)) {
       final word = match.group(0)!;
       final wordStem = _stemText(word.toLowerCase());
@@ -1399,7 +1265,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     return spans;
   }
 
-  // --- UI ---
+  // --- UI (Fully Translated) ---
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.of(context).smallerThan(TABLET);
@@ -1424,56 +1290,26 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                   children: [
                     const SizedBox(height: 24),
                     const Breadcrumbs(items: [
-                      BreadcrumbItem(text: "Главная", routeName: '/'),
-                      BreadcrumbItem(text: "Полезное", routeName: '/useful'),
+                      BreadcrumbItem(text: "Home", routeName: '/'),
+                      BreadcrumbItem(text: "Useful", routeName: '/useful'),
                       BreadcrumbItem(
-                          text: "Инструменты SEO",
-                          routeName: '/useful/instruments'),
+                          text: "SEO Tools", routeName: '/useful/instruments'),
                       BreadcrumbItem(
-                          text: "SEO Анализатор текста", routeName: null),
+                          text: "SEO Text Analyzer", routeName: null),
                     ]),
                     const SizedBox(height: 40),
-                    Text("Анализатор текста на соответствие SEO ТЗ",
+                    Text("SEO Text Analyzer for Technical Specifications",
                         style: headlineTextStyle(context)),
                     const SizedBox(height: 16),
-                    RichText(
-                      text: TextSpan(
-                        style: subtitleTextStyle(context),
-                        children: <TextSpan>[
-                          const TextSpan(
-                            text:
-                                'Вставьте ваш текст и техническое задание, чтобы проверить соответствие ключевых параметров. Можно добавить до 5 пар для одновременного анализа.\n\n',
-                          ),
-                          TextSpan(
-                            text: 'ПРИМЕР/ШАБЛОН ПОЛНОЦЕННОГО РАБОТАЮЩЕГО ТЗ',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () async {
-                                final url = Uri.parse(
-                                    'https://docs.google.com/document/d/1DAVnjwPHQGfa23KZN7SO71T5DeSRtcRB/edit?usp=sharing&ouid=114606455229993507775&rtpof=true&sd=true');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content:
-                                            Text('Не удалось открыть ссылку')),
-                                  );
-                                }
-                              },
-                          ),
-                        ],
-                      ),
-                    ),
+                    Text(
+                        'Paste your text and technical specifications (TechSpec) to check compliance with key parameters. You can add up to 5 pairs for simultaneous analysis.',
+                        style: subtitleTextStyle(context)),
                     const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: TextButton.icon(
                         icon: const Icon(Icons.help_outline, size: 18),
-                        label: const Text("Как это работает?"),
+                        label: const Text("How does it work?"),
                         onPressed: () => _showHelpDialog(context),
                       ),
                     ),
@@ -1493,14 +1329,14 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                         if (_pairs.length < 5)
                           OutlinedButton.icon(
                             icon: const Icon(Icons.add),
-                            label: const Text("Добавить пару"),
+                            label: const Text("Add Pair"),
                             onPressed: _addPair,
                           ),
                         if (_pairs.length > 1) ...[
                           const SizedBox(width: 16),
                           OutlinedButton.icon(
                             icon: const Icon(Icons.remove),
-                            label: const Text("Удалить последнюю"),
+                            label: const Text("Remove Last"),
                             style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.red),
                             onPressed: () => _removePair(_pairs.length - 1),
@@ -1513,7 +1349,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                     Center(
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.analytics_outlined),
-                        label: const Text("Запустить глобальный анализ"),
+                        label: const Text("Run Global Analysis"),
                         style: elevatedButtonStyle(context).copyWith(
                           backgroundColor:
                               WidgetStateProperty.all(Colors.green[700]),
@@ -1532,7 +1368,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                       const SizedBox(height: 40),
                       divider(context),
                       const SizedBox(height: 40),
-                      Text("Результаты анализа",
+                      Text("Analysis Results",
                           style: headlineTextStyle(context)),
                       const SizedBox(height: 24),
                       ListView.builder(
@@ -1551,183 +1387,19 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                     ],
                     const SizedBox(height: 80),
                     const ShareButtonsBlock(
-                      shareText: "Попробуйте этот удобный SEO-анализатор:",
-                      shareSubject: "Инструмент: SEO-анализатор текста",
+                      shareText: "Check out this handy SEO analyzer:",
+                      shareSubject: "Tool: SEO Text Analyzer",
                     ),
-                    const SizedBox(height: 60),
-
-                    // Разделитель
-                    divider(context),
                     const SizedBox(height: 40),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        margin: marginBottom40,
-                        child: RichText(
-                          text: TextSpan(
-                            style: bodyTextStyle(context),
-                            children: [
-                              const TextSpan(
-                                text:
-                                    "Если вам понравился этот сайт или то, что я делаю - вы можете поддержать меня в моем телеграм канале ",
-                              ),
-                              TextSpan(
-                                text: "@shastovscky",
-                                style: bodyTextStyle(context).copyWith(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () => launchUrl(
-                                      Uri.parse('https://t.me/shastovscky')),
-                              ),
-                              const TextSpan(
-                                text: " или подписаться на меня в инстаграм ",
-                              ),
-                              TextSpan(
-                                text: "@yellolwapple",
-                                style: bodyTextStyle(context).copyWith(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () => launchUrl(Uri.parse(
-                                      'https://instagram.com/yellolwapple')),
-                              ),
-                              const TextSpan(
-                                text:
-                                    " в нем я делюсь фото и видео из своих поездок.",
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // кнопки соц.сетей (СТАРАЯ КНОПКА УДАЛЕНА)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 40),
-                      width: double.infinity,
-                      child: Center(
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 800),
-                          child: Wrap(
-                            spacing: 16,
-                            runSpacing: 16,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.telegram,
-                                    color: theme.colorScheme.onSurface),
-                                label: const Text('Telegram личный'),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(
-                                    Uri.parse('https://t.me/switchleveler')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.campaign,
-                                    color: theme.colorScheme.onSurface),
-                                label: const Text('Telegram канал'),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(
-                                    Uri.parse('https://t.me/shastovscky')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.camera_alt,
-                                    color: theme.colorScheme.onSurface),
-                                label: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Instagram'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Запрещенная в РФ организация',
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          color: theme.colorScheme.secondary),
-                                    ),
-                                  ],
-                                ),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(Uri.parse(
-                                    'https://instagram.com/yellolwapple')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.work,
-                                    color: theme.colorScheme.onSurface),
-                                label: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('LinkedIn'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Запрещенная в РФ организация',
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          color: theme.colorScheme.secondary),
-                                    ),
-                                  ],
-                                ),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(Uri.parse(
-                                    'https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.smart_display_outlined,
-                                    color: theme.colorScheme.onSurface),
-                                label: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('YouTube'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Запрещенная в РФ организация',
-                                      style: TextStyle(
-                                          fontSize: 9,
-                                          color: theme.colorScheme.secondary),
-                                    ),
-                                  ],
-                                ),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(Uri.parse(
-                                    'https://www.youtube.com/@itsmyadv')),
-                              ),
-                              ElevatedButton.icon(
-                                icon: Icon(Icons.article_outlined,
-                                    color: theme.colorScheme.onSurface),
-                                label: const Text('VC.RU'),
-                                style: elevatedButtonStyle(context),
-                                onPressed: () => launchUrl(
-                                    Uri.parse('https://vc.ru/id1145025')),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Breadcrumbs(items: [
-                      BreadcrumbItem(text: "Главная", routeName: '/'),
-                      BreadcrumbItem(text: "Полезное", routeName: '/useful'),
-                      BreadcrumbItem(
-                          text: "Инструменты SEO",
-                          routeName: '/useful/instruments'),
-                      BreadcrumbItem(
-                          text: "SEO Анализатор текста", routeName: null),
-                    ]),
+                    divider(context),
                     ...authorSection(
                       context: context,
                       imageUrl: "assets/images/avatar_default.webp",
-                      name: "Автор инструмента: Шастовский Даниил",
+                      name: "Tool Author: Daniil Shastovsky",
                       bio:
-                          "SEO-специалист и Flutter-разработчик. Создаю полезные инструменты для себя и коллег, чтобы автоматизировать рутину и освободить время для более важных задач.",
+                          "SEO specialist and Flutter developer. I create useful tools for myself and my colleagues to automate routine tasks.",
                     ),
                     const SizedBox(height: 40),
-
-                    // <<< КОНЕЦ ВСТАВКИ >>>
-
                     divider(context),
                     const Footer(),
                   ],
@@ -1742,6 +1414,8 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
   }
 
   Widget _buildTextTzPairWidget(int index, ThemeData theme) {
+    // ... This widget's internal text is also translated
+    // Full method provided for clarity
     final pair = _pairs[index];
     const double editorHeight = 300;
 
@@ -1753,7 +1427,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Пара №${index + 1}",
+            Text("Pair #${index + 1}",
                 style: headlineSecondaryTextStyle(context)),
             const SizedBox(height: 16),
             ResponsiveRowColumn(
@@ -1768,23 +1442,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Текст", style: headlineSecondaryTextStyle(context)),
+                      Text("Text", style: headlineSecondaryTextStyle(context)),
                       const SizedBox(height: 8),
                       QuillToolbar.simple(
                         configurations: QuillSimpleToolbarConfigurations(
                           controller: pair.textController,
-                          customButtons: [
-                            QuillToolbarCustomButtonOptions(
-                              icon: const Icon(Icons.paste),
-                              tooltip: "Вставить с форматированием",
-                              onPressed: () {
-                                // <<< ИСПРАВЛЕНО ЗДЕСЬ
-                                _pasteHtml(pair.textController);
-                              },
-                            ),
-                          ],
                           sharedConfigurations: const QuillSharedConfigurations(
-                            locale: Locale('ru'),
+                            locale: Locale('en'),
                           ),
                         ),
                       ),
@@ -1802,7 +1466,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                             readOnly: false,
                             sharedConfigurations:
                                 const QuillSharedConfigurations(
-                              locale: Locale('ru'),
+                              locale: Locale('en'),
                             ),
                           ),
                         ),
@@ -1810,10 +1474,9 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-// Кнопка 1: Вставить текст
                           ElevatedButton.icon(
                             icon: const Icon(Icons.paste),
-                            label: const Text("Вставить текст"),
+                            label: const Text("Paste Text"),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 16),
@@ -1822,11 +1485,10 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                               _pasteHtml(pair.textController);
                             },
                           ),
-                          const SizedBox(width: 16), // Отступ между кнопками
-// Кнопка 2: Распознать структуру
+                          const SizedBox(width: 16),
                           ElevatedButton.icon(
                             icon: const Icon(Icons.auto_fix_high),
-                            label: const Text("Распознать структуру"),
+                            label: const Text("Recognize Structure"),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange.shade700,
                               foregroundColor: Colors.white,
@@ -1847,7 +1509,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Техническое задание",
+                      Text("Technical Specifications (TechSpec)",
                           style: headlineSecondaryTextStyle(context)),
                       const SizedBox(height: 8),
                       SizedBox(
@@ -1859,7 +1521,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           textAlignVertical: TextAlignVertical.top,
                           style: bodyTextStyle(context),
                           decoration: InputDecoration(
-                            hintText: "Вставьте ТЗ...",
+                            hintText: "Paste your TechSpec here...",
                             hintStyle: subtitleTextStyle(context),
                             border: const OutlineInputBorder(),
                             focusedBorder: OutlineInputBorder(
@@ -1870,11 +1532,12 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.manage_search),
-                          label: const Text("Распарсить это ТЗ"),
+                          label: const Text("Parse This TechSpec"),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 24, vertical: 16),
@@ -1887,7 +1550,6 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
             if (pair.parsedTz != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
@@ -1903,27 +1565,27 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Проверьте и скорректируйте данные из ТЗ",
+        Text("Verify and correct the parsed TechSpec data",
             style: headlineSecondaryTextStyle(context)),
         const SizedBox(height: 16),
-        _buildEditableField(context, pair.volumeController, "Объем текста"),
+        _buildEditableField(context, pair.volumeController, "Text Volume"),
         const SizedBox(height: 16),
-        _buildEditableField(context, pair.titleController, "Метатег Title"),
-        const SizedBox(height: 16),
-        _buildEditableField(
-            context, pair.descriptionController, "Метатег Description"),
+        _buildEditableField(context, pair.titleController, "Meta Title"),
         const SizedBox(height: 16),
         _buildEditableField(
-            context, pair.structureController, "Структура текста"),
+            context, pair.descriptionController, "Meta Description"),
         const SizedBox(height: 16),
         _buildEditableField(
-            context, pair.exactKeywordsController, "Точное вхождение (Ключи)"),
-        const SizedBox(height: 16),
-        _buildEditableField(context, pair.dilutedKeywordsController,
-            "Слова из подсветки в выдаче"),
+            context, pair.structureController, "Text Structure"),
         const SizedBox(height: 16),
         _buildEditableField(
-            context, pair.thematicWordsController, "Тематические слова (LSI)"),
+            context, pair.exactKeywordsController, "Exact Keywords"),
+        const SizedBox(height: 16),
+        _buildEditableField(
+            context, pair.dilutedKeywordsController, "Diluted Keywords"),
+        const SizedBox(height: 16),
+        _buildEditableField(
+            context, pair.thematicWordsController, "Thematic Words (LSI)"),
       ],
     );
   }
@@ -1942,7 +1604,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           style: bodyTextStyle(context).copyWith(fontFamily: 'monospace'),
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
-            hintText: "Если данные не нашлись, вы можете вписать их сюда...",
+            hintText: "If data was not found, you can enter it here...",
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
                   color: Theme.of(context).colorScheme.primary, width: 2.0),
@@ -1956,7 +1618,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
   Widget _buildResultSection(
       BuildContext context, AnalysisResult result, int pairNumber) {
     return ExpansionTile(
-      title: Text("Результаты анализа для Пары №$pairNumber",
+      title: Text("Analysis Results for Pair #$pairNumber",
           style: headlineTextStyle(context)),
       initiallyExpanded: true,
       children: [
@@ -1966,7 +1628,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (result.highlightedText.isNotEmpty) ...[
-                Text("Текст с подсветкой",
+                Text("Highlighted Text",
                     style: headlineSecondaryTextStyle(context)),
                 const SizedBox(height: 8),
                 Container(
@@ -1984,14 +1646,14 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                 ),
                 const SizedBox(height: 24),
               ],
-              Text("Общие требования",
+              Text("General Requirements",
                   style: headlineSecondaryTextStyle(context)),
               const SizedBox(height: 8),
               ...result.generalResults.map((res) => Card(
                     child: ListTile(
                       title: Text(res.name),
                       subtitle: Text(
-                          "Требование: ${res.requirement}, Факт: ${res.actual}"),
+                          "Required: ${res.requirement}, Actual: ${res.actual}"),
                       trailing: res.isSuccess
                           ? const Icon(Icons.check_circle, color: Colors.green)
                           : const Icon(Icons.error, color: Colors.red),
@@ -2000,13 +1662,13 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               const SizedBox(height: 24),
               _buildSpellingErrorsSection(context, result.spellingErrors),
               const SizedBox(height: 24),
-              Text("Параметры из ТЗ",
+              Text("TechSpec Parameters",
                   style: headlineSecondaryTextStyle(context)),
               const SizedBox(height: 8),
               Card(
                   child: ListTile(
                       leading: const Icon(Icons.text_fields),
-                      title: const Text("Объем текста (без пробелов)"),
+                      title: const Text("Text Volume (no spaces)"),
                       subtitle: Text(result.volumeResult),
                       trailing: result.volumeResult.contains('✅')
                           ? const Icon(Icons.check_circle, color: Colors.green)
@@ -2014,7 +1676,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               Card(
                   child: ListTile(
                       leading: const Icon(Icons.title),
-                      title: const Text("Метатег Title"),
+                      title: const Text("Meta Title"),
                       subtitle: Text(result.titleResult),
                       trailing: result.titleResult.contains('✅')
                           ? const Icon(Icons.check_circle, color: Colors.green)
@@ -2022,7 +1684,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               Card(
                   child: ListTile(
                       leading: const Icon(Icons.description),
-                      title: const Text("Метатег Description"),
+                      title: const Text("Meta Description"),
                       subtitle: Text(result.descriptionResult),
                       trailing: result.descriptionResult.contains('✅')
                           ? const Icon(Icons.check_circle, color: Colors.green)
@@ -2030,20 +1692,20 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
               Card(
                   child: ListTile(
                       leading: const Icon(Icons.format_list_bulleted),
-                      title: const Text("Структура текста"),
+                      title: const Text("Text Structure"),
                       subtitle: Text(result.structureResult),
                       trailing: result.structureResult.contains('✅')
                           ? const Icon(Icons.check_circle, color: Colors.green)
                           : const Icon(Icons.warning, color: Colors.orange))),
               const SizedBox(height: 24),
               _buildKeywordAnalysisSection(
-                  context, "Точное вхождение", result.exactInclusion),
-              const SizedBox(height: 24),
-              _buildKeywordAnalysisSection(context,
-                  "Слова из подсветки в выдаче", result.dilutedInclusion),
+                  context, "Exact Match Keywords", result.exactInclusion),
               const SizedBox(height: 24),
               _buildKeywordAnalysisSection(
-                  context, "Тематические слова (LSI)", result.thematicWords),
+                  context, "Diluted Keywords", result.dilutedInclusion),
+              const SizedBox(height: 24),
+              _buildKeywordAnalysisSection(
+                  context, "Thematic Words (LSI)", result.thematicWords),
             ],
           ),
         )
@@ -2058,19 +1720,19 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Выберите режим анализа вхождений:",
+            "Select keyword analysis mode:",
             style: headlineSecondaryTextStyle(context),
           ),
           const SizedBox(height: 8),
           RadioListTile<SearchMode>(
             title: Row(
               children: [
-                const Text("Пересечение вхождений (стандартный)"),
+                const Text("Overlapping Occurrences (standard)"),
                 IconButton(
                   icon: const Icon(Icons.help_outline, size: 18),
                   onPressed: () => _showModeHelpDialog(
-                    "Пересечение вхождений",
-                    "Самый простой режим. Каждая ключевая фраза ищется по всему тексту независимо от других. Если фраза 'купить автомобиль' найдена, то при поиске слова 'автомобиль' оно также будет найдено внутри этой фразы. Этот режим может завышать количество коротких ключей.",
+                    "Overlapping Occurrences",
+                    "The simplest mode. Each keyword is searched throughout the text independently. If 'buy a car' is found, a search for 'car' will also find it within that phrase. This mode may overcount shorter keywords.",
                   ),
                 )
               ],
@@ -2084,12 +1746,12 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           RadioListTile<SearchMode>(
             title: Row(
               children: [
-                const Text("Разовые вхождения (рекомендуемый)"),
+                const Text("Single Pass (recommended)"),
                 IconButton(
                   icon: const Icon(Icons.help_outline, size: 18),
                   onPressed: () => _showModeHelpDialog(
-                    "Разовые вхождения",
-                    "Более точный SEO-алгоритм. Сначала ищутся самые длинные фразы. Если фраза 'купить автомобиль' найдена, то эта часть текста 'блокируется', и более короткие ключи ('автомобиль', 'купить') внутри нее уже не ищутся. Блокировка работает только в рамках одного типа ключей (например, 'Точных').",
+                    "Single Pass",
+                    "A more accurate SEO algorithm. It searches for the longest phrases first. If 'buy a car' is found, that part of the text is 'locked,' and shorter keywords ('car', 'buy') are no longer searched for within it. Locking works only within one keyword type (e.g., 'Exact').",
                   ),
                 ),
               ],
@@ -2103,12 +1765,12 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
           RadioListTile<SearchMode>(
             title: Row(
               children: [
-                const Text("Уникальные вхождения (строгий)"),
+                const Text("Unique Pass (strict)"),
                 IconButton(
                   icon: const Icon(Icons.help_outline, size: 18),
                   onPressed: () => _showModeHelpDialog(
-                    "Уникальные вхождения",
-                    "Самый строгий режим. Если любая фраза (например, точное вхождение 'купить автомобиль') найдена, то эта часть текста блокируется для поиска ВООБЩЕ ВСЕХ ДРУГИХ ключей (включая LSI и слова из подсветки). Полезно для избегания переспама.",
+                    "Unique Pass",
+                    "The strictest mode. If any phrase (e.g., exact match 'buy a car') is found, that part of the text is locked for ALL OTHER keyword searches (including LSI and diluted). Useful for avoiding keyword stuffing.",
                   ),
                 ),
               ],
@@ -2131,7 +1793,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         color: Colors.green.withOpacity(0.1),
         child: const ListTile(
           leading: Icon(Icons.check_circle, color: Colors.green),
-          title: Text("Орфографических ошибок не найдено"),
+          title: Text("No spelling errors found"),
         ),
       );
     }
@@ -2140,7 +1802,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Орфография (найдено ${errors.length} ${errors.length == 1 ? 'ошибка' : (errors.length < 5 ? 'ошибки' : 'ошибок')})",
+          "Spelling (found ${errors.length} ${errors.length == 1 ? 'error' : 'errors'})",
           style: headlineSecondaryTextStyle(context),
         ),
         const SizedBox(height: 8),
@@ -2176,7 +1838,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                   ],
                 ),
               ),
-              subtitle: Text("Варианты: ${error.suggestions.join(', ')}"),
+              subtitle: Text("Suggestions: ${error.suggestions.join(', ')}"),
             ),
           );
         }),
@@ -2192,36 +1854,36 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
         Text(title, style: headlineSecondaryTextStyle(context)),
         const SizedBox(height: 16),
         if (categoryResult.results.isEmpty)
-          const Text("Требования для этой категории в ТЗ не найдены.")
+          const Text("Requirements for this category not found in TechSpec.")
         else ...[
-          Text("Всего ключей в ТЗ: ${categoryResult.results.length}"),
+          Text("Total keywords in TechSpec: ${categoryResult.results.length}"),
           if (categoryResult.notFound > 0)
             Text(
-                "❌ Нет вхождений: ${categoryResult.notFound} из ${categoryResult.results.length}",
+                "❌ Not found: ${categoryResult.notFound} of ${categoryResult.results.length}",
                 style: const TextStyle(color: Colors.red)),
           if (categoryResult.moreThanNeeded > 0)
             Text(
-                "⚠️ Вхождений больше, чем нужно: ${categoryResult.moreThanNeeded} из ${categoryResult.results.length}",
+                "⚠️ More than required: ${categoryResult.moreThanNeeded} of ${categoryResult.results.length}",
                 style: const TextStyle(color: Colors.orange)),
           if (categoryResult.lessThanNeeded > 0)
             Text(
-                "⚠️ Вхождений меньше, чем нужно: ${categoryResult.lessThanNeeded} из ${categoryResult.results.length}",
+                "⚠️ Less than required: ${categoryResult.lessThanNeeded} of ${categoryResult.results.length}",
                 style: const TextStyle(color: Colors.orange)),
           if (categoryResult.perfectMatch > 0)
             Text(
-                "✅ Требуемое кол-во вхождений: ${categoryResult.perfectMatch} из ${categoryResult.results.length}",
+                "✅ Perfect match: ${categoryResult.perfectMatch} of ${categoryResult.results.length}",
                 style: const TextStyle(color: Colors.green)),
           const SizedBox(height: 8),
           ExpansionTile(
-            title: const Text("Показать детальную таблицу"),
+            title: const Text("Show detailed table"),
             children: [
               SizedBox(
                 width: double.infinity,
                 child: DataTable(
                   columns: const [
-                    DataColumn(label: Text("Ключевая фраза")),
-                    DataColumn(label: Text("Требуется"), numeric: true),
-                    DataColumn(label: Text("Найдено"), numeric: true),
+                    DataColumn(label: Text("Keyword")),
+                    DataColumn(label: Text("Required"), numeric: true),
+                    DataColumn(label: Text("Found"), numeric: true),
                   ],
                   rows: categoryResult.results.map((entry) {
                     final req = entry.key;
@@ -2271,7 +1933,7 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'Идет полный семантический анализ...\nПожалуйста, подождите.',
+                      'Running full semantic analysis...\nPlease wait.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
