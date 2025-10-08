@@ -1693,25 +1693,24 @@ class _SeoAnalyzerPageState extends State<SeoAnalyzerPage> {
                           ),
                         ),
                       ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.manage_search),
+                          label: const Text("Распарсить это ТЗ"),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
+                          ),
+                          onPressed: () => _parseTzForPair(index),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton.icon(
-                // Меняем на ElevatedButton.icon
-                icon: const Icon(Icons.manage_search), // Добавляем иконку
-                label: const Text("Распарсить это ТЗ"),
-                style: ElevatedButton.styleFrom(
-                  // Добавляем стиль
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                ),
-                onPressed: () => _parseTzForPair(index),
-              ),
-            ),
             if (pair.parsedTz != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
