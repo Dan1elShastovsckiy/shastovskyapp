@@ -5,10 +5,10 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  
+
   <title>SHASTOVSKY</title>
   <meta name="title" content="Привет! Я Шастовский Даниил: тут Фотографии путешествий и обучение SEO">
-  <meta name="description" content="Это персональный сайт Даниила Шастовского. Авторские фотографии из путешествий, статьи по SEO-образованию для начинающих и портфолио проектов. Контакты для сотрудничества.">
+  <meta name="description" content="Это персональный сайт Даниила Шастовского. Здесь я выкладываю авторские фотографии из путешествий, статьи по SEO для начинающих и портфолио проектов.">
 
   <!-- iOS meta tags and icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,22 +18,23 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <meta name="google-signin-client_id" content="791857716093-ebijhm1h32cfba7ttps8ftp4779vncvd.apps.googleusercontent.com">
   <link rel="manifest" href="manifest.json">
-  
+
   <meta property="og:type" content="website">
   <meta property="og:title" content="Привет! Я Шастовский Даниил: тут Фотографии путешествий и обучение SEO">
-  <meta property="og:description" content="Персональный сайт Даниила Шастовского. Авторские фотографии, статьи по SEO, портфолио.">
-  <meta property="og:image" content="https://shastovsky.ru/assets/assets/images/me_sachara_desert.webp"> 
-  <meta property="og:url" content="https://shastovsky.ru/">
+  <meta property="og:description" content="Персональный сайт Даниила Шастовского. Авторские фотографии, статьи по разработке и SEO, а также мои проекты.">
+  <meta property="og:image" content="https://shastovsky.com/assets/assets/images/me_sachara_desert.webp">
+  <meta property="og:url" content="https://shastovsky.com/">
   <meta property="og:site_name" content="SHASTOVSKY">
-  
-  <!-- <<< НАЧАЛО НОВЫХ СТИЛЕЙ ДЛЯ АНИМАЦИИ >>> -->
+
+
   <style>
     body {
       background-color: #F5F5F5;
       margin: 0;
       padding: 0;
-      overflow: hidden; 
+      overflow: hidden;
     }
 
     .loader-container {
@@ -43,14 +44,16 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      /* Добавляем плавный переход для скрытия */
+      transition: opacity 0.5s ease-out;
     }
-    
+
     @media (prefers-color-scheme: dark) {
       body { background-color: #121212; }
       .message { color: #BDBDBD; }
       .cat { filter: invert(1); }
     }
-    
+
     .cat {
       width: 400px;
       height: 200px;
@@ -64,7 +67,7 @@
         background-position: 0 0;
       }
       to {
-        background-position: 0 -2400px; 
+        background-position: 0 -2400px;
       }
     }
 
@@ -80,22 +83,60 @@
     .message.fade-out {
       opacity: 0;
     }
-    
+
   </style>
-  <!-- <<< КОНЕЦ НОВЫХ СТИЛЕЙ >>> -->
+
+  <style id="prerender-styles">
+    /* Стили применяться к элементам внутри #flutter-target ДО гидратации */
+    #flutter-target flt-semantics {
+      display: block;
+      padding: 0 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #333;
+    }
+    #flutter-target flt-semantics[role="heading"][aria-level="1"] {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+    #flutter-target flt-semantics[role="heading"][aria-level="2"] {
+      font-size: 2em;
+      font-weight: bold;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    @media (prefers-color-scheme: dark) {
+      #flutter-target flt-semantics {
+        color: #ccc;
+      }
+    }
+  </style>
 
 </head>
 <body>
-  <div id="loader" class="loader-container">
-    <!-- Кот, который анимирует ходьбу на месте -->
-    <div class="cat"></div>
-    <!-- Сообщение для пользователя, которое будет меняться -->
-    <p id="loading-message" class="message"></p>
+  <!-- PRERENDER_TARGET_START -->
+  <div id="flutter-target" style="width: 100%; height: 100%;">
+    <!-- Этот блок будет виден, пока грузится JS. -->
+    <div id="loader" class="loader-container">
+      <div class="cat"></div>
+      <p id="loading-message" class="message"></p>
+    </div>
   </div>
-  
+  <!-- PRERENDER_TARGET_END -->
+
+  <div id="prerender-container" style="display: none;"></div>
+
+  <!-- Контент для пользователей с отключенным JS -->
+  <noscript>
+    <div class="loader-container">
+      <p>Для работы этого сайта необходим JavaScript.</p>
+    </div>
+  </noscript>
   <script src="flutter_bootstrap.js" async></script>
 
-  <!-- <<< ОБНОВЛЕННЫЙ СКРИПТ ДЛЯ РАНДОМНЫХ СООБЩЕНИЙ >>> -->
   <script>
     const messages = [
       "Привет! Это Flutter-приложение, ему нужно немного магии, чтобы ожить...",
@@ -114,7 +155,7 @@
     ];
 
     const messageElement = document.getElementById("loading-message");
-    let currentIndex = Math.floor(Math.random() * messages.length);
+    if (messageElement) {let currentIndex = Math.floor(Math.random() * messages.length);
 
     // Функция для смены текста
     function changeMessage() {
@@ -134,28 +175,52 @@
 
     // Показываем первое случайное сообщение сразу
     messageElement.textContent = messages[currentIndex];
-    
+
     // Запускаем смену сообщений каждые 4,5 секунды
     setInterval(changeMessage, 4500);
+    }
   </script>
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "name": "SHASTOVSKY",
-    "url": "https://shastovsky.ru/",
+    "url": "https://shastovsky.com/",
     "author": {
       "@type": "Person",
       "name": "Даниил Шастовский",
-      "url": "https://shastovsky.ru/about"
+      "url": "https://shastovsky.com/about"
     },
-    "description": "Персональный сайт Даниила Шастовского. Авторские фотографии из путешествий, статьи по SEO-образованию для начинающих и портфолио проектов.",
+    "description": "Это персональный сайт Даниила Шастовского. Здесь я выкладываю авторские фотографии из путешествий, статьи по SEO для начинающих и портфолио проектов.",
     "publisher": {
       "@type": "Person",
       "name": "Даниил Шастовский"
     }
   }
   </script>
-  
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBysABGHqay__jGNldXYbz5cKl7AD62zFY",
+    authDomain: "shastovscky-users.firebaseapp.com",
+    projectId: "shastovscky-users",
+    storageBucket: "shastovscky-users.firebasestorage.app",
+    messagingSenderId: "791857716093",
+    appId: "1:791857716093:web:990f94154f6b23b77c0a14",
+    measurementId: "G-GTGR5C9BVR"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 </body>
 </html>

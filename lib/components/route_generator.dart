@@ -2,117 +2,131 @@
 
 import 'package:flutter/material.dart';
 import 'package:minimal/pages/page_instruments.dart';
-
-// --- ИМПОРТИРУЕМ ВСЕ СТРАНИЦЫ НАПРЯМУЮ, БЕЗ `deferred as` ---
-import 'package:minimal/pages/page_list.dart';
-import 'package:minimal/pages/page_useful.dart';
-import 'package:minimal/pages/page_useful_dev.dart';
-import 'package:minimal/pages/page_useful_seo.dart';
-import 'package:minimal/pages/page_try_coding.dart';
-import 'package:minimal/pages/page_not_found.dart';
-import 'package:minimal/pages/page_post.dart';
-import 'package:minimal/pages/page_georgia_post.dart';
-import 'package:minimal/pages/page_html_sandbox.dart';
-import 'package:minimal/pages/pages_useful/dev/page_seo_analyzer_dev_story.dart';
-import 'package:minimal/pages/pages_useful/page_semantic_core_guide.dart';
-import 'package:minimal/pages/pages_useful/page_seo_analyzer_en.dart';
-import 'package:minimal/pages/pages_useful/page_seo_tools.dart';
-import 'package:minimal/pages/pages_useful/page_flutter_seo_post.dart';
-import 'package:minimal/pages/pages_useful/page_sitemap_guide.dart';
-import 'package:minimal/pages/pages_useful/page_state_management_post.dart';
-import 'package:minimal/pages/pages_useful/page_design_patterns.dart';
-import 'package:minimal/pages/pages_useful/page_seo_ai_post.dart';
-import 'package:minimal/pages/pages_useful/page_eeat_guide_post.dart';
-import 'package:minimal/pages/pages_useful/page_linkbuilding_post.dart';
-import 'package:minimal/pages/pages_useful/page_technical_audit_post.dart';
-import 'package:minimal/pages/pages_useful/page_seo_analyzer.dart'; // <-- новая страница анализатор
-import 'package:minimal/pages/page_about.dart';
-import 'package:minimal/pages/page_portfolio.dart';
-import 'package:minimal/pages/page_typography.dart';
-import 'package:minimal/pages/page_contacts.dart';
-import 'package:minimal/pages/page_under_construction.dart';
-import 'package:minimal/pages/page_copyright.dart';
-import 'package:minimal/pages/page_favisnake.dart';
+import 'package:minimal/pages/page_leaderboard.dart';
+import 'package:minimal/pages/pages.dart';
+import 'package:minimal/pages/pages_instruments/page_seo_forecast.dart';
+import 'package:minimal/pages/pages_instruments/page_seo_analyzer.dart';
+import 'package:minimal/pages/pages_instruments/page_seo_analyzer_en.dart';
+import 'package:minimal/pages/page_saved_reports.dart';
 
 class RouteGenerator {
+  // Карта для всех СТАТИЧЕСКИХ роутов.
+  // Обратите внимание: SeoForecastPage отсюда удален, так как он теперь обрабатывается динамически.
+  static final Map<String, WidgetBuilder> _routes = {
+    '/': (context) => const ListPage(),
+    '/${ListPage.name}': (context) => const ListPage(),
+
+    // Роуты авторизации
+    '/${LoginPage.name}': (context) => const LoginPage(),
+    '/${RegisterPage.name}': (context) => const RegisterPage(),
+    '/${ForgotPasswordPage.name}': (context) => const ForgotPasswordPage(),
+    '/${AccountPage.name}': (context) => const AccountPage(),
+    '/${SavedReportsPage.name}': (context) => const SavedReportsPage(),
+
+    // Существующие роуты PostJordanPage
+    '/${UsefulPage.name}': (context) => const UsefulPage(),
+    '/${UsefulDevPage.name}': (context) => const UsefulDevPage(),
+    '/${UsefulSeoPage.name}': (context) => const UsefulSeoPage(),
+    '/${TryCodingPage.name}': (context) => const TryCodingPage(),
+    '/${InstrumentsPage.name}': (context) => const InstrumentsPage(),
+    '/${PostPage.name}': (context) => const PostPage(),
+    '/${PostSriLankaPage.name}': (context) => const PostSriLankaPage(),
+    '/${PostGeorgiaPage.name}': (context) => const PostGeorgiaPage(),
+    '/${PostJordanPage.name}': (context) => const PostJordanPage(),
+    '/${HtmlSandboxPage.name}': (context) => const HtmlSandboxPage(),
+    '/${SeoToolsPage.name}': (context) => const SeoToolsPage(),
+    '/${SemanticCoreGuidePage.name}': (context) =>
+        const SemanticCoreGuidePage(),
+    '/${PostFlutterSeoPage.name}': (context) => const PostFlutterSeoPage(),
+    '/${PostStateManagementPage.name}': (context) =>
+        const PostStateManagementPage(),
+    '/${PostSeoAnalyzerDevStory.name}': (context) =>
+        const PostSeoAnalyzerDevStory(),
+    '/${PostForecastDevStory.name}': (context) =>
+        const PostForecastDevStory(), // Новая страница истории разработки
+    '/${DesignPatternsPage.name}': (context) => const DesignPatternsPage(),
+    '/${PostSeoAiPage.name}': (context) => const PostSeoAiPage(),
+    '/${PostEeatGuidePage.name}': (context) => const PostEeatGuidePage(),
+    '/${PostLinkbuildingPage.name}': (context) => const PostLinkbuildingPage(),
+    '/${PostTechnicalAuditPage.name}': (context) =>
+        const PostTechnicalAuditPage(),
+    '/${SitemapGuidePage.name}': (context) => const SitemapGuidePage(),
+    '/${SeoAnalyzerPage.name}': (context) => const SeoAnalyzerPage(),
+    '/${SeoAnalyzerPageEn.name}': (context) => const SeoAnalyzerPageEn(),
+    // '${SeoForecastPage.name}': (context) => const SeoForecastPage(), // <--- УДАЛЕНО ОТСЮДА LeaderboardPage
+    '/${LeaderboardPage.name}': (context) => const LeaderboardPage(),
+    '/${AboutPage.name}': (context) => const AboutPage(),
+    '/${PortfolioPage.name}': (context) => const PortfolioPage(),
+    '/${TypographyPage.name}': (context) => const TypographyPage(),
+    '/${ContactsPage.name}': (context) => const ContactsPage(),
+    '/${CopyrightPage.name}': (context) => const CopyrightPage(),
+    '/${FaviSnakePage.name}': (context) => const FaviSnakePage(),
+  };
+
   static Route<dynamic> generateRoute(RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) {
-        final String pathName = Uri.parse(settings.name ?? '/').path;
+        // Используем URI для удобного парсинга пути и его сегментов
+        final uri = Uri.parse(settings.name ?? '/');
+        final rawPath = uri.path.isEmpty ? '/' : uri.path;
+        final pathName = rawPath.length > 1
+            ? rawPath.replaceFirst(RegExp(r'/+$'), '')
+            : rawPath;
+        final pathSegments =
+            uri.pathSegments.where((segment) => segment.isNotEmpty).toList();
         Widget page;
 
-        // Простая и надежная цепочка if/else if PostSeoAnalyzerDevStory
-        if (pathName == '/' || pathName == '/${ListPage.name}') {
-          page = const ListPage();
-        } else if (pathName == '/${UsefulPage.name}') {
-          page = const UsefulPage();
-        } else if (pathName == '/${UsefulDevPage.name}') {
-          page = const UsefulDevPage();
-        } else if (pathName == '/${UsefulSeoPage.name}') {
-          page = const UsefulSeoPage();
-        } else if (pathName == '/${TryCodingPage.name}') {
-          page = const TryCodingPage();
-        } else if (pathName == '/${InstrumentsPage.name}') {
-          page = const InstrumentsPage();
-        } else if (pathName == '/${PostPage.name}') {
-          page = const PostPage();
-        } else if (pathName == '/${PostGeorgiaPage.name}') {
-          page = const PostGeorgiaPage();
-        } else if (pathName == '/${HtmlSandboxPage.name}') {
-          page = const HtmlSandboxPage();
-        } else if (pathName == '/${SeoToolsPage.name}') {
-          page = const SeoToolsPage();
-        } else if (pathName == '/${SemanticCoreGuidePage.name}') {
-          page = const SemanticCoreGuidePage();
-        } else if (pathName == '/${PostFlutterSeoPage.name}') {
-          page = const PostFlutterSeoPage();
-        } else if (pathName == '/${PostStateManagementPage.name}') {
-          page = const PostStateManagementPage();
-        } else if (pathName == '/${PostSeoAnalyzerDevStory.name}') {
-          page = const PostSeoAnalyzerDevStory();
-        } else if (pathName == '/${DesignPatternsPage.name}') {
-          page = const DesignPatternsPage();
-        } else if (pathName == '/${PostSeoAiPage.name}') {
-          page = const PostSeoAiPage();
-        } else if (pathName == '/${PostEeatGuidePage.name}') {
-          page = const PostEeatGuidePage();
-        } else if (pathName == '/${PostLinkbuildingPage.name}') {
-          page = const PostLinkbuildingPage();
-        } else if (pathName == '/${PostTechnicalAuditPage.name}') {
-          page = const PostTechnicalAuditPage();
-        } else if (pathName == '/${SitemapGuidePage.name}') {
-          page = const SitemapGuidePage();
-        } else if (pathName == '/${SeoAnalyzerPage.name}') {
-          page = const SeoAnalyzerPage();
-        } else if (pathName == '/${SeoAnalyzerPageEn.name}') {
-          page = const SeoAnalyzerPageEn();
-        } else if (pathName == '/${AboutPage.name}') {
-          page = const AboutPage();
-        } else if (pathName == '/${PortfolioPage.name}') {
-          page = const PortfolioPage();
-        } else if (pathName == '/${TypographyPage.name}') {
-          page = const TypographyPage();
-        } else if (pathName == '/${ContactsPage.name}') {
-          page = const ContactsPage();
-        } else if (pathName == '/${CopyrightPage.name}') {
-          page = const CopyrightPage();
-        } else if (pathName == '/${FaviSnakePage.name}') {
-          page = const FaviSnakePage();
-        } else if (pathName == '/${PageUnderConstruction.name}') {
-          page = PageUnderConstruction(
-            title: (settings.arguments as Map<String, dynamic>?)?['title'] ??
-                'Страница в разработке',
-            postTitle: 'Страница в разработке',
-          );
-        } else {
+        // --- НАЧАЛО НОВОЙ ЛОГИКИ ДЛЯ ДИНАМИЧЕСКИХ РОУТОВ ---
+
+        // Проверяем, относится ли URL к странице прогноза
+        // pathName.startsWith более надежен, чем прямое сравнение
+        final forecastSegments = SeoForecastPage.name.split('/');
+        final isForecastPath = pathSegments.length >= forecastSegments.length &&
+            pathSegments.take(forecastSegments.length).join('/') ==
+                SeoForecastPage.name;
+
+        if (isForecastPath) {
+          if (pathSegments.length == forecastSegments.length) {
+            page = const SeoForecastPage();
+          } else if (pathSegments.length == forecastSegments.length + 1 &&
+              pathSegments.last.isNotEmpty) {
+            final reportId = pathSegments.last;
+            page = SeoForecastPage(reportId: reportId);
+          } else {
+            page = const PageNotFound();
+          }
+        }
+
+        // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
+        // Если роут не был обработан динамически, ищем его в статической карте
+        else if (_routes.containsKey(pathName)) {
+          page = _routes[pathName]!(context);
+        }
+        // Отдельно обрабатываем роут со сложными аргументами (ваша существующая логика)
+        else if (pathName == '/${PageUnderConstruction.name}') {
+          final arguments = settings.arguments;
+          final argumentTitle = arguments is Map ? arguments['title'] : null;
+          final requestedTitle = argumentTitle is String
+              ? argumentTitle
+              : uri.queryParameters['title'];
+          final title = requestedTitle?.trim().isNotEmpty == true
+              ? requestedTitle!.trim()
+              : 'Страница в разработке';
+          page = PageUnderConstruction(postTitle: title);
+        }
+        // Если ничего не найдено - 404
+        else {
           page = const PageNotFound();
         }
 
+        // Оборачиваем любую страницу в SelectionArea, как и было
         return SelectionArea(
           child: page,
         );
       },
+      // Сохраняем ваше требование по отсутствию анимации перехода
       transitionDuration: Duration.zero,
       reverseTransitionDuration: Duration.zero,
     );

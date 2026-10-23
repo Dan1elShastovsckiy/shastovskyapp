@@ -4,10 +4,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:minimal/utils/meta_tag_service.dart'; // <<< ИМПОРТ ДЛЯ МЕТА-ТЕГОВ
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+// <<< ШАГ 1: Добавляем импорт семантических виджетов >>>
+import 'package:minimal/components/semantic_widgets.dart';
 
-// <<< ИЗМЕНЕНИЕ 1: StatelessWidget -> StatefulWidget >>>
 class AboutPage extends StatefulWidget {
   static const String name = 'about';
 
@@ -17,22 +18,30 @@ class AboutPage extends StatefulWidget {
   State<AboutPage> createState() => _AboutPageState();
 }
 
-// <<< ИЗМЕНЕНИЕ 2: СОЗДАН НОВЫЙ КЛАСС State >>>
 class _AboutPageState extends State<AboutPage> {
-  // <<< ИЗМЕНЕНИЕ 3: ДОБАВЛЕН initState С МЕТА-ТЕГАМИ >>>
+  // <<< ШАГ 2: Добавляем флаг для определения режима рендеринга >>>
+  bool _isPrerendering = false;
+
   @override
   void initState() {
     super.initState();
+    // <<< ШАГ 3: Проверяем URL на наличие параметра пререндеринга >>>
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+
     MetaTagService().updateAllTags(
       title: "Обо мне | Даниил Шастовский - SEO, разработка, путешествия",
       description:
           "Привет! Я Даниил, SEO-специалист и разработчик. Здесь я делюсь своим опытом в digital, историями из поездок и фотографиями.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/avatar_default.webp",
+          "https://shastovsky.com/assets/assets/images/avatar_default.webp",
     );
   }
 
-  // <<< ИЗМЕНЕНИЕ 4: ВСЯ ЛОГИКА И ХЕЛПЕРЫ ПЕРЕНЕСЕНЫ СЮДА >>>
   String calculateExperience() {
     final startDate = DateTime(2017, 12);
     final now = DateTime.now();
@@ -61,8 +70,54 @@ class _AboutPageState extends State<AboutPage> {
     return 'месяцев';
   }
 
+  // <<< ШАГ 4: Новый метод для генерации семантического контента >>>
+  Widget _buildPrerenderContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticH1("Обо мне"),
+        SemanticImg(
+            src: "assets/images/avatar_default.webp", alt: "Даниил Шастовский"),
+        SemanticP(
+            "Хin chào) Меня зовут Даниил! Здесь вы найдете больше информации о моем опыте работы как SEO-Специалиста и также как руководителя. Я рассматриваю предложения на позиции Senior SEO Analyst или Head of SEO Department. Ну и конечно же, я открыт к предложениям по отдельным проектам."),
+        SemanticH2("Немного о моих ценностях в работе"),
+        SemanticP(
+            "В работе особенно ценю: качественную документацию, чёткие технические задания, профессиональную команду и отлаженные процессы. Открыт к сотрудничеству и буду рад встрече! Часто путешествую, поэтому рассматриваю только удалённый формат работы."),
+        SemanticH2("Мой опыт"),
+        SemanticP(calculateExperience()),
+        SemanticH2("Zum Punkt (Январь 2023 — по настоящее время)"),
+        SemanticP(
+            "Senior SEO-специалист, GroupHead. Полностью отвечаю за 3 крупных постоянных проектов. Работаю над внедрением ИИ технологий в продвижении проектов. Создаю инструкции по работе с Ai для seo-продвижения и работой с кодом проектов. Руковожу командой SEO специалистов."),
+        SemanticH2("Molinos (Февраль 2022 — Декабрь 2022)"),
+        SemanticP(
+            "Middle SEO. Работа над задачами продвижения со стороны Senior ведущего проекта. Составление технического и SEO аудита новых проектов. Обучение."),
+        SemanticH2("Zharkov seo agency (Июнь 2021 — Февраль 2022)"),
+        SemanticP(
+            "SEO-специалист. Начало карьеры в SEO, прохождение курсов обучения. Ведение 8+ проектов с сентября 2021. Опыт работы с ограничениями Яндекса и их устранением. Достижение значительных результатов в продвижении сайтов."),
+        SemanticH2("Тинькофф Инвестиции (Сентябрь 2020 — Июнь 2021)"),
+        SemanticP(
+            "Инвестиционный консультант (Тут я просто искал себя). Аналитика и ведение портфеля. Создание трейд стратегии. Помощь и консультация для действующих клиентов брокера."),
+        SemanticH2("Фриланс (Январь 2019 — Сентябрь 2020)"),
+        SemanticP("Full-stack web-разработчик. Разработка сайтов."),
+        SemanticH2("Plastic system LLC (Декабрь 2017 — Сентябрь 2020)"),
+        SemanticP(
+            "Ведущий web-администратор. Управление и наполнение контентом двух сайтов компании. Ведение социальных сетей (VK, Facebook, Instagram). Настройка и управление рекламными кампаниями. Работа с Яндекс.Маркет и Google Ads. Координация работы с подрядчиками. Создание лендингов и сайтов компании."),
+        SemanticH2("EPAM Systems Inc. (Май 2019 — Август 2019)"),
+        SemanticP(
+            "Тестировщик ПО. Производственная практика. Разработка и тестирование ботов."),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5: Добавляем условную логику в метод build >>>
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
+
+    // Ваш обычный UI код без изменений
     final isMobile = MediaQuery.of(context).size.width < 800;
     final theme = Theme.of(context);
 

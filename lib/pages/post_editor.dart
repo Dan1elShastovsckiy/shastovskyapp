@@ -30,7 +30,7 @@ class _PostEditorState extends State<PostEditor> {
     _imageController = TextEditingController(text: post?.imageUrl ?? '');
     _categoryController = TextEditingController(text: post?.category ?? '');
     _contentController = TextEditingController(text: post?.content ?? '');
-    
+
     if (post != null) {
       for (final tag in post.tags) {
         _tagControllers.add(TextEditingController(text: tag));
@@ -70,7 +70,8 @@ class _PostEditorState extends State<PostEditor> {
               ),
               TextFormField(
                 controller: _previewController,
-                decoration: const InputDecoration(labelText: 'Краткое описание'),
+                decoration:
+                    const InputDecoration(labelText: 'Краткое описание'),
                 maxLines: 3,
               ),
               TextFormField(
@@ -162,6 +163,7 @@ class _PostEditorState extends State<PostEditor> {
       );
 
       await _postRepository.savePost(post);
+      if (!mounted) return;
       Navigator.pop(context);
     }
   }

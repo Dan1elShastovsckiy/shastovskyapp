@@ -1,43 +1,134 @@
-name: Build
+name: Build and deploy site
 
 on:
   push:
-    branches:
-      - master
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shastovsky-production
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out source
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
-          submodules: recursive
-          token: ${{ secrets.PAT }}
-      - uses: subosito/flutter-action@v2
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
+          flutter-version: 3.47.0
           channel: stable
-      - name: Clone deployment repo
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Install prerender dependencies
+        working-directory: prerender_tool
+        run: dart pub get --enforce-lockfile
+
+      - name: Analyze Dart code
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Build Flutter Web
+        run: flutter build web --release --no-web-resources-cdn --no-wasm-dry-run
+
+      - name: Prerender public pages
+        working-directory: prerender_tool
+        run: dart run prerender.dart
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: website
+          path: build/web/
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    needs: build
+    if: github.repository == 'Dan1elShastovsckiy/shastovskyapp' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: website
+          path: build/web
+
+      - name: Configure pinned SSH access
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
-          git clone --single-branch "https://${{ secrets.PAT }}@github.com/rayliverified/Demo.git" "clone_dir"
-          rm -rf clone_dir/flutterwebsites/minimal
-          mkdir -p clone_dir/flutterwebsites/minimal
-      - name: Build
+          set -euo pipefail
+          if [[ -z "$DEPLOY_HOST" || -z "$DEPLOY_KNOWN_HOSTS" || -z "$DEPLOY_SSH_KEY" ]]; then
+            echo "Configure DEPLOY_HOST, DEPLOY_KNOWN_HOSTS and DEPLOY_SSH_KEY." >&2
+            exit 1
+          fi
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/shastovsky_deploy_key"
+          chmod 600 "$HOME/.ssh/shastovsky_deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -F "$DEPLOY_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null
+
+      - name: Deploy release
+        id: deploy
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
         run: |
-          flutter build web --release --base-href /flutterwebsites/minimal/ --wasm --web-resources-cdn
-          mv build/web/* clone_dir/flutterwebsites/minimal
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
-      - name: Get time in seconds
-        id: seconds
-        run: echo "seconds=$(date +'%s')" >> $GITHUB_OUTPUT
-      - name: Push build commit
+          set -euo pipefail
+          if [[ "$DEPLOY_USER" != "shastovsky-deploy" ]]; then
+            echo "DEPLOY_USER must be shastovsky-deploy." >&2
+            exit 1
+          fi
+          tar -C build/web -czf "$RUNNER_TEMP/shastovsky-site.tar.gz" .
+          ssh -T -i "$HOME/.ssh/shastovsky_deploy_key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
+            "$DEPLOY_USER@$DEPLOY_HOST" deploy \
+            < "$RUNNER_TEMP/shastovsky-site.tar.gz"
+
+      - name: Check the published site
+        id: smoke
         run: |
-          cd clone_dir
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add *
-          git commit -m "Build Minimal ${{ steps.date.outputs.date }} (${{ steps.seconds.outputs.seconds }})"
-          git pull --rebase
-          git push
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-time 45 \
+            https://shastovsky.com/ --output "$RUNNER_TEMP/shastovsky-home.html"
+          grep -q 'flutter_bootstrap.js' "$RUNNER_TEMP/shastovsky-home.html"
+          curl --fail --silent --show-error --location --max-time 45 \
+            https://shastovsky.com/about/ --output "$RUNNER_TEMP/shastovsky-about.html"
+          grep -qi '<h1' "$RUNNER_TEMP/shastovsky-about.html"
+          curl --fail --silent --show-error --location --max-time 45 \
+            https://shastovsky.com/georgia-part1/ --output "$RUNNER_TEMP/shastovsky-georgia.html"
+          grep -q 'https://pactors.io/countries/georgia' "$RUNNER_TEMP/shastovsky-georgia.html"
+          curl --fail --silent --show-error --head --max-time 30 \
+            https://shastovsky.com/main.dart.js >/dev/null
+          status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --max-time 30 https://shastovsky.com/upload.php)"
+          if [[ "$status" != "403" ]]; then
+            echo "Expected /upload.php to return 403, got $status." >&2
+            exit 1
+          fi
+
+      - name: Roll back if public checks fail
+        if: failure() && steps.deploy.outcome == 'success' && steps.smoke.outcome == 'failure'
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          ssh -T -i "$HOME/.ssh/shastovsky_deploy_key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" rollback

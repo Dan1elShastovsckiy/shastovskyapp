@@ -4,12 +4,15 @@ version: 2.1.1
 publish_to: none
 
 environment:
-  sdk: '>=3.4.0 <4.0.0'
-  flutter: ">=3.24.0"
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
     sdk: flutter
+
+  flutter_localizations: # <<< ДОБАВЬТЕ ЭТОТ БЛОК
+    sdk: flutter        # <<<
 
   flutter_web_plugins:
     sdk: flutter
@@ -24,7 +27,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.3.0
   flutter_web_optimizer: ^1.5.1
-  provider: ^6.0.0
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
   snowball_stemmer: ^0.1.0
@@ -33,11 +35,11 @@ dependencies:
   # Для редактора кода с подсветкой синтаксиса
   code_text_field: ^1.1.0
 
-  flutter_markdown: ^0.7.1 # Для отображения Markdown
-  
+  flutter_markdown_plus: ^1.0.12 # Для отображения Markdown
+
   # Для отображения HTML/CSS превью
-  flutter_widget_from_html_core: ^0.15.2
-  
+  flutter_widget_from_html_core: ^0.17.0
+
   # Для запуска JS-кода в веб-вью
   universal_html: ^2.2.4
   webview_flutter: ^4.7.0 # для мобильных платформ в будущем
@@ -45,20 +47,55 @@ dependencies:
   split_view: ^3.2.0
 
   # Для обрабтки рич текста
-  flutter_quill: ^9.2.3
-  delta_markdown_converter: ^0.0.2
+  flutter_quill: ^11.6.0
   vsc_quill_delta_to_html: ^1.0.5
-  quill_html_converter: ^9.2.3
   html: ^0.15.6
   rtf: ^0.1.0
   http: ^1.5.0
+# Firebase Core
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
+  cloud_firestore: ^6.1.0
+  google_sign_in: ^7.2.0
+  google_sign_in_web: ^1.1.0
 
+  shared_preferences: ^2.2.3
+
+  # Для управления состоянием пользователя
+  provider: ^6.1.5
+  # Для хранения файлов (аватарок)
+  firebase_storage: ^13.0.4
+  # Для выбора изображений из галереи
+  image_picker: ^1.1.2
+
+  path: ^1.9.0
+  device_info_plus: ^9.1.2
+  html2md: ^1.3.2
+
+  # Для сложных статистических расчетов (линейная регрессия)
+  stats: ^3.0.0
+  # Для построения красивых графиков
+  fl_chart: ^1.1.1
+  intl: ^0.20.2 # Для форматирования дат и чисел
+  printing: ^5.12.0 # Помощник для сохранения и печати PDF
+  # Для генерации CSV (Excel)
+  csv: ^6.0.0
+  excel: ^4.0.6
+  path_provider: ^2.1.3 # Для работы с файловой системой
+
+  # Для генерации уникальных ID отчетов
+  uuid: ^4.4.0
+
+  # Новая библиотека для экспорта в PDF
+  flutter_to_pdf: ^0.4.1
+  pdf: ^3.11.3
+  web: ^1.1.1 # Для поддержки веб
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
-  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^6.0.0
 
 flutter_icons:
   android: true
@@ -80,9 +117,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/fonts/
     - assets/portfolio/
     - assets/images/marocco/
     - assets/images/georgia_1/
+    - assets/images/srilanka/
+    - assets/images/jordan/
     - assets/images/seo-ai-era/
     - assets/images/seo-guides/
     - assets/images/dev-guides/
@@ -92,3 +132,56 @@ flutter:
     - assets/images/seo/
     - assets/images/dev/
     - assets/images/dev/seo_analyzer_story/
+    - assets/images/seo_forecast/
+    - assets/images/dev/forecast_story/
+  fonts:
+    - family: Montserrat
+      fonts:
+        # --- REGULAR STYLE ---
+        - asset: assets/fonts/Montserrat-Thin-250.ttf
+          weight: 200
+        - asset: assets/fonts/Montserrat-ExtraLight-275.ttf
+          weight: 200 # ExtraLight часто сопоставляют с 200
+        - asset: assets/fonts/Montserrat-Light-300.ttf
+          weight: 300
+        # Используем более конкретное имя файла. Montserrat-Regular.ttf можно удалить, чтобы избежать путаницы.
+        - asset: assets/fonts/Montserrat-Regular-400.ttf
+          weight: 400
+        - asset: assets/fonts/Montserrat-Medium-500.ttf
+          weight: 500
+        - asset: assets/fonts/Montserrat-SemiBold-600.ttf
+          weight: 600
+        - asset: assets/fonts/Montserrat-Bold-700.ttf
+          weight: 700
+        - asset: assets/fonts/Montserrat-ExtraBold-800.ttf
+          weight: 800
+        - asset: assets/fonts/Montserrat-Black-900.ttf
+          weight: 900
+
+        # --- ITALIC STYLE ---
+        - asset: assets/fonts/Montserrat-Thin-Italic-250.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/Montserrat-ExtraLight-Italic-275.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/Montserrat-Light-Italic-300.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Montserrat-Italic-400.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Montserrat-Medium-Italic-500.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Montserrat-SemiBold-Italic-600.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Montserrat-Bold-Italic-700.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Montserrat-ExtraBold-Italic-800.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Montserrat-Black-Italic-900.ttf
+          weight: 900

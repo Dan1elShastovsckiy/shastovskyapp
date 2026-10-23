@@ -42,6 +42,7 @@ class TextBodySecondary extends StatelessWidget {
 class TextHeadlineSecondary extends StatelessWidget {
   final String text;
 
+  // ИСПРАВЛЕНИЕ: Мы полностью удалили `required TextStyle style` из конструктора.
   const TextHeadlineSecondary({super.key, required this.text});
 
   @override

@@ -4,5 +4,5 @@
 /// Это базовая реализация для не-веб платформ.
 String getCurrentUrl() {
   // Возвращаем ваш основной домен как запасной вариант
-  return 'https://shastovsky.ru';
+  return 'https://shastovsky.com';
 }

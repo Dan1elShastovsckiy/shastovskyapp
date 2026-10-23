@@ -46,7 +46,7 @@ class _HtmlSandboxPageState extends State<HtmlSandboxPage> {
       description:
           "Тестируйте верстку и стили в реальном времени. Встроенный справочник и готовые примеры для быстрого старта в веб-разработке.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/seo-guides/techcheck_website_seo.webp", // <-- Добавлена картинка
+          "https://shastovsky.com/assets/assets/images/seo-guides/techcheck_website_seo.webp", // <-- Добавлена картинка
     );
 
     _htmlController =

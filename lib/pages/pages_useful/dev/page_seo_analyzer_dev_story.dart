@@ -2,6 +2,8 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:minimal/components/comments_section.dart';
+import 'package:minimal/components/reactions_widget.dart';
 import 'package:minimal/components/related_articles.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/components/share_buttons_block.dart';
@@ -10,8 +12,11 @@ import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
 import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:minimal/components/feature_tile.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
+// <<< ШАГ 1: Добавляем импорт семантических виджетов >>>
+import 'package:minimal/components/semantic_widgets.dart';
 
 class PostSeoAnalyzerDevStory extends StatefulWidget {
   static const String name = 'useful/dev/seo-analyzer-story';
@@ -35,6 +40,9 @@ class _PostSeoAnalyzerDevStoryState extends State<PostSeoAnalyzerDevStory> {
     "assets/images/avatar_default.webp",
   ];
 
+  // <<< ШАГ 2: Добавляем флаг для определения режима рендеринга >>>
+  bool _isPrerendering = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -46,13 +54,88 @@ class _PostSeoAnalyzerDevStoryState extends State<PostSeoAnalyzerDevStory> {
   @override
   void initState() {
     super.initState();
+    // <<< ШАГ 3: Проверяем URL на наличие параметра пререндеринга >>>
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+
     MetaTagService().updateAllTags(
       title:
           "Под капотом SEO-анализатора: история разработки | Блог Даниила Шастовского",
       description:
           "Путь от идеи и простого прототипа до асинхронного Flutter-приложения с парсером, стеммингом и отзывчивым UI. Глубокое погружение в решение реальных проблем.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/dev/seo_analyzer_story/ui_thread_isolate.webp",
+          "https://shastovsky.com/assets/assets/images/dev/seo_analyzer_story/ui_thread_isolate.webp",
+    );
+  }
+
+  // <<< ШАГ 4: Новый метод для генерации семантического контента >>>
+  Widget _buildPrerenderContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticH1("Под капотом SEO-анализатора: история разработки"),
+        SemanticP(
+            "Любой полезный инструмент начинается с боли. Эта статья — честная история о том, как боль от рутинной SEO-проверки текстов превратилась в полноценное Flutter-приложение. Мы пройдем весь путь: от наивного прототипа и фидбэка коллег до борьбы с зависанием UI и неожиданных открытий о работе буфера обмена."),
+        SemanticH2("Глава 1: Прототип v0.1 — Боль, страдания и Ctrl+F"),
+        SemanticP(
+            "Все началось с простой задачи: проверить, соответствует ли текст копирайтера техническому заданию (ТЗ). Каждый раз это был один и тот же ритуал:\n1. Скопировать текст в один сервис для подсчета символов.\n2. Вручную (Ctrl+F) искать каждое ключевое слово, считая вхождения.\n3. Пытаться понять, все ли темы из структуры ТЗ раскрыты в подзаголовках.\nЭто было долго, нудно и чревато ошибками. Так родилась идея: создать инструмент, который бы делал все это автоматически."),
+        SemanticImg(
+            src: "assets/images/dev/seo_analyzer_story/v1_prototype.webp",
+            alt: "Первый прототип SEO-анализатора"),
+        SemanticH2("Глава 2: Первый фидбэк и первые проблемы"),
+        SemanticP(
+            "Первая версия была собрана «на коленке»: два поля TextField, кнопка «Проверить» и простейшая логика text.contains(keyword). Проблемы обнаружились сразу, как только я показал инструмент коллегам:\n• «Он не находит ключи, которые точно есть!» — String.contains() не понимал падежей. «Купить машину» и «купить машина» для него были разными фразами.\n• «В ТЗ куча всего, а ты проверяешь только ключи» — парсер ТЗ был слишком примитивен и не умел извлекать структуру, LSI-слова, мета-теги.\n• «В объем текста попадает всё подряд» — алгоритм не мог правильно «отрезать» конец секции и забирал в «Объем» половину ТЗ.\nСтало ясно, что наивный подход провалился. Нужна была настоящая «математика»."),
+        SemanticH2("Глава 3: Эволюция — от строк к семантике"),
+        SemanticP(
+            "Алгоритмы вместо Contains(). Простой поиск был заменен на более надежный, вдохновленный классическими алгоритмами вроде Бойера-Мура... Главным прорывом стала борьба с морфологией. На помощь пришел алгоритм стемминга. Теперь перед анализом и текст, и ключи проходили «очистку», превращаясь в набор основ слов."),
+        SemanticImg(
+            src: "assets/images/dev/seo_analyzer_story/stemming_diagram.webp",
+            alt: "Схема работы стемминга"),
+        SemanticP(
+            "Парсер ТЗ 2.0. Парсер был полностью переписан. Теперь алгоритм искал стартовый маркер, начинал собирать строки и останавливался, как только встречал следующий известный маркер или несколько пустых строк подряд."),
+        SemanticImg(
+            src:
+                "assets/images/dev/seo_analyzer_story/tz_parser_flowchart.webp",
+            alt: "Схема парсера ТЗ"),
+        SemanticH2("Глава 4: Фидбэк Лены и рождение v1.0"),
+        SemanticP(
+            "После всех улучшений инструмент стал гораздо умнее. Настало время для серьезного тест-драйва. Я отдал его на проверку коллеге Лене Мельниковой (@oh_laalaa). Ее фидбэк стал катализатором для превращения прототипа в настоящий рабочий инструмент."),
+        SemanticP(
+            "Проблема №1: «Текст — это не просто буквы!» Решение: Интеграция flutter_quill. Этот Rich Text редактор, хранящий документ в формате Delta, стал сердцем новой версии."),
+        SemanticP(
+            "Проблема №2: «А где проверка орфографии?» Решение: Интеграция с API Яндекс.Спеллера."),
+        SemanticP(
+            "Проблема №3: «Считает не так, как Миратекст!» Решение: Глубокое погружение в математику. Алгоритм был допилен, чтобы учитывать «занятые» диапазоны."),
+        SemanticH2("Глава 5: Главный враг — зависание интерфейса (UI Freeze)"),
+        SemanticP(
+            "При нажатии на кнопку «Запустить анализ» приложение замирало на 5-10 секунд. Причина — блокировка UI-потока."),
+        SemanticImg(
+            src: "assets/images/dev/seo_analyzer_story/ui_thread_jam.webp",
+            alt: "Блокировка UI потока"),
+        SemanticP(
+            "Решение: Изоляты и compute(). Вся логика анализа была вынесена в отдельную глобальную функцию и запущена через compute(), что освободило основной поток и сделало анимацию плавной."),
+        SemanticImg(
+            src: "assets/images/dev/seo_analyzer_story/ui_thread_isolate.webp",
+            alt: "Использование изолятов для разгрузки UI потока"),
+        SemanticP(
+            "Но даже после этого лоадер «дергался». Финальным штрихом стало добавление Future.delayed перед запуском тяжелых операций."),
+        SemanticH2("Глава 6: Битва за UX и фиаско с RTF"),
+        SemanticP(
+            "Последней нерешенной задачей оставалась вставка из Google Docs. Отладка показала, что Google Docs не кладет в буфер обмена ничего, кроме простого текста!"),
+        SemanticP(
+            "Элегантный поворот: функция «Распознать структуру». Так родилась идея кнопки «🪄 Распознать структуру», которая запускает эвристический алгоритм и применяет форматирование по правилам: короткая строка без точки — заголовок, строка с • или * — пункт списка."),
+        SemanticImg(
+            src:
+                "assets/images/dev/seo_analyzer_story/recognize_before_after.webp",
+            alt: "Результат работы функции Распознать структуру"),
+        SemanticH2("Заключение: итерации, компромиссы и фокус на пользователе"),
+        SemanticP(
+            "Путь создания этого инструмента — классический пример итеративной разработки. От неработающего прототипа и критики коллег, через решение фундаментальных проблем производительности, до столкновения с ограничениями внешнего мира и поиска элегантных обходных путей. Ключевой вывод: идеального решения не существует. Но можно, шаг за шагом, приближаться к нему, постоянно держа в фокусе главную цель — решить «боль» пользователя максимально простым и эффективным способом."),
+      ],
     );
   }
 
@@ -102,6 +185,13 @@ class _PostSeoAnalyzerDevStoryState extends State<PostSeoAnalyzerDevStory> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5: Добавляем условную логику в метод build >>>
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
+
+    // Ваш обычный код для UI
     final isMobile = ResponsiveBreakpoints.of(context).smallerThan(TABLET);
     final theme = Theme.of(context);
 
@@ -125,15 +215,43 @@ class _PostSeoAnalyzerDevStoryState extends State<PostSeoAnalyzerDevStory> {
               ]),
             ),
             const SizedBox(height: 40),
+            // 1. Дата публикации (над заголовком, мелким шрифтом)
+            Center(
+              child: Text(
+                DateFormat.yMMMMd('ru_RU')
+                    .format(DateTime(2025, 9, 15)), // Укажите вашу дату
+                style: bodyTextStyle(context).copyWith(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 2. Основной заголовок (без изменений)
             Text("Под капотом SEO-анализатора: история разработки",
                 style: headlineTextStyle(context), textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            Text(
-              "Время чтения: ~20 минут",
-              style: subtitleTextStyle(context)
-                  .copyWith(fontStyle: FontStyle.italic),
-              textAlign: TextAlign.center,
+
+            // 3. Время чтения и счетчик просмотров (под заголовком)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Время чтения
+                const Icon(Icons.timer_outlined, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  "~20 минут чтения",
+                  style: subtitleTextStyle(context).copyWith(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
+            // <<< КОНЕЦ ОБНОВЛЕННОГО БЛОКА ЗАГОЛОВКА >>>
+
             const SizedBox(height: 16),
             Text(
               "Любой полезный инструмент начинается с боли. Эта статья — честная история о том, как боль от рутинной SEO-проверки текстов превратилась в полноценное Flutter-приложение. Мы пройдем весь путь: от наивного прототипа и фидбэка коллег до борьбы с зависанием UI и неожиданных открытий о работе буфера обмена.",
@@ -403,6 +521,20 @@ class _PostSeoAnalyzerDevStoryState extends State<PostSeoAnalyzerDevStory> {
                   "Ключевой вывод: идеального решения не существует. Но можно, шаг за шагом, приближаться к нему, постоянно держа в фокусе главную цель — решить «боль» пользователя максимально простым и эффективным способом.",
             ),
             const SizedBox(height: 40),
+            // <<< НОВЫЙ БЛОК: Реакции >>>
+            const Align(
+              alignment: Alignment.center,
+              child: Text("Как вам статья?", style: TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(height: 16),
+            const Center(
+              child: ReactionsWidget(
+                articleRouteName: PostSeoAnalyzerDevStory.name,
+              ),
+            ),
+            const SizedBox(height: 60),
+            divider(context),
+            const SizedBox(height: 20),
             const Align(
               alignment: Alignment.centerLeft,
               child: TagWrapper(tags: [
@@ -416,6 +548,11 @@ class _PostSeoAnalyzerDevStoryState extends State<PostSeoAnalyzerDevStory> {
             const SizedBox(height: 20),
             const ShareButtonsBlock(), // <<< ДОБАВЛЕН ВИДЖЕТ ДЛЯ КНОПОК ПОДЕЛИТЬСЯ >>>
             const SizedBox(height: 40),
+            // <<< НОВЫЙ БЛОК: Комментарии >>>
+            const CommentsSection(
+              articleRouteName: PostSeoAnalyzerDevStory.name,
+            ),
+            const SizedBox(height: 60),
             const RelatedArticles(
               currentArticleRouteName: PostSeoAnalyzerDevStory.name,
               category: 'dev',

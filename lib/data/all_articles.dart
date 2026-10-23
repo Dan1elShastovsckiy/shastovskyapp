@@ -7,6 +7,14 @@ import 'package:minimal/pages/pages.dart';
 final List<Article> allArticles = [
   // --- DEV СТАТЬИ ---
   const Article(
+    title: "От калькулятора до SaaS: история создания SEO-прогноза",
+    description:
+        "Как простая идея превратилась в фичу с Firebase, аутентификацией Google и защищенной БД.",
+    imageUrl: "assets/images/dev/forecast_story/forecast-story-banner.webp",
+    routeName: PostForecastDevStory.name,
+    category: 'dev',
+  ),
+  const Article(
     title: "Под капотом SEO-анализатора: история разработки",
     description:
         "Путь от идеи и простого прототипа до асинхронного приложения.",
@@ -88,7 +96,7 @@ final List<Article> allArticles = [
     routeName: PostTechnicalAuditPage.name,
     category: 'seo',
   ),
-  // --- TRAVEL СТАТЬИ ---
+  // --- TRAVEL СТАТЬИ --- ИОРДАНИЯ. От Мертвого моря до песков Арракиса
   const Article(
     title: "МАРОККО: Заблудиться, чтобы найти себя в сердце пустоты",
     description:
@@ -103,6 +111,23 @@ final List<Article> allArticles = [
         "Первое знакомство с Грузией: апокалиптическая посадка в Батуми, огненная шаурма и хоррор-квест по ночным дорогам в деревню над облаками […]",
     imageUrl: "assets/images/georgia_mountains.webp",
     routeName: PostGeorgiaPage.name, // Используем имя класса PostGeorgiaPage
+    category: 'travel',
+  ),
+  const Article(
+    title: "ИОРДАНИЯ: От Мертвого моря до песков Арракиса",
+    description:
+        "Путешествие по Иордании: от купания в Мертвом море до исследования древних руин Петра и пустынных пейзажей Вади Рам […]",
+    imageUrl: "assets/images/jordan/jordan-banner.webp",
+    routeName: PostJordanPage.name, // Используем имя класса PostJordanPage
+    category: 'travel',
+  ),
+  // <<< 2. НОВЫЙ ПОСТ: ШРИ-ЛАНКА >>>
+  const Article(
+    title: "ШРИ-ЛАНКА: От серф-провала до горных вершин Цейлона",
+    description:
+        "6 месяцев жизни на острове. Вся правда о быте, ценах, серфинге, невероятных закатах и почему здесь нет доставки еды. Честный гайд […]",
+    imageUrl: "assets/images/sri_banner_thumb.webp",
+    routeName: PostSriLankaPage.name, // Используем имя класса PostSriLankaPage
     category: 'travel',
   ),
 ];

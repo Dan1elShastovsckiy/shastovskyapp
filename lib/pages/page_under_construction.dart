@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:minimal/components/semantic_widgets.dart';
 
 class PageUnderConstruction extends StatelessWidget {
   static const String name = 'under_construction';
   final String postTitle;
 
-  const PageUnderConstruction(
-      {super.key, required this.postTitle, required title});
+  const PageUnderConstruction({super.key, required this.postTitle});
 
-  get menuStyle => null;
+  Null get menuStyle => null;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +30,7 @@ class PageUnderConstruction extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           ...[
+            SemanticH1(postTitle),
             Align(
               alignment: Alignment.center,
               child: Container(

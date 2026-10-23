@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/utils/max_width_extension.dart'; // <<< ДОБАВЛЯЕМ ИМПОРТ
 
 class PageNotFound extends StatelessWidget {
   const PageNotFound({super.key});
@@ -9,7 +10,6 @@ class PageNotFound extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: const Color(0xFFF5F5F5),// Убираем, чтобы использовать тему
       appBar: const PreferredSize(
         preferredSize: Size.fromHeight(110),
         child: MinimalMenuBar(),
@@ -18,44 +18,60 @@ class PageNotFound extends StatelessWidget {
         slivers: [
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                Text(
-                  "404",
-                  style: headlineTextStyle(context).copyWith(fontSize: 80),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              // ИСПОЛЬЗУЕМ MaxWidthBox ДЛЯ ОГРАНИЧЕНИЯ ШИРИНЫ
+              child: MaxWidthBox(
+                maxWidth: 800,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(),
+                    Text(
+                      "404",
+                      style: headlineTextStyle(context).copyWith(fontSize: 80),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Упс! Страница не найдена",
+                      style: subtitleTextStyle(context).copyWith(fontSize: 24),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      "Мы не смогли найти страницу, которую вы искали.",
+                      textAlign: TextAlign.center,
+                      style: bodyTextStyle(context),
+                    ),
+                    const SizedBox(height: 40),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.home_rounded),
+                      label: const Text("ВЕРНУТЬСЯ НА ГЛАВНУЮ"),
+                      // Используем стиль из темы
+                      style: elevatedButtonStyle(context),
+                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                          context, '/', (route) => false),
+                    ),
+                    const Spacer(flex: 2),
+                    // Убираем футер отсюда, так как он будет в общем потоке
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  "Упс! Страница не найдена",
-                  style: subtitleTextStyle(context).copyWith(fontSize: 24),
+              ),
+            ),
+          ),
+          // Добавляем футер как отдельный Sliver-элемент для консистентности
+          SliverToBoxAdapter(
+            child: MaxWidthBox(
+              maxWidth: 1200,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    divider(context),
+                    const Footer(),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  "Мы не смогли найти страницу, которую вы искали.",
-                  textAlign: TextAlign.center,
-                  style: bodyTextStyle(context),
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.home_rounded, color: Colors.white),
-                  label: const Text("ВЕРНИТЕ МЕНЯ НА САЙТ"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff1d1d1d),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 20),
-                    textStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                      context, '/', (route) => false),
-                ),
-                const Spacer(flex: 2),
-                const Footer(),
-              ],
-            ).toMaxWidth(),
+              ),
+            ),
           ),
         ],
       ),
@@ -63,6 +79,4 @@ class PageNotFound extends StatelessWidget {
   }
 }
 
-extension on Column {
-  toMaxWidth() {}
-}
+// ПУСТОЕ РАСШИРЕНИЕ УДАЛЕНО

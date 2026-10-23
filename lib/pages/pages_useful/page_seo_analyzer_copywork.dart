@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // <<<
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:highlight/languages/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:minimal/components/components.dart';

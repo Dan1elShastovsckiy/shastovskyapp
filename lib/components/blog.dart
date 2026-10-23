@@ -3,16 +3,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-// <<< ШАГ 5.1: Импортируем провайдер для доступа к состоянию темы >>>
+import 'package:intl/intl.dart';
 import 'package:minimal/components/theme_provider.dart';
 import 'package:minimal/pages/page_instruments.dart';
+import 'package:minimal/services/auth_service.dart';
 import 'package:provider/provider.dart';
-// <<< ШАГ 5.2: Больше не используем старые константы цветов напрямую >>>
-// import 'package:minimal/components/color.dart';
 import 'package:minimal/components/spacing.dart';
 import 'package:minimal/components/text.dart';
 import 'package:minimal/components/typography.dart';
 import 'package:minimal/pages/pages.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // --- Компоненты ImageWrapper, TagWrapper (без изменений, но с адаптацией цветов) ---
 
@@ -38,7 +38,6 @@ class ImageWrapper extends StatelessWidget {
           }
           return Container(
             height: 200,
-            // <<< ШАГ 5.3: Используем цвет из темы для плейсхолдера >>>
             color: Theme.of(context).colorScheme.surface,
           );
         },
@@ -70,7 +69,6 @@ class Tag extends StatelessWidget {
   Widget build(BuildContext context) {
     return RawMaterialButton(
       onPressed: () {},
-      // <<< ШАГ 5.4: Адаптируем цвета тега для темной и светлой темы >>>
       fillColor: Theme.of(context).colorScheme.onSurface,
       hoverColor: Theme.of(context).colorScheme.secondary,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -93,7 +91,6 @@ class ReadMoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // <<< ШАГ 5.5: Адаптируем цвета кнопки "Читать далее" >>>
     final theme = Theme.of(context);
     return OutlinedButton(
       onPressed: onPressed,
@@ -122,7 +119,6 @@ class ReadMoreButton extends StatelessWidget {
   }
 }
 
-// <<< ШАГ 5.6: Адаптируем цвета разделителей >>>
 Widget divider(BuildContext context) =>
     Divider(color: Theme.of(context).dividerColor, thickness: 1);
 Widget dividerSmall(BuildContext context) => Container(
@@ -139,13 +135,11 @@ List<Widget> authorSection(
     String? imageUrl,
     String? name,
     String? bio}) {
-  // <<< ИСПРАВЛЕНИЕ: Переменная переписана в локальную функцию >>>
   void navigateToAbout() {
     Navigator.pushNamed(context, '/${AboutPage.name}');
   }
 
   return [
-    // <<< ШАГ 5.7: Передаем context в виджет divider >>>
     divider(context),
     Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
@@ -177,7 +171,6 @@ List<Widget> authorSection(
                 if (name != null)
                   InkWell(
                     onTap: navigateToAbout,
-                    // <<< ШАГ 5.8: Заменяем жестко заданные стили на стили из темы >>>
                     child:
                         Text(name, style: headlineSecondaryTextStyle(context)),
                   ),
@@ -197,37 +190,64 @@ List<Widget> authorSection(
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
+  // <<< НОВЫЙ МЕТОД для открытия внешних ссылок >>>
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      // Открываем ссылку в новой вкладке для веб-версии
+      await launchUrl(uri, webOnlyWindowName: '_blank');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      // ИЗМЕНЕНИЕ: Используем Row для размещения двух элементов
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Разносим по краям
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment:
+            CrossAxisAlignment.end, // Выравниваем по нижнему краю
         children: [
-          // <<< НОВАЯ ССЫЛКА НА ЗМЕЙКУ >>>
-          InkWell(
-            onTap: () => Navigator.pushNamed(context, '/favisnake'),
-            borderRadius: BorderRadius.circular(4),
-            hoverColor: Colors.transparent, // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
-            splashColor:
-                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ И ЭФФЕКТ КЛИКА
-            highlightColor:
-                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ ВСЁ НАВЕРНЯКА
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: TextBody(text: "Play favisnake"),
-            ),
+          // <<< ИЗМЕНЕНИЕ: Оборачиваем левую часть в Column >>>
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Ссылка на змейку (без изменений)
+              InkWell(
+                onTap: () => Navigator.pushNamed(context, '/fluttersnake'),
+                borderRadius: BorderRadius.circular(2),
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextBody(text: "Play fluttersnake"),
+                ),
+              ),
+
+              // <<< НОВАЯ ССЫЛКА на Wordle >>>
+              InkWell(
+                // Вызываем наш новый метод для открытия поддомена
+                onTap: () => _launchUrl('https://wordle.shastovsky.com'),
+                borderRadius: BorderRadius.circular(2),
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextBody(text: "Play wordle"),
+                ),
+              ),
+            ],
           ),
-          // <<< ИЗМЕНЕННЫЙ COPYRIGHT >>>
+
+          // Ссылка на Copyright (без изменений)
           InkWell(
             onTap: () => Navigator.pushNamed(context, '/copyright'),
             borderRadius: BorderRadius.circular(4),
-            hoverColor: Colors.transparent, // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
-            splashColor:
-                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ И ЭФФЕКТ КЛИКА
-            highlightColor:
-                Colors.transparent, // <-- И ЭТУ, ЧТОБЫ УБРАТЬ ВСЁ НАВЕРНЯКА
+            hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: TextBody(text: "Copyright © 2025"),
@@ -244,6 +264,9 @@ class ListItem extends StatelessWidget {
   final String? imageUrl;
   final Widget? description;
   final VoidCallback onReadMore;
+  // <<< НОВЫЕ ПОЛЯ >>>
+  final DateTime? publicationDate;
+  final int? readingTime;
 
   const ListItem({
     super.key,
@@ -251,6 +274,8 @@ class ListItem extends StatelessWidget {
     this.imageUrl,
     this.description,
     required this.onReadMore,
+    this.publicationDate,
+    this.readingTime,
   });
 
   @override
@@ -262,10 +287,29 @@ class ListItem extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Container(
             margin: marginBottom12,
-            // <<< ШАГ 5.9: Заменяем жестко заданные стили на стили из темы >>>
             child: Text(title, style: headlineTextStyle(context)),
           ),
         ),
+
+        // <<< НОВЫЙ БЛОК ДЛЯ МЕТАДАННЫХ >>>
+        if (publicationDate != null || readingTime != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Text(
+                // Формируем строку: "15 октября 2025 • ~10 минут чтения"
+                '${publicationDate != null ? DateFormat.yMMMMd('ru_RU').format(publicationDate!) : ''}'
+                '${publicationDate != null && readingTime != null ? '  •  ' : ''}'
+                '${readingTime != null ? '~$readingTime минут чтения' : ''}',
+                style: subtitleTextStyle(context).copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+          ),
+
         if (description != null)
           Align(
             alignment: Alignment.centerLeft,
@@ -292,13 +336,14 @@ class MinimalMenuBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-    // <<< ШАГ 5.10: Получаем доступ к провайдеру и теме >>>
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final authService = Provider.of<AuthService>(context);
     final theme = Theme.of(context);
 
+    // Используем Material, чтобы обеспечить фон и тень
     return Material(
-      // <<< ШАГ 5.11: Используем цвета из темы >>>
       color: theme.colorScheme.surface,
+      elevation: 0, // Можно добавить тень, если нужно
       child: Container(
         padding: EdgeInsets.symmetric(
             vertical: isMobile ? 0 : 10, horizontal: isMobile ? 12 : 16),
@@ -310,6 +355,7 @@ class MinimalMenuBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // --- Логотип (без изменений) ---
             InkWell(
               hoverColor: Colors.transparent,
               highlightColor: Colors.transparent,
@@ -321,7 +367,6 @@ class MinimalMenuBar extends StatelessWidget {
                 child: Text(
                   "SHASTOVSKY.",
                   style: GoogleFonts.montserrat(
-                    // <<< ШАГ 5.12: Адаптируем цвет текста >>>
                     color: theme.colorScheme.onSurface,
                     fontSize: isMobile ? 20 : 24,
                     letterSpacing: 3,
@@ -330,8 +375,10 @@ class MinimalMenuBar extends StatelessWidget {
                 ),
               ),
             ),
+
+            // --- Управление отображением кнопок ---
             if (isMobile)
-              // <<< ШАГ 5.13: Добавляем переключатель темы для мобильной версии >>>
+              // <<< ИЗМЕНЕНИЕ: Возвращаем вашу оригинальную структуру Row >>>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -347,35 +394,54 @@ class MinimalMenuBar extends StatelessWidget {
                       themeProvider.toggleTheme(!themeProvider.isDarkMode);
                     },
                   ),
-                  IconButton(
-                    icon: Icon(Icons.menu,
-                        size: 28, color: theme.colorScheme.onSurface),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  ),
+                  // Используем Builder, чтобы получить правильный context,
+                  // который "видит" Scaffold.
+                  Builder(builder: (context) {
+                    return IconButton(
+                      icon: Icon(Icons.menu,
+                          size: 28, color: theme.colorScheme.onSurface),
+                      // Вызываем openDrawer (для меню слева)
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    );
+                  }),
                 ],
               )
             else
+              // <<< ИСПРАВЛЕНИЕ: Expanded заменен на Stack для более гибкой верстки >>>
               Expanded(
-                child: Container(
+                child: Stack(
                   alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // <<< ШАГ 5.14: Добавляем переключатель темы для десктопной версии >>>
-                      ..._buildMenuItems(context),
-                      IconButton(
-                        icon: Icon(
-                          themeProvider.isDarkMode
-                              ? Icons.wb_sunny_outlined
-                              : Icons.nightlight_round,
-                          color: theme.colorScheme.onSurface,
+                  children: [
+                    // Слой 1: Основное меню
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ..._buildMenuItems(context),
+                        // Добавляем отступ справа, чтобы иконки не накладывались на последний пункт меню
+                        const SizedBox(width: 120),
+                      ],
+                    ),
+
+                    // Слой 2: Кнопки темы и авторизации
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _buildAuthMenuItemSmall(context, authService),
+                        IconButton(
+                          icon: Icon(
+                            themeProvider.isDarkMode
+                                ? Icons.wb_sunny_outlined
+                                : Icons.nightlight_round,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          onPressed: () {
+                            themeProvider
+                                .toggleTheme(!themeProvider.isDarkMode);
+                          },
                         ),
-                        onPressed: () {
-                          themeProvider.toggleTheme(!themeProvider.isDarkMode);
-                        },
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -393,8 +459,8 @@ class MinimalMenuBar extends StatelessWidget {
         items: {
           "Разработка": '/${UsefulDevPage.name}',
           "SEO": '/${UsefulSeoPage.name}',
-          "Попробуй кодить": '/${TryCodingPage.name}', // <-- ДОБАВИТЬ
-          "Инструменты SEO": '/${InstrumentsPage.name}', // <-- анализ текста
+          "Попробуй кодить": '/${TryCodingPage.name}',
+          "Инструменты SEO": '/${InstrumentsPage.name}',
         },
       ),
       _buildMenuItem(context, "ОБО МНЕ",
@@ -408,9 +474,30 @@ class MinimalMenuBar extends StatelessWidget {
     ];
   }
 
+  // <<< ИСПРАВЛЕНИЕ: Код этого виджета уже правильный, оставляем как есть >>>
+  Widget _buildAuthMenuItemSmall(
+      BuildContext context, AuthService authService) {
+    final theme = Theme.of(context);
+
+    final VoidCallback onPressed;
+    if (authService.isAuthenticated) {
+      onPressed = () => Navigator.pushNamed(context, '/${AccountPage.name}');
+    } else {
+      onPressed = () => Navigator.pushNamed(context, '/${LoginPage.name}');
+    }
+
+    return IconButton(
+      icon: Icon(
+        Icons.person_outline,
+        color: theme.colorScheme.onSurface,
+      ),
+      tooltip: authService.isAuthenticated ? "Профиль" : "Войти",
+      onPressed: onPressed,
+    );
+  }
+
   Widget _buildMenuItem(
       BuildContext context, String text, VoidCallback onPressed) {
-    // <<< ШАГ 5.15: Адаптируем цвет текста в пунктах меню >>>
     final menuStyle = GoogleFonts.montserrat(
       fontSize: 14,
       fontWeight: FontWeight.w500,
@@ -449,7 +536,6 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
 
   @override
   Widget build(BuildContext context) {
-    // <<< ШАГ 5.16: Адаптируем цвета выпадающего меню >>>
     final theme = Theme.of(context);
     final menuStyle = GoogleFonts.montserrat(
       fontSize: 14,
@@ -530,12 +616,10 @@ class _DesktopDropdownMenuItemState extends State<_DesktopDropdownMenuItem> {
 }
 
 Drawer buildAppDrawer(BuildContext context) {
-  // <<< ШАГ 5.17: Получаем доступ к провайдеру и теме для бокового меню >>>
   final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
   final theme = Theme.of(context);
 
   return Drawer(
-    // <<< ШАГ 5.18: Адаптируем цвета бокового меню >>>
     backgroundColor: theme.scaffoldBackgroundColor,
     child: ListView(
       padding: EdgeInsets.zero,
@@ -599,7 +683,6 @@ Drawer buildAppDrawer(BuildContext context) {
             ),
           ],
         ),
-        // ... (остальные ListTile навигации)
         ListTile(
           title: const Text('ОБО МНЕ'),
           onTap: () {
@@ -628,7 +711,6 @@ Drawer buildAppDrawer(BuildContext context) {
             Navigator.pushNamed(context, '/${ContactsPage.name}');
           },
         ),
-        // <<< ШАГ 5.19: Добавляем переключатель темы в боковое меню >>>
         const Divider(),
         ListTile(
           leading: Icon(
@@ -644,14 +726,48 @@ Drawer buildAppDrawer(BuildContext context) {
             Navigator.pop(context);
           },
         ),
+        const Divider(),
+        Consumer<AuthService>(
+          builder: (context, authService, child) {
+            if (authService.isAuthenticated) {
+              return Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.person_outline),
+                    title: const Text('ПРОФИЛЬ'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/${AccountPage.name}');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: const Text('ВЫЙТИ'),
+                    onTap: () {
+                      authService.logout();
+                      Navigator.pop(context);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/', (route) => false);
+                    },
+                  ),
+                ],
+              );
+            } else {
+              return ListTile(
+                leading: const Icon(Icons.login),
+                title: const Text('ВОЙТИ / РЕГИСТРАЦИЯ'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/${LoginPage.name}');
+                },
+              );
+            }
+          },
+        ),
       ],
     ),
   );
 }
-
-// Классы BreadcrumbItem и Breadcrumbs остаются без изменений,
-// но их цвета также будут адаптироваться благодаря тому, что
-// bodyTextStyle и textSecondary теперь берутся из темы.
 
 class BreadcrumbItem {
   final String text;

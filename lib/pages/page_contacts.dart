@@ -2,11 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
-import 'package:minimal/utils/meta_tag_service.dart';
+// <<< ШАГ 1: Добавляем импорт семантических виджетов >>>
+import 'package:minimal/components/semantic_widgets.dart';
 
 class ContactsPage extends StatefulWidget {
   static const String name = 'contacts';
@@ -17,15 +19,55 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
+  // <<< ШАГ 2: Добавляем флаг для определения режима рендеринга >>>
+  bool _isPrerendering = false;
+
   @override
   void initState() {
     super.initState();
+    // <<< ШАГ 3: Проверяем URL на наличие параметра пререндеринга >>>
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+
     MetaTagService().updateAllTags(
         title: "Контакты | Даниил Шастовский",
         description:
             "Контакты для сотрудничества. Email, Telegram, WhatsApp и ссылки на все мои профили в социальных сетях.",
         imageUrl:
-            "https://shastovsky.ru/assets/assets/images/avatar_default.png");
+            "https://shastovsky.com/assets/assets/images/avatar_default.png");
+  }
+
+  // <<< ШАГ 4: Новый метод для генерации семантического контента >>>
+  Widget _buildPrerenderContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticH1("Мои контакты"),
+        SemanticP("Контакты для сотрудничества."),
+        SemanticH2("Основные контакты"),
+        SemanticP("Телефон: +7 991 681-84-92"),
+        SemanticP("WhatsApp: +7 991 681-84-92"),
+        SemanticA(
+            href: "mailto:shastovsckiy@gmail.com",
+            text: "Email: shastovsckiy@gmail.com"),
+        SemanticA(
+            href: "https://t.me/switchleveler",
+            text: "Telegram: @switchleveler"),
+        SemanticH2("Все остальные мои профили в сети:"),
+        SemanticA(href: "https://t.me/shastovscky", text: "Telegram канал"),
+        SemanticA(
+            href: "https://instagram.com/yellolwapple", text: "Instagram"),
+        SemanticA(href: "https://www.youtube.com/@itsmyadv", text: "YouTube"),
+        SemanticA(href: "https://vc.ru/id1145025", text: "VC.RU"),
+        SemanticA(
+            href: "https://hh.ru/resume/b94af167ff049031c70039ed1f746c61797571",
+            text: "LinkedIn (Резюме)"),
+      ],
+    );
   }
 
   Widget _buildSocialButton({
@@ -74,6 +116,11 @@ class _ContactsPageState extends State<ContactsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5: Добавляем условную логику в метод build >>>
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
     final isMobile = MediaQuery.of(context).size.width < 800;
     final theme = Theme.of(context);
     final horizontalPadding =
@@ -109,7 +156,8 @@ class _ContactsPageState extends State<ContactsPage> {
                             fontSize: ResponsiveValue(context,
                                 defaultValue: 30.0,
                                 conditionalValues: [
-                              const Condition.largerThan(name: TABLET, value: 36.0)
+                              const Condition.largerThan(
+                                  name: TABLET, value: 36.0)
                             ]).value)),
                     const SizedBox(height: 8),
                     Text("Контакты для сотрудничества",

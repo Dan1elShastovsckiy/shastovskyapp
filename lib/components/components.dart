@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
+import 'package:minimal/components/typography.dart';
 
 // Экспортируем все остальные компоненты, как и раньше
 export 'image_carousel.dart';
@@ -78,4 +79,49 @@ class CodeBlock extends StatelessWidget {
       ),
     );
   }
+}
+
+// Вспомогательный виджет для пунктов "Чем полезно?"
+class InfoPoint extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const InfoPoint({super.key, required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2.0, right: 12.0),
+          child: Icon(icon,
+              size: 20, color: Theme.of(context).colorScheme.primary),
+        ),
+        Expanded(
+          child: Text(text, style: bodyTextStyle(context)),
+        ),
+      ],
+    );
+  }
+}
+
+// <<< (класс для статей в lib/components/components.dart) >>>
+class UsefulArticle {
+  final String title;
+  final String description;
+  final String imageUrl;
+  final List<String> tags;
+  final String routeName;
+  final DateTime publicationDate;
+  final int readingTime;
+
+  UsefulArticle({
+    required this.title,
+    required this.description,
+    required this.imageUrl,
+    required this.tags,
+    required this.routeName,
+    required this.publicationDate,
+    required this.readingTime,
+  });
 }

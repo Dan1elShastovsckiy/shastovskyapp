@@ -30,7 +30,6 @@
 .pub-cache/
 .pub/
 /build/
-pubspec.lock
 /navigation_utils
 
 # Web related
@@ -63,3 +62,16 @@ ios/Pods/
 
 # macOS specific
 .DS_Store
+node_modules
+
+# Never commit private SSH credentials.
+/appkey
+/appkey.pub
+/LOCAL_NOTES.md
+
+# Platform Firebase files are local setup for non-web builds.
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+/macos/Runner/GoogleService-Info.plist
+
+prerender_tool/.local-chrome/

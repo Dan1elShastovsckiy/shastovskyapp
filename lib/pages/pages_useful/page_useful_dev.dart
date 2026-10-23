@@ -1,0 +1,223 @@
+// lib/pages/page_useful_dev.dart
+
+import 'package:flutter/material.dart';
+import 'package:minimal/pages/pages.dart';
+import 'package:minimal/components/components.dart';
+import 'package:minimal/utils/max_width_extension.dart';
+import 'package:minimal/utils/meta_tag_service.dart';
+
+class UsefulDevPage extends StatefulWidget {
+  static const String name = 'useful/dev';
+  const UsefulDevPage({super.key});
+
+  @override
+  State<UsefulDevPage> createState() => _UsefulDevPageState();
+}
+
+class _UsefulDevPageState extends State<UsefulDevPage> {
+  final List<UsefulArticle> _allArticles = [
+    UsefulArticle(
+      title: "От калькулятора до SaaS: история создания SEO-прогноза",
+      description:
+          "Как простая идея превратилась в full-stack фичу с Firebase, аутентификацией Google и защищенной базой данных. Разбор граблей и решений.",
+      imageUrl: "assets/images/dev/forecast_story/forecast-story-banner.webp",
+      tags: ["Flutter", "Firebase", "Аутентификация", "Разработка"],
+      routeName: PostForecastDevStory.name,
+      // <<< ДОБАВЛЕНЫ НОВЫЕ ДАННЫЕ >>>
+      publicationDate: DateTime(2025, 10, 22), // Год, Месяц, День
+      readingTime: 15,
+    ),
+    UsefulArticle(
+      title: "Под капотом SEO-анализатора: история разработки",
+      description:
+          "Путь от идеи и простого прототипа до асинхронного Flutter-приложения с парсером, стеммингом и отзывчивым UI. Глубокое погружение в решение реальных проблем.",
+      imageUrl: "assets/images/dev/seo_analyzer_story/ui_thread_isolate.webp",
+      tags: ["Flutter", "Разработка", "Производительность", "UI/UX"],
+      routeName: PostSeoAnalyzerDevStory.name,
+      // <<< ДОБАВЛЕНЫ НОВЫЕ ДАННЫЕ >>>
+      publicationDate: DateTime(2025, 9, 15),
+      readingTime: 20,
+    ),
+    UsefulArticle(
+      title: "Паттерны проектирования: Интерактивная галерея",
+      description:
+          "Изучайте паттерны в игровом стиле. Тапните на Singleton, Factory или Observer, чтобы увидеть код и простое объяснение...",
+      imageUrl: "assets/images/dev_article_3.webp",
+      tags: ["Flutter", "Архитектура", "Паттерны"],
+      routeName: DesignPatternsPage.name,
+      // <<< ДОБАВЛЕНЫ НОВЫЕ ДАННЫЕ >>>
+      publicationDate: DateTime(2025, 8, 5),
+      readingTime: 25,
+    ),
+    UsefulArticle(
+      title: "Flutter Web & SEO: Полное руководство по SSG",
+      description:
+          "Как настроить пререндеринг (SSG) для Flutter-сайта, чтобы он нравился поисковикам и быстро загружался...",
+      imageUrl: "assets/images/dev_article_1.webp",
+      tags: ["Flutter", "SEO"],
+      routeName: PostFlutterSeoPage.name,
+      // <<< ДОБАВЛЕНЫ НОВЫЕ ДАННЫЕ >>>
+      publicationDate: DateTime(2025, 7, 20),
+      readingTime: 18,
+    ),
+    UsefulArticle(
+      title: "State Management в Flutter: Какой выбрать в 2025?",
+      description:
+          "Provider, BLoC, Riverpod, GetX... Разбираем плюсы и минусы каждого подхода на реальных примерах.",
+      imageUrl: "assets/images/dev_article_2.webp",
+      tags: ["Flutter", "Архитектура"],
+      routeName: PostStateManagementPage.name,
+      // <<< ДОБАВЛЕНЫ НОВЫЕ ДАННЫЕ >>>
+      publicationDate: DateTime(2025, 6, 10),
+      readingTime: 22,
+    ),
+  ];
+
+  late List<UsefulArticle> _filteredArticles;
+  String _selectedTag = "Все материалы";
+  // <<< ИЗМЕНЕНИЕ 3: Добавляем новые теги в список для фильтрации >>>
+  final List<String> _allTags = [
+    "Все материалы",
+    "Flutter",
+    "Разработка",
+    "Firebase", // Новый тег
+    "Аутентификация", // Новый тег
+    "Архитектура",
+    "Производительность",
+    "UI/UX",
+    "SEO",
+    "Паттерны",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredArticles = _allArticles;
+
+    MetaTagService().updateAllTags(
+      title: "Разработка | Статьи о Flutter, Dart и веб-технологиях",
+      description:
+          "Гайды, обзоры и практические советы по веб-разработке. Фокус на Flutter Web, Dart, SEO-аспектах и лучших практиках.",
+      imageUrl: "https://shastovsky.com/assets/assets/images/flutter_logo.webp",
+    );
+  }
+
+  void _filterArticles(String tag) {
+    setState(() {
+      _selectedTag = tag;
+      if (tag == "Все материалы") {
+        _filteredArticles = _allArticles;
+      } else {
+        _filteredArticles = _allArticles
+            .where((article) => article.tags.contains(tag))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      drawer: isMobile ? buildAppDrawer(context) : null,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(isMobile ? 65 : 110),
+        child: const MinimalMenuBar(),
+      ),
+      body: CustomScrollView(
+        slivers: [
+          ...[
+            const SizedBox(height: 40),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Breadcrumbs(
+                items: [
+                  BreadcrumbItem(text: "Главная", routeName: '/'),
+                  BreadcrumbItem(
+                      text: "Полезное", routeName: '/${UsefulPage.name}'),
+                  BreadcrumbItem(text: "Разработка"),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text("Статьи по Flutter, Dart и веб-технологиям",
+                style: subtitleTextStyle(context), textAlign: TextAlign.center),
+            const SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: _allTags.map((tag) {
+                  final isSelected = _selectedTag == tag;
+                  return ChoiceChip(
+                    label: Text(tag),
+                    selected: isSelected,
+                    onSelected: (selected) => _filterArticles(tag),
+                    backgroundColor: theme.colorScheme.surface,
+                    selectedColor: theme.colorScheme.primary,
+                    labelStyle: TextStyle(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(color: theme.colorScheme.primary)),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            divider(context),
+          ].toMaxWidthSliver(),
+          SliverList.list(
+            children: [
+              if (_filteredArticles.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 80.0),
+                  child: Center(
+                      child: Text(
+                    "Материалов по этому тегу пока нет...",
+                    style: subtitleTextStyle(context),
+                  )),
+                )
+              else
+                ..._filteredArticles.expand((article) => [
+                      ListItem(
+                        imageUrl: article.imageUrl,
+                        title: article.title,
+                        description: Text(article.description,
+                            style: bodyTextStyle(context)),
+
+                        // <<< ПЕРЕДАЕМ НОВЫЕ ДАННЫЕ В ВИДЖЕТ >>>
+                        publicationDate: article.publicationDate,
+                        readingTime: article.readingTime,
+
+                        onReadMore: () => Navigator.pushNamed(
+                          context,
+                          '/${article.routeName}',
+                          arguments: {'title': article.title},
+                        ),
+                      ),
+                      divider(context),
+                    ]),
+              const SizedBox(height: 80),
+            ].toMaxWidth(),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: MaxWidthBox(maxWidth: 1200, child: Container()),
+          ),
+          ...[
+            divider(context),
+            const Footer(),
+          ].toMaxWidthSliver(),
+        ],
+      ),
+    );
+  }
+}

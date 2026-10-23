@@ -6,8 +6,9 @@ import 'package:minimal/components/components.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+// <<< ШАГ 1: Добавляем импорт семантических виджетов >>>
+import 'package:minimal/components/semantic_widgets.dart';
 
-// <<< ИЗМЕНЕНИЕ 1: StatelessWidget -> StatefulWidget >>>
 class PortfolioPage extends StatefulWidget {
   static const String name = 'portfolio';
 
@@ -17,24 +18,143 @@ class PortfolioPage extends StatefulWidget {
   State<PortfolioPage> createState() => _PortfolioPageState();
 }
 
-// <<< ИЗМЕНЕНИЕ 2: СОЗДАН НОВЫЙ КЛАСС State >>>
 class _PortfolioPageState extends State<PortfolioPage> {
-  // <<< ИЗМЕНЕНИЕ 3: ДОБАВЛЕН initState С МЕТА-ТЕГАМИ >>>
+  // <<< ШАГ 2: Добавляем флаг для определения режима рендеринга >>>
+  bool _isPrerendering = false;
+
   @override
   void initState() {
     super.initState();
+    // <<< ШАГ 3: Проверяем URL на наличие параметра пререндеринга >>>
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+
     MetaTagService().updateAllTags(
       title: "Портфолио | Проекты Даниила Шастовского",
       description:
           "Обзор моих ключевых проектов в области SEO-продвижения, веб-разработки и контент-стратегий. Результаты, кейсы и технологии.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/me_georgia_mountains_2.webp", // Убедитесь, что эта картинка существует
+          "https://shastovsky.com/assets/assets/images/me_georgia_mountains_2.webp",
     );
   }
 
-  // <<< ИЗМЕНЕНИЕ 4: ВЕСЬ КОД UI ПЕРЕНЕСЕН СЮДА >>>
+  // <<< ШАГ 4: Новый метод для генерации семантического контента >>>
+  Widget _buildPrerenderContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticH1("Проекты"),
+        SemanticP(
+            "Здесь вы можете найти проекты, которые я вел и выращивал в процессе своей карьеры. Я продолжаю активно работать со многими из нижеперечисленных компаний, развивая их и достигая новых высот."),
+        SemanticH2("Мои проекты"),
+        SemanticH2("Разработка SaaS сервиса SEO Control"),
+        SemanticImg(
+            src: "assets/portfolio/seocontrol_logo.webp",
+            alt: "Логотип SEO Control"),
+        SemanticP(
+            "Собственный SaaS-продукт для автоматизации SEO-мониторинга. Стек: Python (FastAPI), React, Docker, PostgreSQL. Сервис агрегирует данные из Яндекс.Вебмастера, Метрики и Google Search Console, строит единые отчеты и уведомляет об ошибках."),
+        SemanticA(
+            href: "https://seocontrol.shastovsky.com/",
+            text: "Перейти к сервису"),
+        SemanticH2("SEO для Genotek.ru"),
+        SemanticImg(
+            src: "assets/portfolio/genotek_logo.webp", alt: "Логотип Genotek"),
+        SemanticP(
+            "Проект вел длительное время, и он продолжает показывать положительную динамику. За год работы удалось добиться роста органического трафика на +42% и вывести ключевые запросы по генетическим тестам в ТОП-3."),
+        SemanticH2("SEO для Vitateka.ee"),
+        SemanticImg(
+            src: "assets/portfolio/vitateka_logo.webp",
+            alt: "Логотип Vitateka"),
+        SemanticP(
+            "Ключевая задача: реабилитация европейского проекта интернет-аптеки после взлома. За год работы средняя позиция по целевым запросам была улучшена на 35% по всем регионам Европы, а органический трафик вырос на 75% по сравнению с докризисным периодом."),
+        SemanticH2("SEO для блога Credistory.ru"),
+        SemanticImg(
+            src: "assets/portfolio/credistory_logo.webp",
+            alt: "Логотип Credistory"),
+        SemanticP(
+            "Результат: впечатляющий рост органического трафика на +55% к каждому месяцу в течение года. Ключевым фактором успеха стала разработка и реализация контент-стратегии."),
+        SemanticH2("SEO для Leroymerlin.ru"),
+        SemanticImg(
+            src: "assets/portfolio/leroymerlin_logo.webp",
+            alt: "Логотип Leroy Merlin"),
+        SemanticP(
+            "Работал в качестве Middle SEO-специалиста в большой внутренней команде проекта до ухода компании из РФ. Ключевой задачей была реализация масштабной контент-стратегии с целью вытеснения конкурентов из выдачи."),
+        SemanticH2("SEO для sportmaster.ru"),
+        SemanticImg(
+            src: "assets/portfolio/sportmaster_logo.webp",
+            alt: "Логотип Спортмастер"),
+        SemanticP(
+            "В качестве Middle SEO-специалиста в составе сильной команды внес свой вклад в рост онлайн-продаж на +35% в крупнейших городах. Зоны ответственности: контент-планирование для блога, участие в реорганизации структуры сайта."),
+        SemanticH2("SEO для iek.ru"),
+        SemanticImg(src: "assets/portfolio/iek_logo.webp", alt: "Логотип IEK"),
+        SemanticP(
+            "Работал над проектом в составе команды агентства. Нашей задачей было обеспечение стабильного роста в консервативной B2B-нише. Добились планомерного улучшения всех ключевых SEO-показателей."),
+        SemanticH2("SEO для weitnauer.com"),
+        SemanticImg(
+            src: "assets/portfolio/weitnauer_logo.webp",
+            alt: "Логотип Weitnauer"),
+        SemanticP(
+            "Принял проект швейцарского бренда и за короткий срок провел полный аудит и составил стартовую стратегию. Проект вырос с нуля до ТОП-3 и ТОП-10 в ключевых регионах."),
+        SemanticH2("SEO для askona.ru"),
+        SemanticImg(
+            src: "assets/portfolio/askona_logo.webp", alt: "Логотип Askona"),
+        SemanticP(
+            "Один из самых сложных и конкурентных проектов. В условиях высочайшей конкуренции проект показывает стабильный рост показателей от квартала к кварталу, нивелируя даже сезонные падения спроса."),
+        SemanticH2("SEO для rsk-factory.ru"),
+        SemanticImg(
+            src: "assets/portfolio/rsk_factory_logo.webp",
+            alt: "Логотип РСК-Фабрика"),
+        SemanticP(
+            "Уникальный проект по созданию кастомной мебели. Результаты за год совместной работы: рост семантического ядра в ТОП-10 на 27%, увеличение переходов на 63%."),
+        SemanticH2("SEO для vmeste.sber.ru"),
+        SemanticImg(
+            src: "assets/portfolio/vmeste_sber_logo.webp",
+            alt: "Логотип СберВместе"),
+        SemanticP(
+            "Очень важный и добрый проект, где главная цель — сделать так, чтобы помощь всегда находила тех, кто в ней нуждается. Вся работа по SEO направлена на максимальное увеличение видимости сайта."),
+        SemanticH2("SEO для sbersova.ru"),
+        SemanticImg(
+            src: "assets/portfolio/sbersova_logo.webp",
+            alt: "Логотип СберСова"),
+        SemanticP(
+            "Большая платформа с курсами и блогом по инвестициям. Несмотря на молодость проекта и жесточайшую конкуренцию, мы показываем очень успешную годовую динамику."),
+        SemanticH2("SEO для Maple Tattoo Supply CA"),
+        SemanticImg(
+            src: "assets/portfolio/maple_logo.webp",
+            alt: "Логотип Maple Tattoo Supply"),
+        SemanticP(
+            "Задача: комплексная подготовка и запуск SEO-продвижения для канадского интернет-магазина с нуля. За время сотрудничества был выполнен полный комплекс работ по базовой оптимизации."),
+        SemanticH2("Flutter разработка сайта shastovsky.com"),
+        SemanticImg(
+            src: "assets/portfolio/shastovsky_logo.webp",
+            alt: "Логотип shastovsky.com"),
+        SemanticP(
+            "Этот сайт - мой личный проект, разработанный с нуля на Flutter. Исходный код проекта доступен на GitHub."),
+        SemanticA(
+            href: "https://github.com/Dan1elShastovsckiy/shastovskyapp/",
+            text: "Посмотреть на GitHub"),
+        SemanticH2("Какой у меня подход к работе?"),
+        SemanticP(
+            "Я верю в важность качественного кода, ТЗ по SMART и чистого дизайна. Мой подход заключается в том, чтобы создавать продукты, которые не только функциональные, но и приятны в использовании. Всегда стремлюсь к лучшим практикам SEO, разработки и использую современные технологии. Я открыт к новым идеям и всегда готов учиться, люблю работать в команде и считаю, что совместная работа приводит к лучшим результатам."),
+        SemanticP(
+            "Я считаю, что каждый проект — это возможность для роста и обучения и стремлюсь к тому, чтобы каждый мой проект был не только успешным, но и полезным для пользователей."),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5: Добавляем условную логику в метод build >>>
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
+
+    // Ваш обычный UI код без изменений
     final isMobile = MediaQuery.of(context).size.width < 800;
     final theme = Theme.of(context);
     final boldTextStyle =
@@ -92,6 +212,80 @@ class _PortfolioPageState extends State<PortfolioPage> {
                                   .copyWith(fontSize: 28),
                             ),
                           ),
+                        ),
+                        // <<< ОБНОВЛЕННЫЙ БЛОК SEO CONTROL >>>
+                        _buildProjectExpansionTile(
+                          context: context,
+                          title: "Full-stack разработка SEO Control",
+                          isInitiallyExpanded: false,
+                          children: [
+                            _buildLogo('assets/portfolio/seocontrol_logo.webp'),
+                            Text(
+                              "Собственный SaaS-продукт для автоматизации рутины SEO-специалистов. Это единая панель мониторинга, которая объединяет данные из Яндекс.Вебмастера, Яндекс.Метрики и Google Search Console.",
+                              style: bodyTextStyle(context),
+                            ),
+                            const SizedBox(height: 20),
+                            Text("Технологический стек:", style: boldTextStyle),
+                            Text("• Frontend: React, Vite, Tailwind CSS.",
+                                style: bodyTextStyle(context)),
+                            Text("• Backend: Python (FastAPI), SQLAlchemy.",
+                                style: bodyTextStyle(context)),
+                            Text(
+                                "• Database & Infra: PostgreSQL, Docker, Nginx.",
+                                style: bodyTextStyle(context)),
+
+                            const SizedBox(height: 20),
+
+                            // <<< ВСТАВЛЯЕМ GIF ЗДЕСЬ >>>
+                            // Flutter сам поймет, что это анимация и начнет ее проигрывать
+                            _buildMetricImage(
+                                'assets/portfolio/seocontrol_demo.gif'),
+
+                            // Можно добавить подпись, если нужно
+                            Center(
+                              child: Text(
+                                "Демонстрация работы интерфейса",
+                                style: subtitleTextStyle(context)
+                                    .copyWith(fontSize: 12),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            Text("Ключевые возможности:", style: boldTextStyle),
+                            Text(
+                                "• Автоматическая ежедневная проверка позиций и технических ошибок.",
+                                style: bodyTextStyle(context)),
+                            Text("• Сводные отчеты \"человеческим языком\".",
+                                style: bodyTextStyle(context)),
+                            Text("• Мониторинг SSL и доменов.",
+                                style: bodyTextStyle(context)),
+
+                            const SizedBox(height: 16),
+                            Align(
+                              alignment: Alignment.center,
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  style: bodyTextStyle(context),
+                                  children: [
+                                    const TextSpan(
+                                        text: "Сервис доступен публично: "),
+                                    TextSpan(
+                                      text: "seocontrol.shastovsky.com",
+                                      style: bodyTextStyle(context).copyWith(
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => launchUrl(Uri.parse(
+                                            'https://seocontrol.shastovsky.com/')),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         _buildProjectExpansionTile(
                           context: context,
@@ -189,8 +383,6 @@ class _PortfolioPageState extends State<PortfolioPage> {
                                 "Работал в качестве Middle SEO-специалиста в большой внутренней команде проекта до ухода компании из РФ. Ввиду NDA, могу поделиться общей стратегией и результатами на концептуальном уровне.",
                                 style: bodyTextStyle(context)),
                             const SizedBox(height: 16),
-                            _buildMetricImage(
-                                'assets/portfolio/leroymerlin_metrics1.webp'),
                             Text(
                                 "Ключевой задачей была реализация масштабной контент-стратегии (20-40 текстов в день) с целью вытеснения конкурентов из выдачи по всем возможным НЧ и СЧ запросам. Такой проактивный подход обеспечивал проекту колоссальные показатели роста и доминирование в нише.",
                                 style: bodyTextStyle(context)),
@@ -224,8 +416,6 @@ class _PortfolioPageState extends State<PortfolioPage> {
                             Text(
                                 "Работал над проектом в составе команды агентства. Нашей задачей было обеспечение стабильного роста в консервативной B2B-нише. Мы добились планомерного улучшения всех ключевых SEO-показателей (переходов, показов, CTR).",
                                 style: bodyTextStyle(context)),
-                            _buildMetricImage(
-                                'assets/portfolio/iek_metrics1.webp'),
                             const SizedBox(height: 16),
                             Text(
                                 "Стратегия была сфокусирована на двух ключевых направлениях:",
@@ -247,8 +437,6 @@ class _PortfolioPageState extends State<PortfolioPage> {
                                 "Принял проект швейцарского бренда (поставщик Duty Free) и за короткий срок провел полный аудит, внедрил систему контент-менеджмента и составил стартовую стратегию для линкбилдинга.",
                                 style: bodyTextStyle(context)),
                             const SizedBox(height: 16),
-                            _buildMetricImage(
-                                'assets/portfolio/weitnauer_metrics1.webp'),
                             Text(
                                 "Затем я передал проект своему подопечному Антону (Антон если читаешь это - こんにちは), который блестяще его реализовал. С помощью стратегической базы проект вырос с нуля до ТОП-3 и ТОП-10 в ключевых регионах, а DR сайта увеличился до 15 всего за полгода.",
                                 style: bodyTextStyle(context)),
@@ -262,8 +450,6 @@ class _PortfolioPageState extends State<PortfolioPage> {
                             Text(
                                 "Один из самых сложных и конкурентных проектов. В условиях высочайшей конкуренции в мебельной нише и внутренних сложностей с разработкой, под моим контролем проект показывает стабильный рост показателей от квартала к кварталу, нивелируя даже сезонные падения спроса.",
                                 style: bodyTextStyle(context)),
-                            _buildMetricImage(
-                                'assets/portfolio/askona_metrics1.webp'),
                             const SizedBox(height: 16),
                             Text(
                                 "Более подробной информацией, к сожалению, поделиться не могу ввиду строгого NDA.",
@@ -309,8 +495,6 @@ class _PortfolioPageState extends State<PortfolioPage> {
                                 "Очень важный и добрый проект, где главная цель — сделать так, чтобы помощь всегда находила тех, кто в ней нуждается. Вся работа по SEO направлена на максимальное увеличение видимости сайта по запросам, связанным с благотворительностью.",
                                 style: bodyTextStyle(context)),
                             const SizedBox(height: 16),
-                            _buildMetricImage(
-                                'assets/portfolio/vmeste_sber_metrics1.webp'),
                             Text(
                                 "Мы растим блог и улучшаем сайт, чтобы каждый, кто хочет помочь, мог легко нас найти. Проект находится под NDA.",
                                 style: bodyTextStyle(context)),
@@ -325,8 +509,6 @@ class _PortfolioPageState extends State<PortfolioPage> {
                                 "Большая платформа с курсами и блогом по инвестициям. Несмотря на молодость проекта и жесточайшую конкуренцию с гигантами вроде Тинькофф Журнала, мы показываем очень успешную годовую динамику.",
                                 style: bodyTextStyle(context)),
                             const SizedBox(height: 16),
-                            _buildMetricImage(
-                                'assets/portfolio/sbersova_metrics1.webp'),
                             Text(
                                 "Благодаря комплексной работе моей команды с контентом и внешними ссылками, мы добились значительного роста запросов в ТОП-10 и увеличения цитируемости сайта. Проект находится под NDA.",
                                 style: bodyTextStyle(context)),
@@ -375,7 +557,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
                         ),
                         _buildProjectExpansionTile(
                           context: context,
-                          title: "Flutter разработка сайта shastovsky.ru",
+                          title: "Flutter разработка сайта shastovsky.com",
                           isInitiallyExpanded: true,
                           children: [
                             _buildLogo('assets/portfolio/shastovsky_logo.webp'),

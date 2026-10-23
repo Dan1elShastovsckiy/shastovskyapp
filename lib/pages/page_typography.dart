@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
 import 'package:minimal/pages/pages.dart';
 import 'package:minimal/utils/max_width_extension.dart';
-import 'package:minimal/utils/meta_tag_service.dart'; // <<< ИМПОРТ ДЛЯ МЕТА-ТЕГОВ
+import 'package:minimal/utils/meta_tag_service.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
+// <<< ШАГ 1: Добавляем импорт семантических виджетов >>>
+import 'package:minimal/components/semantic_widgets.dart';
 
-// <<< ИЗМЕНЕНИЕ 1: StatelessWidget -> StatefulWidget >>>
 class TypographyPage extends StatefulWidget {
   static const String name = 'about-app';
 
@@ -20,22 +21,78 @@ class TypographyPage extends StatefulWidget {
   State<TypographyPage> createState() => _TypographyPageState();
 }
 
-// <<< ИЗМЕНЕНИЕ 2: СОЗДАН НОВЫЙ КЛАСС State >>>
 class _TypographyPageState extends State<TypographyPage> {
-  // <<< ИЗМЕНЕНИЕ 3: ДОБАВЛЕН initState С МЕТА-ТЕГАМИ >>>
+  // <<< ШАГ 2: Добавляем флаг для определения режима рендеринга >>>
+  bool _isPrerendering = false;
+
   @override
   void initState() {
     super.initState();
+    // <<< ШАГ 3: Проверяем URL на наличие параметра пререндеринга >>>
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+
     MetaTagService().updateAllTags(
       title: "Об этом сайте | Блог Даниила Шастовского на Flutter",
       description:
           "Узнайте, как и зачем был создан этот сайт. Технологии, цели проекта и планы по развитию (бэклог). Создано на Flutter.",
       imageUrl:
-          "https://shastovsky.ru/assets/assets/images/flutter_logo_preview.webp", // Рекомендую создать картинку
+          "https://shastovsky.com/assets/assets/images/flutter_logo_preview.webp",
     );
   }
 
-  // <<< ИЗМЕНЕНИЕ 4: ВСЯ ЛОГИКА И ХЕЛПЕРЫ ПЕРЕНЕСЕНЫ СЮДА >>>
+  // <<< ШАГ 4: Новый метод для генерации семантического контента >>>
+  Widget _buildPrerenderContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticH1("Об этом сайте"),
+        SemanticP(
+            "Это приложение, являющееся для меня некой песочницей для изучения технологий, написанное на Flutter, демонстрирует возможности фреймворка и его адаптивность. Flutter - это кроссплатформенный фреймворк от Google, который позволяет создавать приложения для мобильных устройств, веба и десктопа с единой кодовой базой. А также служит моим портфолио, блогом и приложением где я могу делиться полезным со своими подопечными."),
+        SemanticH2("Зачем?"),
+        SemanticP(
+            "Я его делаю чтобы: 1) Изучать и тестировать технологии в боевом режиме; 2) Показать свои навыки и возможности Dart/Flutter. А также, чтобы у меня была простая ссылка на все мое портфолио, в котором будет информация обо мне - как о специалисте, мои проекты и результаты моей работы, а также мой блог с фотографиями и историями путешествий."),
+        SemanticH2("Что дальше?"),
+        SemanticP(
+            "Дальше у меня есть планы развивать это приложение, добавлять новые разделы и возможности. Например, я хочу разделить меню главная на меню блог и сделать два меню с Блогом и Полезными материалами(Уже сделал). На Полезные материалы повесить подменю SEO обучение и Разработка обучение. Дальше хочу добавить интерактивные курсы, где можно будет не только читать статьи, но и выполнять практические задания прямо в приложении. Также планирую добавить возможность комментирования статей, чтобы читатели могли делиться своими мыслями и задавать вопросы."),
+        SemanticH2("Хочу такой же сайт"),
+        SemanticP(
+            "Заказать такой же сайт можно у меня в личных сообщениях. Вот тут находятся мои контакты."),
+        SemanticA(href: "/contacts", text: "Мои контакты"),
+        SemanticH2("Планы по развитию (бэклог)"),
+        SemanticP(
+            "✅ Реализовано: Полный рефакторинг системы тем (Dark/Light Mode)."),
+        SemanticP(
+            "✅ Реализовано: Создание разделов 'Полезное', 'Портфолио', 'Инструменты' и наполнение статьями."),
+        SemanticP("✅ Реализовано: Интерактивная песочница HTML/CSS."),
+        SemanticP("✅ Реализовано: Аутентификация через Google и Email."),
+        SemanticP(
+            "✅ Реализовано: Система комментариев и ответов на них (Firebase)."),
+        SemanticP("✅ Реализовано: Система реакций на статьи (Firebase)."),
+        SemanticP(
+            "✅ Реализовано: SEO-пререндеринг (SSG) для всех страниц с помощью Dart-скрипта."),
+        SemanticP("✅ Реализовано: Инструмент 'SEO-анализатор текста' v1.0."),
+        SemanticP(
+            "✅ Реализовано: Инструмент 'Прогноз SEO-трафика' с сохранением отчетов в Firebase."),
+        SemanticP("✅ Реализовано: Игра 'Змейка' на Flutter."),
+        SemanticP(
+            "📝 В планах: Инструмент 'Прогноз очков' для игровой змейки."),
+        SemanticP("📝 В планах: Интерактивные курсы по SEO и разработке."),
+        SemanticP(
+            "📝 В планах: Раздел 'Авторы' для публикации статей от других экспертов."),
+        SemanticP(
+            "📝 В планах: Интернационализация (i18n) - переключение языка RU/EN."),
+        SemanticP("📝 В планах: Поиск по сайту."),
+        SemanticP(
+            "📝 В планах: Настройка CI/CD и автоматического развертывания через GitHub Actions."),
+      ],
+    );
+  }
+
   void _showBacklogDialog(BuildContext context) {
     final theme = Theme.of(context);
     showDialog(
@@ -58,64 +115,93 @@ class _TypographyPageState extends State<TypographyPage> {
                     child: const Column(
                       children: [
                         ListTile(
-                          leading:
-                              Icon(Icons.check_circle, color: Colors.green),
-                          title: Text("Полный рефакторинг системы тем"),
-                          subtitle: Text(
-                              "Реализовано. Переписана логика наследования цветов для корректной работы Dark/Light Mode."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Полный рефакторинг системы тем"),
+                            subtitle: Text(
+                                "Реализовано. Переписана логика наследования цветов для Dark/Light Mode.")),
                         ListTile(
-                          leading:
-                              Icon(Icons.check_circle, color: Colors.green),
-                          title: Text(
-                              "Создание раздела 'Полезное' и наполнение статьями"),
-                          subtitle: Text(
-                              "Реализовано. Добавлены статьи по SEO и Flutter."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text(
+                                "Создание разделов 'Полезное', 'Портфолио', 'Инструменты'"),
+                            subtitle: Text(
+                                "Реализовано. Добавлены статьи и инструменты.")),
                         ListTile(
-                          leading:
-                              Icon(Icons.check_circle, color: Colors.green),
-                          title: Text(
-                              "Создание раздела 'Попробуй кодить' с интерактивными примерами кода"),
-                          subtitle: Text(
-                              "Реализовано. Добавлен раздел с песочницей html/css."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Интерактивная песочница HTML/CSS"),
+                            subtitle: Text(
+                                "Реализовано в разделе 'Попробуй кодить'.")),
                         ListTile(
-                          leading: Icon(Icons.school, color: Colors.blue),
-                          title: Text("Интерактивные курсы"),
-                          subtitle: Text(
-                              "В планах. Создание раздела с практическими курсами по SEO и разработке."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Аутентификация пользователей"),
+                            subtitle: Text(
+                                "Реализовано. Вход через Google и Email/пароль с помощью Firebase Auth.")),
                         ListTile(
-                          leading: Icon(Icons.people, color: Colors.blue),
-                          title: Text("Раздел 'Авторы'"),
-                          subtitle: Text(
-                              "В планах. Возможность публиковать статьи от других экспертов."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Система комментариев и реакций"),
+                            subtitle: Text(
+                                "Реализовано. Интеграция с Firestore для хранения данных.")),
                         ListTile(
-                          leading: Icon(Icons.language, color: Colors.blue),
-                          title: Text("Интернационализация (i18n)"),
-                          subtitle: Text(
-                              "В планах. Добавление переключателя языка (RU/EN) для всего интерфейса."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("SEO-пререндеринг (SSG)"),
+                            subtitle: Text(
+                                "Реализовано. Все страницы генерируют HTML-версии для поисковых роботов.")),
                         ListTile(
-                          leading: Icon(Icons.comment, color: Colors.orange),
-                          title: Text("Система комментариев для статей"),
-                          subtitle: Text(
-                              "В планах. Интеграция стороннего сервиса или своя реализация."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Инструмент 'SEO-анализатор'"),
+                            subtitle: Text(
+                                "Реализовано. Анализ текста на соответствие ТЗ с асинхронной обработкой.")),
                         ListTile(
-                          leading: Icon(Icons.search, color: Colors.orange),
-                          title: Text("Поиск по сайту"),
-                          subtitle: Text(
-                              "В планах. Реализация поиска по статьям блога и портфолио."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Инструмент 'Прогноз SEO-трафика'"),
+                            subtitle: Text(
+                                "Реализовано. С сохранением отчетов в личном кабинете.")),
                         ListTile(
-                          leading: Icon(Icons.construction, color: Colors.grey),
-                          title: Text("CI/CD и автоматическое развертывание"),
-                          subtitle: Text(
-                              "В планах. Настройка GitHub Actions для автоматической сборки и деплоя веб-версии."),
-                        ),
+                            leading:
+                                Icon(Icons.check_circle, color: Colors.green),
+                            title: Text("Игра 'Змейка'"),
+                            subtitle: Text(
+                                "Реализовано. Классическая змейка на Flutter с таблицей рекордов.")),
+                        ListTile(
+                            leading: Icon(Icons.analytics_outlined,
+                                color: Colors.orange),
+                            title:
+                                Text("Инструмент 'Прогноз очков' для Змейки"),
+                            subtitle: Text(
+                                "В планах. Создание модели для прогнозирования результатов игры.")),
+                        ListTile(
+                            leading: Icon(Icons.school, color: Colors.blue),
+                            title: Text("Интерактивные курсы"),
+                            subtitle: Text(
+                                "В планах. Создание раздела с практическими курсами по SEO и разработке.")),
+                        ListTile(
+                            leading: Icon(Icons.people, color: Colors.blue),
+                            title: Text("Раздел 'Авторы'"),
+                            subtitle: Text(
+                                "В планах. Возможность публиковать статьи от других экспертов.")),
+                        ListTile(
+                            leading: Icon(Icons.language, color: Colors.blue),
+                            title: Text("Интернационализация (i18n)"),
+                            subtitle: Text(
+                                "В планах. Добавление переключателя языка (RU/EN).")),
+                        ListTile(
+                            leading: Icon(Icons.search, color: Colors.orange),
+                            title: Text("Поиск по сайту"),
+                            subtitle: Text(
+                                "В планах. Реализация поиска по статьям блога и портфолио.")),
+                        ListTile(
+                            leading:
+                                Icon(Icons.construction, color: Colors.grey),
+                            title: Text("CI/CD и автоматическое развертывание"),
+                            subtitle: Text(
+                                "В планах. Настройка GitHub Actions для автоматической сборки и деплоя.")),
                       ],
                     ),
                   ),
@@ -138,6 +224,12 @@ class _TypographyPageState extends State<TypographyPage> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< ШАГ 5: Добавляем условную логику в метод build >>>
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
+
     final isMobile = MediaQuery.of(context).size.width < 800;
     final theme = Theme.of(context);
 
@@ -184,24 +276,21 @@ class _TypographyPageState extends State<TypographyPage> {
                             style: subtitleTextStyle(context),
                             children: [
                               const TextSpan(
-                                text:
-                                    "Это приложение, являющееся для меня некой песочницей для изучения технологий, написанное на ",
-                              ),
+                                  text:
+                                      "Это приложение, являющееся для меня некой песочницей для изучения технологий, написанное на "),
                               TextSpan(
                                 text: "Flutter",
                                 style: subtitleTextStyle(context).copyWith(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () => launchUrl(
                                       Uri.parse('https://docs.flutter.dev/')),
                               ),
                               const TextSpan(
-                                text:
-                                    ", демонстрирует возможности фреймворка и его адаптивность. Flutter - это кроссплатформенный фреймворк от Google, который позволяет создавать приложения для мобильных устройств, веба и десктопа с единой кодовой базой.\n\n"
-                                    "А также служит моим портфолио, блогом и приложением где я могу делиться полезным со своими подопечными. Здесь я делюсь результатами своей работы, пишу полезные статьи(кому-то надеюсь они окажутся полезными), а также своими путешествиями и фотографиями.",
-                              ),
+                                  text:
+                                      ", демонстрирует возможности фреймворка и его адаптивность. Flutter - это кроссплатформенный фреймворк от Google, который позволяет создавать приложения для мобильных устройств, веба и десктопа с единой кодовой базой.\n\n"
+                                      "А также служит моим портфолио, блогом и приложением где я могу делиться полезным со своими подопечными. Здесь я делюсь результатами своей работы, пишу полезные статьи(кому-то надеюсь они окажутся полезными), а также своими путешествиями и фотографиями."),
                             ],
                           ),
                         ),
@@ -289,17 +378,15 @@ class _TypographyPageState extends State<TypographyPage> {
                                   text: "Заказать такой же сайт можно у меня "),
                               TextSpan(
                                 text: "в личных сообщениях. ",
-                                style: subtitleTextStyle(context).copyWith(
-                                  fontWeight: FontWeight.w900,
-                                ),
+                                style: subtitleTextStyle(context)
+                                    .copyWith(fontWeight: FontWeight.w900),
                               ),
                               const TextSpan(text: "Вот тут находятся "),
                               TextSpan(
                                 text: "мои контакты",
                                 style: subtitleTextStyle(context).copyWith(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () => Navigator.pushNamed(
                                       context, '/${ContactsPage.name}'),
@@ -330,36 +417,32 @@ class _TypographyPageState extends State<TypographyPage> {
                             style: bodyTextStyle(context),
                             children: [
                               const TextSpan(
-                                text:
-                                    "Если вам понравился этот сайт или то, что я делаю - вы можете поддержать меня в моем телеграм канале ",
-                              ),
+                                  text:
+                                      "Если вам понравился этот сайт или то, что я делаю - вы можете поддержать меня в моем телеграм канале "),
                               TextSpan(
                                 text: "@shastovscky",
                                 style: bodyTextStyle(context).copyWith(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () => launchUrl(
                                       Uri.parse('https://t.me/shastovscky')),
                               ),
                               const TextSpan(
-                                text: " или подписаться на меня в инстаграм ",
-                              ),
+                                  text:
+                                      " или подписаться на меня в инстаграм "),
                               TextSpan(
                                 text: "@yellolwapple",
                                 style: bodyTextStyle(context).copyWith(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () => launchUrl(Uri.parse(
                                       'https://instagram.com/yellolwapple')),
                               ),
                               const TextSpan(
-                                text:
-                                    " в нем я делюсь фото и видео из своих поездок.",
-                              ),
+                                  text:
+                                      " в нем я делюсь фото и видео из своих поездок."),
                             ],
                           ),
                         ),

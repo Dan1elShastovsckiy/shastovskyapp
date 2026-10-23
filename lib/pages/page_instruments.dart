@@ -1,14 +1,14 @@
-// lib/pages/page_try_coding.dart
-
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
-import 'package:minimal/pages/pages_useful/page_seo_analyzer.dart';
-import 'package:minimal/pages/pages_useful/page_seo_analyzer_en.dart';
+import 'package:minimal/pages/pages_instruments/page_seo_forecast.dart';
+import 'package:minimal/pages/pages_instruments/page_seo_analyzer.dart';
+import 'package:minimal/pages/pages_instruments/page_seo_analyzer_en.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 import 'package:responsive_framework/responsive_framework.dart'
     hide MaxWidthBox;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:minimal/utils/meta_tag_service.dart';
+import 'package:minimal/components/semantic_widgets.dart';
 
 class InstrumentsPage extends StatefulWidget {
   static const String name = 'useful/instruments';
@@ -19,9 +19,18 @@ class InstrumentsPage extends StatefulWidget {
 }
 
 class _InstrumentsPageState extends State<InstrumentsPage> {
+  bool _isPrerendering = false;
+
   @override
   void initState() {
     super.initState();
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+
     MetaTagService().updateAllTags(
       title: "Полезные инструменты для SEO | Сайт Даниила Шастовского",
       description:
@@ -29,8 +38,50 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
     );
   }
 
+  Future<void> _launchURL() async {
+    final Uri url = Uri.parse('https://seocontrol.shastovsky.com/');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  Widget _buildPrerenderContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SemanticH1("Полезные инструменты для SEO"),
+        SemanticP("Полезные инструменты для вашей работы с SEO"),
+        SemanticH2("Анализатор текста SEO"),
+        SemanticP("Просто закиньте текст и ТЗ для анализа"),
+        SemanticA(
+            href: "/${SeoAnalyzerPage.name}",
+            text: "Перейти к Анализатору текста SEO"),
+        SemanticH2("SEO English Text Analyzer"),
+        SemanticP("Just drop in text and terms for analysis"),
+        SemanticA(
+            href: "/${SeoAnalyzerPageEn.name}",
+            text: "Go to SEO English Text Analyzer"),
+        SemanticH2("Прогноз SEO"),
+        SemanticP("Рассчитайте прогноз по трафику проекта в пару кликов"),
+        SemanticA(
+            href: "/${SeoForecastPage.name}", text: "Перейти к Прогнозу SEO"),
+        // Ссылка для бота на новый сервис
+        SemanticH2("SEO Control Panel"),
+        SemanticP("Автоматический мониторинг Яндекс и Google"),
+        SemanticA(
+            href: "https://seocontrol.shastovsky.com/",
+            text: "Перейти в SEO Control"),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
+
     final isMobile = ResponsiveBreakpoints.of(context).smallerThan(TABLET);
     final theme = Theme.of(context);
 
@@ -41,8 +92,6 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
         child: const MinimalMenuBar(),
       ),
       drawer: isMobile ? buildAppDrawer(context) : null,
-
-      // <<< ГЛАВНОЕ ИСПРАВЛЕНИЕ: ЗАМЕНА CustomScrollView НА SingleChildScrollView >>>
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -64,6 +113,7 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
                     style: subtitleTextStyle(context),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 40),
+
                 _buildCategoryButton(
                     context: context,
                     icon: Icons.web,
@@ -71,28 +121,92 @@ class _InstrumentsPageState extends State<InstrumentsPage> {
                     subtitle: "Просто закиньте текст и ТЗ для анализа",
                     routeName: '/${SeoAnalyzerPage.name}'),
                 const SizedBox(height: 24),
+
                 _buildCategoryButton(
                     context: context,
-                    icon: Icons.web,
+                    icon: Icons.toc,
                     title: "SEO English Text Analyzer",
                     subtitle: "Just drop in text and terms for analysis",
                     routeName: '/${SeoAnalyzerPageEn.name}'),
                 const SizedBox(height: 24),
-                _buildCategoryButton(
-                  context: context,
-                  icon: Icons.link,
-                  title: "Проверка внешних ссылок",
-                  subtitle: "Скоро...",
-                  routeName: null,
+
+                // <<< ЗАМЕНЕНА ЗАГЛУШКИ НА СИНЮЮ КНОПКУ >>>
+                InkWell(
+                  onTap: _launchURL,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 40),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.auto_graph_rounded,
+                              size: 48, color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "SEO Control Panel",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize:
+                                24, // Размер как в headlineSecondaryTextStyle
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Manrope', // Ваш шрифт заголовков
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Автоматический мониторинг Яндекс и Google",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.open_in_new,
+                                color: Colors.white70, size: 16),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
+
                 _buildCategoryButton(
-                  context: context,
-                  icon: Icons.search,
-                  title: "Генератор семантического ядра",
-                  subtitle: "Скоро...",
-                  routeName: null,
-                ),
+                    context: context,
+                    icon: Icons.trending_up,
+                    title: "Прогноз SEO",
+                    subtitle:
+                        "Рассчитайте прогноз по трафику проекта в пару кликов",
+                    routeName: '/${SeoForecastPage.name}'),
+
                 const SizedBox(height: 80),
                 Container(
                   margin: const EdgeInsets.only(bottom: 40),

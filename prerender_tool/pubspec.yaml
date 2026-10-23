@@ -1,0 +1,8 @@
+name: prerender_tool
+description: A script to prerender Flutter web app pages.
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+
+dependencies:
+  puppeteer: ^3.20.0 # Библиотека для управления браузером Chromium
+  path: ^1.9.0

@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:minimal/components/components.dart';
-import 'package:minimal/pages/page_georgia_post.dart'; // <<< 1. ИМПОРТ НОВОЙ СТРАНИЦЫ
-import 'package:minimal/pages/page_post.dart';
+import 'package:minimal/components/semantic_widgets.dart'; // <<< ИМПОРТ СЕМАНТИКИ
+import 'package:minimal/pages/travel_posts/page_sri_lanka_post.dart';
+import 'package:minimal/pages/travel_posts/page_georgia_post.dart';
+import 'package:minimal/pages/travel_posts/page_jordan_post.dart';
+import 'package:minimal/pages/travel_posts/page_post.dart';
 import 'package:minimal/pages/page_under_construction.dart';
 import 'package:minimal/utils/max_width_extension.dart';
 
 // Константы для постов
+const String srilankaTitle =
+    "ШРИ-ЛАНКА. От серф-провала до горных вершин Цейлона";
+const String srilankaDescription =
+    "6 месяцев жизни на острове. Вся правда о быте, ценах, серфинге, невероятных закатах и почему здесь нет доставки еды. Честный гайд […]";
+const String jordanTitle = "ИОРДАНИЯ. От Мертвого моря до песков Арракиса";
+const String jordanDescription =
+    "Честный гид по стране, недооцененной российскими туристами. Цены, отели, Jordan Pass, аренда авто и, конечно, запах ослов в Петре […]";
 const String moroccoTitle =
     "МАРОККО: Заблудиться, чтобы найти себя в сердце пустоты";
 const String moroccoDescription =
@@ -50,17 +60,33 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   final ScrollController _scrollController = ScrollController();
+  // <<< ФЛАГ РЕНДЕРИНГА >>>
+  bool _isPrerendering = false;
 
   final List<String> _pageImages = [
+    "assets/images/sri_banner.webp",
+    "assets/images/jordan/jordan-banner.webp",
     "assets/images/me_sachara_desert.webp",
-    "assets/images/georgia_mountains.webp", // <-- Картинка для Грузии (остается)
+    "assets/images/georgia_mountains.webp",
     "assets/images/kuala_lumpur.webp",
     "assets/images/abu_dhabi.webp",
     "assets/images/me_istambul.webp",
     "assets/images/vietnam_beach.webp",
     "assets/images/me_similan_island_colored.webp",
-    "assets/images/me_georgia_mountains 2.webp",
+    "assets/images/me_georgia_mountains_2.webp",
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // <<< ПРОВЕРКА URL >>>
+    final uri = Uri.base;
+    if (uri.queryParameters['prerender'] == 'true') {
+      setState(() {
+        _isPrerendering = true;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -76,11 +102,104 @@ class _ListPageState extends State<ListPage> {
     super.dispose();
   }
 
+  // <<< БЛОК СЕМАНТИКИ ДЛЯ БОТОВ >>>
+  Widget _buildPrerenderContent() {
+    const String baseUrl = "https://shastovsky.com";
+    String underConstructionUrl(String title) => Uri(
+          scheme: 'https',
+          host: 'shastovsky.com',
+          path: '/${PageUnderConstruction.name}',
+          queryParameters: {'title': title},
+        ).toString();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // H1 и Описание
+        const SemanticH1(
+            "Блог Даниила Шастовского: Путешествия, SEO и Разработка"),
+        const SemanticP(
+            "Привет! Я Даниил. Это мой блог о жизни в разных точках мира, работе в SEO и разработке на Flutter."),
+
+        // Меню (Абсолютные ссылки)
+        const SemanticH2("Разделы сайта"),
+        SemanticLink(text: "Обо мне", href: "$baseUrl/about"),
+        SemanticLink(text: "Полезное", href: "$baseUrl/useful"),
+        SemanticLink(text: "Проекты (Портфолио)", href: "$baseUrl/portfolio"),
+        SemanticLink(text: "Контакты", href: "$baseUrl/contacts"),
+        SemanticLink(text: "О сайте (PWA)", href: "$baseUrl/about-app"),
+
+        // Статьи
+        const SemanticH2("Истории из путешествий"),
+
+        SemanticH3(srilankaTitle),
+        const SemanticP(srilankaDescription),
+        SemanticLink(text: "Читать статью", href: "$baseUrl/sri-lanka"),
+
+        SemanticH3(jordanTitle),
+        const SemanticP(jordanDescription),
+        SemanticLink(text: "Читать статью", href: "$baseUrl/jordan"),
+
+        SemanticH3(moroccoTitle),
+        const SemanticP(moroccoDescription),
+        SemanticLink(text: "Читать статью", href: "$baseUrl/marocco"),
+
+        SemanticH3(georgiaMountains1Title),
+        const SemanticP(georgiaMountains1Description),
+        SemanticLink(text: "Читать статью", href: "$baseUrl/georgia-part1"),
+
+        SemanticH3(georgiaMountains2Title),
+        const SemanticP(georgiaMountains2Description),
+        SemanticLink(
+            text: "Читать статью",
+            href: underConstructionUrl(georgiaMountains2Title)),
+
+        SemanticH3(phuketTitle),
+        const SemanticP(phuketDescription),
+        SemanticLink(
+            text: "Читать статью", href: underConstructionUrl(phuketTitle)),
+
+        SemanticH3(vietnamTitle),
+        const SemanticP(vietnamDescription),
+        SemanticLink(
+            text: "Читать статью", href: underConstructionUrl(vietnamTitle)),
+
+        SemanticH3(malaysiaTitle),
+        const SemanticP(malaysiaDescription),
+        SemanticLink(
+            text: "Читать статью", href: underConstructionUrl(malaysiaTitle)),
+
+        SemanticH3(dubaiTitle),
+        const SemanticP(dubaiDescription),
+        SemanticLink(
+            text: "Читать статью", href: underConstructionUrl(dubaiTitle)),
+
+        SemanticH3(turkeyTitle),
+        const SemanticP(turkeyDescription),
+        SemanticLink(
+            text: "Читать статью", href: underConstructionUrl(turkeyTitle)),
+
+        // Футер
+        const SemanticH2("Другое"),
+        SemanticLink(text: "Игра FlutterSnake", href: "$baseUrl/fluttersnake"),
+        SemanticLink(
+            text: "Игра Wordle", href: "https://wordle.shastovsky.com/"),
+        SemanticLink(text: "Правовая информация", href: "$baseUrl/copyright"),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 800;
-    final theme = Theme.of(context);
+    // <<< УСЛОВНЫЙ РЕНДЕРИНГ >>>
+    if (_isPrerendering) {
+      return Material(
+          child: SingleChildScrollView(child: _buildPrerenderContent()));
+    }
 
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
+    // --- ВАШ ОРИГИНАЛЬНЫЙ КОД БЕЗ ИЗМЕНЕНИЙ ---
     return Scaffold(
         drawer: isMobile ? buildAppDrawer(context) : null,
         //backgroundColor: const Color.fromARGB(255, 255, 255, 255),// Убираем, чтобы использовать тему
@@ -127,6 +246,26 @@ class _ListPageState extends State<ListPage> {
             ),
             SliverList.list(
               children: [
+                // <<< НОВЫЙ ПОСТ: ШРИ-ЛАНКА >>>
+                ListItem(
+                  imageUrl: "assets/images/sri_banner_thumb.webp",
+                  title: srilankaTitle,
+                  description:
+                      Text(srilankaDescription, style: bodyTextStyle(context)),
+                  onReadMore: () =>
+                      Navigator.pushNamed(context, '/${PostSriLankaPage.name}'),
+                ),
+                divider(context),
+                // Иордания
+                ListItem(
+                  imageUrl: "assets/images/jordan/jordan-banner.webp",
+                  title: jordanTitle,
+                  description:
+                      Text(jordanDescription, style: bodyTextStyle(context)),
+                  onReadMore: () =>
+                      Navigator.pushNamed(context, '/${PostJordanPage.name}'),
+                ),
+                divider(context),
                 // Марокко
                 ListItem(
                   imageUrl: "assets/images/me_sachara_desert.webp",
@@ -241,7 +380,7 @@ class _ListPageState extends State<ListPage> {
 
                 // Грузия 2 (заглушка)
                 ListItem(
-                  imageUrl: "assets/images/me_georgia_mountains 2.webp",
+                  imageUrl: "assets/images/me_georgia_mountains_2.webp",
                   title: georgiaMountains2Title,
                   description: Text(georgiaMountains2Description,
                       style: bodyTextStyle(context)),

@@ -27,6 +27,10 @@ class _ServiceCardState extends State<ServiceCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final logoPath = widget.service.logoPath;
+    final fallbackLogo = Center(
+      child: Icon(Icons.public, size: 40, color: theme.colorScheme.secondary),
+    );
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -65,12 +69,13 @@ class _ServiceCardState extends State<ServiceCard> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  widget.service.logoPath,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Center(child: Icon(Icons.broken_image, size: 40)),
-                ),
+                child: logoPath.isEmpty
+                    ? fallbackLogo
+                    : Image.asset(
+                        logoPath,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => fallbackLogo,
+                      ),
               ),
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),
