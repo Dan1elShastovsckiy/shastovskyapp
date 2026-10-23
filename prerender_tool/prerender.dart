@@ -96,7 +96,13 @@ Future<void> main() async {
           wait: Until.domContentLoaded);
 
       print('Ждем семантический контент страницы...');
-      final prerenderedHtml = await _waitForPrerenderedHtml(page);
+      final requiredHtml = route == '/georgia-part1'
+          ? 'href="https://pactors.io/countries/georgia"'
+          : null;
+      final prerenderedHtml = await _waitForPrerenderedHtml(
+        page,
+        requiredHtml: requiredHtml,
+      );
       final pageMetadataJson =
           await page.evaluate<String>(r'''() => JSON.stringify({
         title: document.title,
@@ -180,7 +186,10 @@ Future<void> main() async {
   }
 }
 
-Future<String> _waitForPrerenderedHtml(Page page) async {
+Future<String> _waitForPrerenderedHtml(
+  Page page, {
+  String? requiredHtml,
+}) async {
   final deadline = DateTime.now().add(const Duration(seconds: 20));
   String? previousHtml;
   var stableChecks = 0;
@@ -191,7 +200,8 @@ Future<String> _waitForPrerenderedHtml(Page page) async {
       return container ? container.innerHTML : '';
     }''');
 
-    if (html.trim().isNotEmpty) {
+    if (html.trim().isNotEmpty &&
+        (requiredHtml == null || html.contains(requiredHtml))) {
       if (html == previousHtml) {
         stableChecks++;
         if (stableChecks >= 2) return html;
@@ -204,6 +214,11 @@ Future<String> _waitForPrerenderedHtml(Page page) async {
     await Future.delayed(const Duration(milliseconds: 300));
   }
 
+  if (requiredHtml != null) {
+    throw StateError(
+      'В семантическом HTML не появился обязательный фрагмент: $requiredHtml',
+    );
+  }
   throw StateError('Семантический контент страницы не появился за 20 секунд.');
 }
 

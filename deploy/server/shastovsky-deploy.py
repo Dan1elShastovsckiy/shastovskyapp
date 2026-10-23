@@ -402,6 +402,11 @@ def validate_manifest_files(files: object) -> dict[str, str]:
     return result
 
 
+def hardlink_file(source: str | os.PathLike[str], destination: str | os.PathLike[str]) -> str:
+    os.link(source, destination)
+    return os.fspath(destination)
+
+
 def deploy_delta(stream=None) -> None:
     if os.geteuid() != 0:
         raise DeployError("The receiver must run as root")
@@ -458,7 +463,9 @@ def deploy_delta(stream=None) -> None:
         validate_server_data(old_release)
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         candidate = RELEASES / f"release-{timestamp}-{os.getpid()}"
-        shutil.copytree(old_release, candidate, copy_function=shutil.copy2)
+        # Releases live on the same filesystem. Hard links make the candidate
+        # cheap to create; changed paths are unlinked before replacement below.
+        shutil.copytree(old_release, candidate, copy_function=hardlink_file)
 
         for name in old_files.keys() - expected_files.keys():
             target = candidate.joinpath(*PurePosixPath(name).parts)
