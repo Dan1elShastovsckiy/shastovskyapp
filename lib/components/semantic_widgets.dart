@@ -3,12 +3,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:web/web.dart' as web;
-import 'dart:js_interop';
-
-// <<< КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Глобальный флаг для ОДНОРАЗОВОЙ очистки >>>
-// Он будет сбрасываться при каждом hot restart в debug режиме,
-// и будет работать корректно для каждой страницы в prerender.dart
-bool _isContainerCleaned = false;
 
 abstract class SemanticWidget extends StatefulWidget {
   final String tag;
@@ -35,18 +29,9 @@ abstract class _SemanticWidgetState<T extends SemanticWidget> extends State<T> {
         final container = web.document.getElementById('prerender-container');
         if (container == null) return;
 
-        // <<< КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Логика очистки >>>
-        // Если это первый SemanticWidget, который рендерится на странице, он очищает контейнер.
-        if (!_isContainerCleaned) {
-          container.innerHTML = ''.toJS;
-          _isContainerCleaned = true;
-
-          // Сбрасываем флаг в следующем микротаске, чтобы он был готов для следующей страницы
-          Future.microtask(() => _isContainerCleaned = false);
-        }
-
-        // <<< КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Прямое добавление в DOM >>>
-        // Мы создаем HTML-элемент и просто добавляем его в наш контейнер.
+        // Каждый маршрут пререндерится в новом BrowserContext с пустым контейнером.
+        // Не очищаем его из callback виджета: более поздний кадр иначе мог бы
+        // удалить уже добавленные семантические элементы, включая ссылки внизу статьи.
         final element = web.document.createElement(widget.tag);
         element.textContent = widget.text;
         widget.attributes.forEach((key, value) {
@@ -119,12 +104,6 @@ class _SemanticLinkedParagraphState
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final container = web.document.getElementById('prerender-container');
         if (container == null) return;
-
-        if (!_isContainerCleaned) {
-          container.innerHTML = ''.toJS;
-          _isContainerCleaned = true;
-          Future.microtask(() => _isContainerCleaned = false);
-        }
 
         final paragraph = web.document.createElement('p');
         paragraph.append(web.document.createTextNode(widget.prefix));
