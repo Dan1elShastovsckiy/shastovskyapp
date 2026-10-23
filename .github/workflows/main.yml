@@ -43,6 +43,8 @@ jobs:
 
       - name: Prerender public pages
         working-directory: prerender_tool
+        env:
+          CHROME_FORCE_NO_SANDBOX: 'true'
         run: dart run prerender.dart
 
       - name: Upload build artifact
