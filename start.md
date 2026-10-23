@@ -17,6 +17,7 @@
 | Общие компоненты и стили | `lib/components/`, `lib/ui/`, `lib/utils/` |
 | HTML, метаданные и SEO | `web/index.html` |
 | Предварительный рендер маршрутов | `prerender_tool/` |
+| CI и production-деплой | `.github/workflows/main.yml`, `deploy/` |
 
 ## Проверка и сборка
 

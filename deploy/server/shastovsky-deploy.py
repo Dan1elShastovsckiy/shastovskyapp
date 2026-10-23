@@ -12,10 +12,8 @@ import tarfile
 import tempfile
 import fcntl
 import stat
-import urllib.error
-import urllib.parse
-import urllib.request
-import zipfile
+import hashlib
+import json
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
@@ -27,11 +25,9 @@ PREVIOUS = SITE_ROOT / ".previous"
 LOCK_FILE = Path("/run/lock/shastovsky-deploy.lock")
 MAX_FILES = 100_000
 MAX_UNPACKED_BYTES = 2 * 1024 * 1024 * 1024
-MAX_ARTIFACT_BYTES = 1024 * 1024 * 1024
-MAX_ARTIFACT_URL_BYTES = 16 * 1024
 VERIFICATION_FILE = re.compile(r"^(?:google|yandex)[A-Za-z0-9_-]+\.html$", re.I)
 SERVER_FILES = {"robots.txt", "sitemap.xml"}
-ARTIFACT_FILENAME = "website.tar.gz"
+MANIFEST_FILENAME = ".shastovsky-manifest.json"
 
 
 class DeployError(RuntimeError):
@@ -135,6 +131,48 @@ def extract_build(stream, destination: Path) -> None:
             os.chmod(target, 0o644)
 
 
+def is_server_managed_path(relative: PurePosixPath) -> bool:
+    if relative.parts and relative.parts[0] == "uploads":
+        return True
+    return len(relative.parts) == 1 and (
+        relative.name in SERVER_FILES or VERIFICATION_FILE.fullmatch(relative.name) is not None
+    )
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        while chunk := source.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def collect_build_manifest(root: Path) -> dict[str, str]:
+    validate_server_data(root)
+    result: dict[str, str] = {}
+    for current_root, directories, files in os.walk(root, followlinks=False):
+        current = Path(current_root)
+        relative_dir = PurePosixPath(current.relative_to(root).as_posix())
+        if relative_dir.parts and relative_dir.parts[0] == "uploads":
+            directories[:] = []
+            continue
+        for name in files:
+            path = current / name
+            relative = PurePosixPath(path.relative_to(root).as_posix())
+            if is_server_managed_path(relative):
+                continue
+            result[relative.as_posix()] = sha256_file(path)
+    return result
+
+
+def manifest() -> None:
+    if os.geteuid() != 0:
+        raise DeployError("The receiver must run as root")
+    current = read_current()
+    result = {"version": 1, "files": collect_build_manifest(current)}
+    print(json.dumps(result, sort_keys=True, separators=(",", ":")), flush=True)
+
+
 def validate_server_data(source: Path) -> None:
     for root, directories, files in os.walk(source, followlinks=False):
         for name in directories + files:
@@ -174,6 +212,21 @@ def copy_server_managed_data(old_release: Path, candidate: Path) -> None:
         shutil.copytree(uploads, destination, copy_function=shutil.copy2)
 
 
+def refresh_server_managed_data(old_release: Path, candidate: Path) -> None:
+    """Refresh mutable server-owned files immediately before release activation."""
+    for name in SERVER_FILES:
+        (candidate / name).unlink(missing_ok=True)
+    for path in candidate.iterdir():
+        if VERIFICATION_FILE.fullmatch(path.name):
+            path.unlink()
+    uploads = candidate / "uploads"
+    if uploads.is_dir() and not uploads.is_symlink():
+        shutil.rmtree(uploads)
+    elif uploads.exists() or uploads.is_symlink():
+        uploads.unlink()
+    copy_server_managed_data(old_release, candidate)
+
+
 def validate_build(build: Path) -> None:
     required = (
         build / "index.html",
@@ -186,8 +239,13 @@ def validate_build(build: Path) -> None:
     if missing:
         raise DeployError("Required build files are missing: " + ", ".join(missing))
 
-    php_files = [str(path.relative_to(build)) for path in build.rglob("*")
-                 if path.is_file() and re.search(r"\.php(?:$|\.)", path.name, re.I)]
+    php_files = [
+        str(path.relative_to(build))
+        for path in build.rglob("*")
+        if path.is_file()
+        and not is_server_managed_path(PurePosixPath(path.relative_to(build).as_posix()))
+        and re.search(r"\.php(?:$|\.)", path.name, re.I)
+    ]
     if php_files:
         raise DeployError("Refusing to publish PHP files: " + ", ".join(php_files[:10]))
 
@@ -314,115 +372,147 @@ def deploy(stream=None) -> None:
             shutil.rmtree(candidate, ignore_errors=True)
 
 
-def validate_artifact_url(url: str) -> None:
-    if len(url.encode("utf-8")) > MAX_ARTIFACT_URL_BYTES:
-        raise DeployError("The artifact URL is too long")
-    if not url or any(ord(char) < 0x21 or ord(char) > 0x7E for char in url):
-        raise DeployError("The artifact URL contains invalid characters")
-    parsed = urllib.parse.urlsplit(url)
-    hostname = (parsed.hostname or "").lower()
-    if (
-        parsed.scheme != "https"
-        or not hostname.endswith(".blob.core.windows.net")
-        or parsed.username is not None
-        or parsed.password is not None
-        or parsed.port is not None
-        or not parsed.path
-        or not parsed.query
-        or parsed.fragment
-    ):
-        raise DeployError("The artifact URL is not a valid HTTPS GitHub artifact URL")
+def validate_manifest_files(files: object) -> dict[str, str]:
+    if not isinstance(files, dict) or len(files) > MAX_FILES:
+        raise DeployError("The deployment manifest has an invalid file list")
 
-
-def download_artifact(url: str, destination) -> None:
-    validate_artifact_url(url)
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "shastovsky-deploy/1.0"},
-    )
-
-    class NoRedirect(urllib.request.HTTPRedirectHandler):
-        def redirect_request(self, req, fp, code, msg, headers, newurl):
-            return None
-
-    opener = urllib.request.build_opener(NoRedirect)
-    try:
-        response = opener.open(request, timeout=60)
-    except (OSError, urllib.error.URLError) as error:
-        raise DeployError("Could not download the GitHub Actions artifact") from error
-
-    with response:
-        final_url = urllib.parse.urlsplit(response.geturl())
+    result: dict[str, str] = {}
+    for name, digest in files.items():
+        if not isinstance(name, str) or not isinstance(digest, str):
+            raise DeployError("The deployment manifest contains an invalid entry")
+        relative = PurePosixPath(name)
         if (
-            response.status != 200
-            or final_url.scheme != "https"
-            or final_url.hostname != urllib.parse.urlsplit(url).hostname
+            not name
+            or relative.is_absolute()
+            or relative.as_posix() != name
+            or "\\" in name
+            or any(part in ("..", "") for part in relative.parts)
+            or name == MANIFEST_FILENAME
+            or is_server_managed_path(relative)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
         ):
-            raise DeployError("The artifact download returned an unexpected response")
+            raise DeployError(f"Invalid deployment manifest path or digest: {name!r}")
+        result[name] = digest
 
-        content_length = response.headers.get("Content-Length")
-        if content_length is not None:
-            try:
-                expected_size = int(content_length)
-            except ValueError as error:
-                raise DeployError("The artifact download has an invalid content length") from error
-            if expected_size < 1 or expected_size > MAX_ARTIFACT_BYTES:
-                raise DeployError("The artifact download size is outside the allowed limit")
-        else:
-            expected_size = None
-
-        received = 0
-        while True:
-            chunk = response.read(1024 * 1024)
-            if not chunk:
-                break
-            received += len(chunk)
-            if received > MAX_ARTIFACT_BYTES:
-                raise DeployError("The artifact download exceeds the 1 GiB limit")
-            destination.write(chunk)
-
-        if received == 0 or (expected_size is not None and received != expected_size):
-            raise DeployError("The artifact download was incomplete")
+    names = set(result)
+    for name in names:
+        for parent in PurePosixPath(name).parents:
+            if parent != PurePosixPath(".") and parent.as_posix() in names:
+                raise DeployError("The deployment manifest has conflicting file paths")
+    return result
 
 
-def deploy_artifact_url() -> None:
+def deploy_delta(stream=None) -> None:
     if os.geteuid() != 0:
         raise DeployError("The receiver must run as root")
-    raw_url = sys.stdin.buffer.readline(MAX_ARTIFACT_URL_BYTES + 1)
-    if len(raw_url) > MAX_ARTIFACT_URL_BYTES or not raw_url.endswith(b"\n"):
-        raise DeployError("A single artifact URL line is required")
+    if stream is None:
+        stream = sys.stdin.buffer
+
+    old_release = read_current()
+    old_previous = read_previous()
+    stage = Path(tempfile.mkdtemp(prefix=".incoming-", dir=SITE_ROOT))
+    candidate: Path | None = None
+
     try:
-        url = raw_url[:-1].decode("ascii")
-    except UnicodeDecodeError as error:
-        raise DeployError("The artifact URL is not valid ASCII") from error
-    if sys.stdin.buffer.read(1):
-        raise DeployError("Unexpected data after the artifact URL")
+        delta = stage / "delta"
+        delta.mkdir(mode=0o755)
+        extract_build(stream, delta)
 
-    with tempfile.TemporaryFile(prefix="shastovsky-artifact-", suffix=".zip", dir="/tmp") as zip_file:
-        download_artifact(url, zip_file)
-        zip_file.seek(0)
+        manifest_path = delta / MANIFEST_FILENAME
+        if not manifest_path.is_file() or manifest_path.stat().st_size > 32 * 1024 * 1024:
+            raise DeployError("The deployment archive has no valid manifest")
+        try:
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise DeployError("The deployment manifest is not valid JSON") from error
+        if (
+            not isinstance(payload, dict)
+            or type(payload.get("version")) is not int
+            or payload["version"] != 1
+        ):
+            raise DeployError("Unsupported deployment manifest version")
+        expected_files = validate_manifest_files(payload.get("files"))
 
-        with zipfile.ZipFile(zip_file) as artifact:
-            entries = artifact.infolist()
-            if len(entries) != 1:
-                raise DeployError("The GitHub artifact must contain exactly one file")
-            entry = entries[0]
-            mode = (entry.external_attr >> 16) & 0o170000
-            if (
-                entry.filename != ARTIFACT_FILENAME
-                or entry.is_dir()
-                or mode not in (0, stat.S_IFREG)
-                or entry.file_size < 1
-                or entry.file_size > MAX_ARTIFACT_BYTES
-            ):
-                raise DeployError("The GitHub artifact does not contain the expected site archive")
+        staged_files: dict[str, Path] = {}
+        for path in delta.rglob("*"):
+            if path.is_symlink():
+                raise DeployError(f"Unsupported delta entry: {path.relative_to(delta)}")
+            if not path.is_file():
+                continue
+            relative = path.relative_to(delta).as_posix()
+            if relative == MANIFEST_FILENAME:
+                continue
+            if relative not in expected_files:
+                raise DeployError(f"The delta contains an unlisted file: {relative}")
+            if sha256_file(path) != expected_files[relative]:
+                raise DeployError(f"The delta file failed its hash check: {relative}")
+            staged_files[relative] = path
 
-            with artifact.open(entry) as source, tempfile.TemporaryFile(
-                prefix="shastovsky-site-", suffix=".tar.gz", dir="/tmp"
-            ) as site_archive:
-                shutil.copyfileobj(source, site_archive, length=1024 * 1024)
-                site_archive.seek(0)
-                deploy(site_archive)
+        old_files = collect_build_manifest(old_release)
+        for name, digest in expected_files.items():
+            if name in staged_files:
+                continue
+            if old_files.get(name) != digest:
+                raise DeployError(f"The delta is missing a changed file: {name}")
+
+        validate_server_data(old_release)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        candidate = RELEASES / f"release-{timestamp}-{os.getpid()}"
+        shutil.copytree(old_release, candidate, copy_function=shutil.copy2)
+
+        for name in old_files.keys() - expected_files.keys():
+            target = candidate.joinpath(*PurePosixPath(name).parts)
+            if not target.is_file() or target.is_symlink():
+                raise DeployError(f"The active release has an unexpected file: {name}")
+            target.unlink()
+
+        for root, directories, _ in os.walk(candidate, topdown=False):
+            for name in directories:
+                directory = Path(root) / name
+                relative = PurePosixPath(directory.relative_to(candidate).as_posix())
+                if is_server_managed_path(relative):
+                    continue
+                try:
+                    directory.rmdir()
+                except OSError:
+                    pass
+
+        for name, source in staged_files.items():
+            target = candidate.joinpath(*PurePosixPath(name).parts)
+            if target.is_dir() and not target.is_symlink():
+                shutil.rmtree(target)
+            else:
+                target.unlink(missing_ok=True)
+            target.parent.mkdir(parents=True, exist_ok=True, mode=0o755)
+            shutil.copy2(source, target)
+            os.chmod(target, 0o644)
+
+        validate_build(candidate)
+        refresh_server_managed_data(old_release, candidate)
+        uploads = candidate / "uploads"
+        if uploads.is_dir():
+            shutil.chown(uploads, user="www-data", group="www-data")
+            for root, directories, files in os.walk(uploads):
+                for name in directories + files:
+                    shutil.chown(Path(root) / name, user="www-data", group="www-data")
+        write_previous(old_release)
+        set_current(candidate)
+        try:
+            smoke_test()
+        except Exception:
+            set_current(old_release)
+            if old_previous:
+                write_previous(old_previous)
+            else:
+                PREVIOUS.unlink(missing_ok=True)
+            raise
+
+        cleanup_releases(candidate, old_release)
+        log(f"activated {candidate.name}; previous release is {old_release.name}")
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
+        if candidate and candidate.exists() and CURRENT.resolve() != candidate.resolve():
+            shutil.rmtree(candidate, ignore_errors=True)
 
 
 def rollback() -> None:
@@ -460,10 +550,15 @@ def main() -> int:
         requested = os.environ.get("SSH_ORIGINAL_COMMAND", "")
         if requested == "deploy":
             os.execv("/usr/bin/sudo", ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy"])
-        if requested == "deploy-url":
+        if requested == "deploy-delta":
             os.execv(
                 "/usr/bin/sudo",
-                ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy", "--deploy-url"],
+                ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy", "--deploy-delta"],
+            )
+        if requested == "manifest":
+            os.execv(
+                "/usr/bin/sudo",
+                ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy", "--manifest"],
             )
         if requested == "rollback":
             os.execv(
@@ -475,15 +570,17 @@ def main() -> int:
                 "/usr/bin/sudo",
                 ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy", "--status"],
             )
-        log("only deploy, deploy-url, rollback and status commands are allowed")
+        log("only deploy, deploy-delta, manifest, rollback and status commands are allowed")
         return 64
 
     if sys.argv[1:] == []:
         operation = deploy
     elif sys.argv[1:] == ["--rollback"]:
         operation = rollback
-    elif sys.argv[1:] == ["--deploy-url"]:
-        operation = deploy_artifact_url
+    elif sys.argv[1:] == ["--deploy-delta"]:
+        operation = deploy_delta
+    elif sys.argv[1:] == ["--manifest"]:
+        operation = manifest
     elif sys.argv[1:] == ["--status"]:
         operation = status
     else:

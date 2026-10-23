@@ -15,8 +15,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      artifact_id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - name: Check out source
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -53,7 +51,6 @@ jobs:
         run: tar -C build/web -czf "$RUNNER_TEMP/website.tar.gz" .
 
       - name: Upload build artifact
-        id: upload
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: website
@@ -88,42 +85,58 @@ jobs:
           chmod 600 "$HOME/.ssh/known_hosts"
           ssh-keygen -F "$DEPLOY_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null
 
-      - name: Deploy release
-        id: deploy
+      - name: Check out deployment scripts
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download build artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: website
+          path: ${{ runner.temp }}/website-artifact
+
+      - name: Unpack build artifact
+        run: |
+          set -euo pipefail
+          mkdir -p build/web
+          tar -xzf "$RUNNER_TEMP/website-artifact/website.tar.gz" -C build/web
+
+      - name: Read active production manifest
         env:
           DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
           DEPLOY_USER: ${{ vars.DEPLOY_USER }}
-          ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if [[ "$DEPLOY_USER" != "shastovsky-deploy" ]]; then
             echo "DEPLOY_USER must be shastovsky-deploy." >&2
             exit 1
           fi
-          if [[ ! "$ARTIFACT_ID" =~ ^[0-9]+$ ]]; then
-            echo "The build job did not provide a valid artifact ID." >&2
-            exit 1
-          fi
-          headers="$RUNNER_TEMP/artifact-headers.txt"
-          curl --fail --silent --show-error --dump-header "$headers" --output /dev/null \
-            --max-time 30 \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GITHUB_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip"
-          artifact_url="$(awk 'tolower($1) == "location:" { sub(/\r$/, "", $2); print $2 }' "$headers")"
-          artifact_host="${artifact_url#https://}"
-          artifact_host="${artifact_host%%/*}"
-          if [[ "$artifact_url" != https://* || "$artifact_host" != *.blob.core.windows.net || "$artifact_url" == "$artifact_host" || ${#artifact_url} -gt 16384 ]]; then
-            echo "GitHub did not return an allowed artifact download URL." >&2
-            exit 1
-          fi
-          echo "::add-mask::$artifact_url"
-          printf '%s\n' "$artifact_url" | ssh -T -i "$HOME/.ssh/shastovsky_deploy_key" \
+          ssh -T -i "$HOME/.ssh/shastovsky_deploy_key" \
             -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
-            "$DEPLOY_USER@$DEPLOY_HOST" deploy-url
+            "$DEPLOY_USER@$DEPLOY_HOST" manifest > "$RUNNER_TEMP/production-manifest.json"
+
+      - name: Deploy release
+        id: deploy
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          if [[ "$DEPLOY_USER" != "shastovsky-deploy" ]]; then
+            echo "DEPLOY_USER must be shastovsky-deploy." >&2
+            exit 1
+          fi
+          python3 deploy/create_delta.py \
+            --source build/web \
+            --baseline "$RUNNER_TEMP/production-manifest.json" \
+            --output "$RUNNER_TEMP/shastovsky-delta.tar.gz"
+          ssh -T -i "$HOME/.ssh/shastovsky_deploy_key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
+            "$DEPLOY_USER@$DEPLOY_HOST" deploy-delta \
+            < "$RUNNER_TEMP/shastovsky-delta.tar.gz"
 
       - name: Check the published site
         id: smoke
