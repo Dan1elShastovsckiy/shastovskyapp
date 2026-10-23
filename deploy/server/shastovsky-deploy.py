@@ -12,6 +12,10 @@ import tarfile
 import tempfile
 import fcntl
 import stat
+import urllib.error
+import urllib.parse
+import urllib.request
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
@@ -23,8 +27,11 @@ PREVIOUS = SITE_ROOT / ".previous"
 LOCK_FILE = Path("/run/lock/shastovsky-deploy.lock")
 MAX_FILES = 100_000
 MAX_UNPACKED_BYTES = 2 * 1024 * 1024 * 1024
+MAX_ARTIFACT_BYTES = 1024 * 1024 * 1024
+MAX_ARTIFACT_URL_BYTES = 16 * 1024
 VERIFICATION_FILE = re.compile(r"^(?:google|yandex)[A-Za-z0-9_-]+\.html$", re.I)
 SERVER_FILES = {"robots.txt", "sitemap.xml"}
+ARTIFACT_FILENAME = "website.tar.gz"
 
 
 class DeployError(RuntimeError):
@@ -254,9 +261,11 @@ def cleanup_releases(current: Path, previous: Path) -> None:
             shutil.rmtree(release)
 
 
-def deploy() -> None:
+def deploy(stream=None) -> None:
     if os.geteuid() != 0:
         raise DeployError("The receiver must run as root")
+    if stream is None:
+        stream = sys.stdin.buffer
     old_release = read_current()
     old_previous = read_previous()
     stage = Path(tempfile.mkdtemp(prefix=".incoming-", dir=SITE_ROOT))
@@ -265,7 +274,7 @@ def deploy() -> None:
     try:
         build = stage / "build"
         build.mkdir(mode=0o755)
-        extract_build(sys.stdin.buffer, build)
+        extract_build(stream, build)
         validate_build(build)
 
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -305,6 +314,117 @@ def deploy() -> None:
             shutil.rmtree(candidate, ignore_errors=True)
 
 
+def validate_artifact_url(url: str) -> None:
+    if len(url.encode("utf-8")) > MAX_ARTIFACT_URL_BYTES:
+        raise DeployError("The artifact URL is too long")
+    if not url or any(ord(char) < 0x21 or ord(char) > 0x7E for char in url):
+        raise DeployError("The artifact URL contains invalid characters")
+    parsed = urllib.parse.urlsplit(url)
+    hostname = (parsed.hostname or "").lower()
+    if (
+        parsed.scheme != "https"
+        or not hostname.endswith(".blob.core.windows.net")
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.port is not None
+        or not parsed.path
+        or not parsed.query
+        or parsed.fragment
+    ):
+        raise DeployError("The artifact URL is not a valid HTTPS GitHub artifact URL")
+
+
+def download_artifact(url: str, destination) -> None:
+    validate_artifact_url(url)
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "shastovsky-deploy/1.0"},
+    )
+
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+    opener = urllib.request.build_opener(NoRedirect)
+    try:
+        response = opener.open(request, timeout=60)
+    except (OSError, urllib.error.URLError) as error:
+        raise DeployError("Could not download the GitHub Actions artifact") from error
+
+    with response:
+        final_url = urllib.parse.urlsplit(response.geturl())
+        if (
+            response.status != 200
+            or final_url.scheme != "https"
+            or final_url.hostname != urllib.parse.urlsplit(url).hostname
+        ):
+            raise DeployError("The artifact download returned an unexpected response")
+
+        content_length = response.headers.get("Content-Length")
+        if content_length is not None:
+            try:
+                expected_size = int(content_length)
+            except ValueError as error:
+                raise DeployError("The artifact download has an invalid content length") from error
+            if expected_size < 1 or expected_size > MAX_ARTIFACT_BYTES:
+                raise DeployError("The artifact download size is outside the allowed limit")
+        else:
+            expected_size = None
+
+        received = 0
+        while True:
+            chunk = response.read(1024 * 1024)
+            if not chunk:
+                break
+            received += len(chunk)
+            if received > MAX_ARTIFACT_BYTES:
+                raise DeployError("The artifact download exceeds the 1 GiB limit")
+            destination.write(chunk)
+
+        if received == 0 or (expected_size is not None and received != expected_size):
+            raise DeployError("The artifact download was incomplete")
+
+
+def deploy_artifact_url() -> None:
+    if os.geteuid() != 0:
+        raise DeployError("The receiver must run as root")
+    raw_url = sys.stdin.buffer.readline(MAX_ARTIFACT_URL_BYTES + 1)
+    if len(raw_url) > MAX_ARTIFACT_URL_BYTES or not raw_url.endswith(b"\n"):
+        raise DeployError("A single artifact URL line is required")
+    try:
+        url = raw_url[:-1].decode("ascii")
+    except UnicodeDecodeError as error:
+        raise DeployError("The artifact URL is not valid ASCII") from error
+    if sys.stdin.buffer.read(1):
+        raise DeployError("Unexpected data after the artifact URL")
+
+    with tempfile.TemporaryFile(prefix="shastovsky-artifact-", suffix=".zip", dir="/tmp") as zip_file:
+        download_artifact(url, zip_file)
+        zip_file.seek(0)
+
+        with zipfile.ZipFile(zip_file) as artifact:
+            entries = artifact.infolist()
+            if len(entries) != 1:
+                raise DeployError("The GitHub artifact must contain exactly one file")
+            entry = entries[0]
+            mode = (entry.external_attr >> 16) & 0o170000
+            if (
+                entry.filename != ARTIFACT_FILENAME
+                or entry.is_dir()
+                or mode not in (0, stat.S_IFREG)
+                or entry.file_size < 1
+                or entry.file_size > MAX_ARTIFACT_BYTES
+            ):
+                raise DeployError("The GitHub artifact does not contain the expected site archive")
+
+            with artifact.open(entry) as source, tempfile.TemporaryFile(
+                prefix="shastovsky-site-", suffix=".tar.gz", dir="/tmp"
+            ) as site_archive:
+                shutil.copyfileobj(source, site_archive, length=1024 * 1024)
+                site_archive.seek(0)
+                deploy(site_archive)
+
+
 def rollback() -> None:
     if os.geteuid() != 0:
         raise DeployError("The receiver must run as root")
@@ -340,6 +460,11 @@ def main() -> int:
         requested = os.environ.get("SSH_ORIGINAL_COMMAND", "")
         if requested == "deploy":
             os.execv("/usr/bin/sudo", ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy"])
+        if requested == "deploy-url":
+            os.execv(
+                "/usr/bin/sudo",
+                ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy", "--deploy-url"],
+            )
         if requested == "rollback":
             os.execv(
                 "/usr/bin/sudo",
@@ -350,13 +475,15 @@ def main() -> int:
                 "/usr/bin/sudo",
                 ["sudo", "-n", "/usr/local/sbin/shastovsky-deploy", "--status"],
             )
-        log("only deploy, rollback and status commands are allowed")
+        log("only deploy, deploy-url, rollback and status commands are allowed")
         return 64
 
     if sys.argv[1:] == []:
         operation = deploy
     elif sys.argv[1:] == ["--rollback"]:
         operation = rollback
+    elif sys.argv[1:] == ["--deploy-url"]:
+        operation = deploy_artifact_url
     elif sys.argv[1:] == ["--status"]:
         operation = status
     else:
